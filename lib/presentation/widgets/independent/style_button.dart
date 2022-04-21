@@ -34,7 +34,7 @@ class StmsStyleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var _theme = Theme.of(context);
-    var heightButton = MediaQuery.of(context).size.height;
+    var heightButton = MediaQuery.of(context).size.height*0.8;
 
     return InkWell(
       onTap: onPressed,
@@ -87,7 +87,7 @@ class StmsStyleButton extends StatelessWidget {
       style: _theme.textTheme.button?.copyWith(
         backgroundColor: _theme.textTheme.button?.backgroundColor,
         color: textColor,
-        fontSize: 18, //16
+        fontSize: 14, //16
         fontWeight: titleWeight,
       ),
     );
@@ -96,9 +96,7 @@ class StmsStyleButton extends StatelessWidget {
   Widget _buildIcon(ThemeData theme) {
     if (icon != null) {
       return Padding(
-        padding: const EdgeInsets.only(
-          right: 8.0,
-        ),
+        padding: const EdgeInsets.all(0.0),
         child: Icon(
           icon,
           size: iconSize,
