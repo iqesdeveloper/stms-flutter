@@ -25,13 +25,17 @@ class _IncomingViewState extends State<IncomingView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                StmsIconButton(
-                  title: 'Receiving',
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(StmsRoutes.purchaseOrder);
-                  },
-                  icon: FontAwesomeIcons.fileInvoice,
+                Container(
+                  color: Colors.blue,
+                  child: StmsIconButton(
+                    title: 'Receiving',
+                    onPressed: () {
+                      Navigator.of(context).pushNamed(StmsRoutes.purchaseOrder);
+                    },
+                    icon: FontAwesomeIcons.fileInvoice,
+                  ),
                 ),
+
                 StmsIconButton(
                   title: 'PAIV Return',
                   onPressed: () {

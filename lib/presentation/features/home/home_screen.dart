@@ -55,76 +55,78 @@ class _HomeScreenState extends State<HomeScreen> {
               height: height,
               padding: EdgeInsets.all(10),
               color: Colors.white,
-              child: Column(
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                // crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    // color: Colors.amber,
-                    height: height * 0.13,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/stms_logo.jpg'),
+              child: SingleChildScrollView(
+                child:  Column(
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      // color: Colors.amber,
+                      height: height * 0.13,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/stms_logo.jpg'),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: height * 0.03),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      StmsImageButton(
-                        title: 'Master File',
-                        assetImage: "assets/master.png",
-                        onPressed: () {
-                          Navigator.of(context).pushNamed(StmsRoutes.master);
-                        },
-                      ),
-                      StmsImageButton(
-                        title: 'Incoming',
-                        assetImage: "assets/incoming.png",
-                        onPressed: () {
-                          Navigator.of(context).pushNamed(StmsRoutes.incoming);
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 3),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      StmsImageButton(
-                        title: 'Outgoing',
-                        onPressed: () {
-                          Navigator.of(context).pushNamed(StmsRoutes.outgoing);
-                        },
-                        assetImage: "assets/outgoing.png",
-                      ),
-                      StmsImageButton(
-                        title: 'Transfer',
-                        assetImage: "assets/transfer.png",
-                        onPressed: () {
-                          Navigator.of(context)
-                              .pushNamed(StmsRoutes.transferItem);
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 3),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      StmsImageButton(
-                        title: 'Stock Count',
-                        onPressed: () {
-                          // Navigator.of(context)
-                          //     .pushNamed(StmsRoutes.stockCount);
-                        },
-                        assetImage: "assets/calculator.png",
-                      ),
-                    ],
-                  ),
-                ],
+                    SizedBox(height: height * 0.03),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        StmsImageButton(
+                          title: 'Master File',
+                          assetImage: "assets/master.png",
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(StmsRoutes.master);
+                          },
+                        ),
+                        StmsImageButton(
+                          title: 'Incoming',
+                          assetImage: "assets/incoming.png",
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(StmsRoutes.incoming);
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 3),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        StmsImageButton(
+                          title: 'Outgoing',
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(StmsRoutes.outgoing);
+                          },
+                          assetImage: "assets/outgoing.png",
+                        ),
+                        StmsImageButton(
+                          title: 'Transfer',
+                          assetImage: "assets/transfer.png",
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pushNamed(StmsRoutes.transferItem);
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 3),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        StmsImageButton(
+                          title: 'Stock Count',
+                          onPressed: () {
+                            // Navigator.of(context)
+                            //     .pushNamed(StmsRoutes.stockCount);
+                          },
+                          assetImage: "assets/calculator.png",
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           );
