@@ -476,7 +476,6 @@ class _AiListItemState extends State<AiListItem> {
             child: Container(
               height: height * 0.6,
               width: width,
-              padding: EdgeInsets.all(5),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,

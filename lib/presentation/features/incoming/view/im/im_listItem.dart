@@ -482,7 +482,6 @@ class _ImListItemState extends State<ImListItem> {
             child: Container(
               height: height * 0.6,
               width: width,
-              padding: EdgeInsets.all(5),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -565,8 +564,8 @@ class _ImListItemState extends State<ImListItem> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               ButtonTheme(
-                                minWidth: width * 0.4,
                                 height: 50,
+                                minWidth: width,
                                 child: StmsStyleButton(
                                   title: 'SCAN SKU',
                                   width: width * 0.35,
@@ -579,7 +578,7 @@ class _ImListItemState extends State<ImListItem> {
                                 ),
                               ),
                               ButtonTheme(
-                                minWidth: width * 0.4,
+                                minWidth: width,
                                 height: 50,
                                 child: StmsStyleButton(
                                   title: 'SCAN UPC',

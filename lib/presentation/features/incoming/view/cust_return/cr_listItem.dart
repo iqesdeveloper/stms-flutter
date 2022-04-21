@@ -456,7 +456,6 @@ class _CrListItemState extends State<CrListItem> {
             child: Container(
               height: height * 0.6,
               width: width,
-              padding: EdgeInsets.all(5),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -539,7 +538,7 @@ class _CrListItemState extends State<CrListItem> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               ButtonTheme(
-                                minWidth: width * 0.4,
+                                minWidth: width * 0.3,
                                 height: 50,
                                 child: StmsStyleButton(
                                   title: 'SCAN SKU',
@@ -553,7 +552,7 @@ class _CrListItemState extends State<CrListItem> {
                                 ),
                               ),
                               ButtonTheme(
-                                minWidth: width * 0.4,
+                                minWidth: width * 0.3,
                                 height: 50,
                                 child: StmsStyleButton(
                                   title: 'SCAN UPC',
