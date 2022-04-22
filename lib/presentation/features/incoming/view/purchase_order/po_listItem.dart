@@ -270,7 +270,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                           ),
                         ),
                         Container(
-                          height: height*0.5,
+                          height: height*0.9,
                           child: FutureBuilder(
                             future: _future,
                             builder: (BuildContext context,
