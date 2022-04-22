@@ -101,11 +101,14 @@ class StmsCard extends StatelessWidget {
                       style: TextStyle(fontSize: 18),
                       textAlign: TextAlign.center,
                     ),
-                    Text(
-                      subtitle3!,
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width*0.6,
+                      child: Text(
+                        subtitle3!,
+                        style: TextStyle(fontSize: 18),
+                        textAlign: TextAlign.left,
+                      ),
+                    )
                   ],
                 )
               : Container(),
