@@ -150,10 +150,9 @@ class _SrItemListViewState extends State<SrItemListView> {
                       subtitle4: '$formatDate',
                     ),
                     Container(
-                      height: height*0.6,
                       child: ListView(
                         shrinkWrap: true,
-                       // physics: const NeverScrollableScrollPhysics(),
+                       physics: const NeverScrollableScrollPhysics(),
                         children: [
                           Container(
                             // padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
@@ -167,6 +166,7 @@ class _SrItemListViewState extends State<SrItemListView> {
                                 1: FixedColumnWidth(45.0),
                                 2: FixedColumnWidth(45.0),
                                 3: FixedColumnWidth(45.0),
+                                4: FixedColumnWidth(40.0),
                               },
                               children: [
                                 TableRow(
@@ -176,7 +176,7 @@ class _SrItemListViewState extends State<SrItemListView> {
                                       child: Text(
                                         ' ',
                                         style: TextStyle(
-                                          fontSize: 16.0,
+                                          fontSize: 14.0,
                                           // height: 1.8,
                                         ),
                                         textAlign: TextAlign.center,
@@ -194,6 +194,11 @@ class _SrItemListViewState extends State<SrItemListView> {
                                     ),
                                     Text(
                                       'Received Qty',
+                                      style: TextStyle(fontSize: 14.0),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Text(
+                                      'ENT Qty',
                                       style: TextStyle(fontSize: 14.0),
                                       textAlign: TextAlign.center,
                                     ),
@@ -243,6 +248,7 @@ class _SrItemListViewState extends State<SrItemListView> {
                                             1: FixedColumnWidth(45.0),
                                             2: FixedColumnWidth(45.0),
                                             3: FixedColumnWidth(45.0),
+                                            4: FixedColumnWidth(40.0),
                                           },
                                           children: [
                                             TableRow(
@@ -287,6 +293,12 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                 ),
                                                 Text(
                                                   "${snapshot.data[index]['item_receive_qty']}",
+                                                  style:
+                                                  TextStyle(fontSize: 14.0),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                Text(
+                                                  "",
                                                   style:
                                                   TextStyle(fontSize: 14.0),
                                                   textAlign: TextAlign.center,
@@ -423,7 +435,7 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                               style:
                                                               TextStyle(
                                                                 fontSize:
-                                                                16.0,
+                                                                14.0,
                                                                 color: Colors
                                                                     .white,
                                                               ),
@@ -456,7 +468,7 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                               style:
                                                               TextStyle(
                                                                 fontSize:
-                                                                18.0,
+                                                                14.0,
                                                                 color: Colors
                                                                     .white,
                                                               ),
@@ -467,82 +479,84 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                     )
                                                         : Container(
                                                       width: width,
-                                                      child: ElevatedButton(
-                                                        style:
-                                                        ElevatedButton
-                                                            .styleFrom(
-                                                          primary: Colors
-                                                              .blueAccent,
-                                                          minimumSize: Size(
-                                                              width * 0.015,
-                                                              height *
-                                                                  0.05),
-                                                        ),
-                                                        onPressed:
-                                                            () async {
-                                                          SharedPreferences
-                                                          prefs =
-                                                          await SharedPreferences
-                                                              .getInstance();
+                                                      child: FittedBox(
+                                                        child: ElevatedButton(
+                                                          style:
+                                                          ElevatedButton
+                                                              .styleFrom(
+                                                            primary: Colors
+                                                                .blueAccent,
+                                                            minimumSize: Size(
+                                                                width * 0.015,
+                                                                height *
+                                                                    0.05),
+                                                          ),
+                                                          onPressed:
+                                                              () async {
+                                                            SharedPreferences
+                                                            prefs =
+                                                            await SharedPreferences
+                                                                .getInstance();
 
-                                                          snapshot.data[index]
-                                                          [
-                                                          'tracking_type'] ==
-                                                              "2"
-                                                              ? serialList =
-                                                          snapshot.data[
-                                                          index]
-                                                          [
-                                                          'serial_list']
-                                                              : serialList =
-                                                          [];
+                                                            snapshot.data[index]
+                                                            [
+                                                            'tracking_type'] ==
+                                                                "2"
+                                                                ? serialList =
+                                                            snapshot.data[
+                                                            index]
+                                                            [
+                                                            'serial_list']
+                                                                : serialList =
+                                                            [];
 
-                                                          selectedItem =
-                                                          snapshot.data[
-                                                          index]
-                                                          [
-                                                          'item_inventory_id'];
-                                                          prefs.setString(
-                                                              'selectedSrID',
-                                                              selectedItem);
+                                                            selectedItem =
+                                                            snapshot.data[
+                                                            index]
+                                                            [
+                                                            'item_inventory_id'];
+                                                            prefs.setString(
+                                                                'selectedSrID',
+                                                                selectedItem);
 
-                                                          prefs.setString(
-                                                              'srTracking',
-                                                              snapshot.data[
-                                                              index]
-                                                              [
-                                                              'tracking_type']);
-                                                          var tracking =
-                                                          snapshot.data[
-                                                          index]
-                                                          [
-                                                          'tracking_type'];
-                                                          var typeScan =
-                                                              'manual';
-                                                          itemName = snapshot
-                                                              .data[
-                                                          index]
-                                                          ['item_name'];
+                                                            prefs.setString(
+                                                                'srTracking',
+                                                                snapshot.data[
+                                                                index]
+                                                                [
+                                                                'tracking_type']);
+                                                            var tracking =
+                                                            snapshot.data[
+                                                            index]
+                                                            [
+                                                            'tracking_type'];
+                                                            var typeScan =
+                                                                'manual';
+                                                            itemName = snapshot
+                                                                .data[
+                                                            index]
+                                                            ['item_name'];
 
-                                                          SkuUpcDialog
-                                                              .showSkuUpcDialog(
-                                                              context)
-                                                              .then(
-                                                                  (value) {
-                                                                checkLocation(
-                                                                    tracking,
-                                                                    typeScan);
-                                                              });
-                                                        },
-                                                        child: Text(
-                                                          'MANUAL',
-                                                          style: TextStyle(
-                                                            fontSize: 16.0,
-                                                            color: Colors
-                                                                .white,
+                                                            SkuUpcDialog
+                                                                .showSkuUpcDialog(
+                                                                context)
+                                                                .then(
+                                                                    (value) {
+                                                                  checkLocation(
+                                                                      tracking,
+                                                                      typeScan);
+                                                                });
+                                                          },
+                                                          child: Text(
+                                                            'MANUAL',
+                                                            style: TextStyle(
+                                                              fontSize: 14.0,
+                                                              color: Colors
+                                                                  .white,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
+                                                      )
                                                     ),
                                                   ],
                                                 ),

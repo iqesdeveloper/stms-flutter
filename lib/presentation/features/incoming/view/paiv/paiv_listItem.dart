@@ -129,372 +129,285 @@ class _PaivItemListViewState extends State<PaivItemListView> {
           }
           return StmsScaffold(
             title: '',
-            body: Container(
-              color: Colors.white,
-              // height: height * 0.9,
-              padding: EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  StmsCard(
-                    title1: 'PAIV Doc No.',
-                    subtitle1: '$paivDoc',
-                    title2: 'Date',
-                    subtitle2: '$paivDate',
-                    title3: 'Ship Date',
-                    subtitle3: '$formatDate',
-                    title4: 'Vendor Name',
-                    subtitle4: '$supplier',
-                  ),
-                  Container(
-                    height: height * 0.65,
-                    child: ListView(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      children: [
-                        Container(
-                          // padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                          child: Table(
-                            defaultVerticalAlignment:
-                                TableCellVerticalAlignment.middle,
-                            border:
-                                TableBorder.all(color: Colors.black, width: 1),
-                            columnWidths: const <int, TableColumnWidth>{
-                              0: FixedColumnWidth(30.0),
-                              1: FixedColumnWidth(90.0),
-                              2: FixedColumnWidth(40.0),
-                              3: FixedColumnWidth(73.0),
-                            },
-                            children: [
-                              TableRow(
-                                children: [
-                                  Container(
-                                    height: 35,
-                                    child: Text(
-                                      '',
-                                      style: TextStyle(
-                                        fontSize: 16.0,
-                                        // height: 1.8,
+            body: SingleChildScrollView(
+              child: Container(
+                color: Colors.white,
+                height: height,
+                padding: EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    StmsCard(
+                      title1: 'PAIV Doc No.',
+                      subtitle1: '$paivDoc',
+                      title2: 'Date',
+                      subtitle2: '$paivDate',
+                      title3: 'Ship Date',
+                      subtitle3: '$formatDate',
+                      title4: 'Vendor Name',
+                      subtitle4: '$supplier',
+                    ),
+                    Container(
+                      child: ListView(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        children: [
+                          Container(
+                            // padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                            child: Table(
+                              defaultVerticalAlignment:
+                              TableCellVerticalAlignment.middle,
+                              border:
+                              TableBorder.all(color: Colors.black, width: 1),
+                              columnWidths: const <int, TableColumnWidth>{
+                                0: FixedColumnWidth(80.0),
+                                1: FixedColumnWidth(45.0),
+                                2: FixedColumnWidth(45.0),
+                                3: FixedColumnWidth(45.0),
+                                4: FixedColumnWidth(40.0),
+                              },
+                              children: [
+                                TableRow(
+                                  children: [
+                                    Container(
+                                      height: 35,
+                                      child: Text(
+                                        '',
+                                        style: TextStyle(
+                                          fontSize: 14.0,
+                                          // height: 1.8,
+                                        ),
+                                        textAlign: TextAlign.center,
                                       ),
+                                    ),
+                                    Text(
+                                      'SKU',
+                                      style: TextStyle(fontSize: 14.0),
                                       textAlign: TextAlign.center,
                                     ),
-                                  ),
-                                  Text(
-                                    'SKU',
-                                    style: TextStyle(fontSize: 16.0),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    'PAIV Qty',
-                                    style: TextStyle(fontSize: 16.0),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    'Received Qty',
-                                    style: TextStyle(fontSize: 16.0),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    ' ',
-                                    style: TextStyle(fontSize: 16.0),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ],
+                                    Text(
+                                      'PAIV Qty',
+                                      style: TextStyle(fontSize: 14.0),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Text(
+                                      'ENT Qty',
+                                      style: TextStyle(fontSize: 14.0),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Text(
+                                      'Received Qty',
+                                      style: TextStyle(fontSize: 14.0),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Text(
+                                      ' ',
+                                      style: TextStyle(fontSize: 14.0),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Container(
-                          // height: MediaQuery.of(context).size.height,
-                          // padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                          child: FutureBuilder(
-                            future: _future,
-                            builder:
-                                (BuildContext context, AsyncSnapshot snapshot) {
-                              if (!snapshot.hasData) {
-                                return Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              } else {
-                                return ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: snapshot.data.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    // DBPaivNonItem()
-                                    //     .getTotal(snapshot.data[index]
-                                    //         ['item_inventory_id'])
-                                    //     .then((value) {
-                                    //   setState(() {
-                                    //     print('qty: $value');
-                                    //   });
-                                    //   //
-                                    // });
+                          Container(
+                            // height: MediaQuery.of(context).size.height,
+                            // padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            child: FutureBuilder(
+                              future: _future,
+                              builder:
+                                  (BuildContext context, AsyncSnapshot snapshot) {
+                                if (!snapshot.hasData) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                } else {
+                                  return ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: snapshot.data.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      // DBPaivNonItem()
+                                      //     .getTotal(snapshot.data[index]
+                                      //         ['item_inventory_id'])
+                                      //     .then((value) {
+                                      //   setState(() {
+                                      //     print('qty: $value');
+                                      //   });
+                                      //   //
+                                      // });
 
-                                    return Material(
-                                      // color: index % 2 == 0 ? Colors.white : Colors.grey[400],
-                                      child: Table(
-                                        border: TableBorder.all(
-                                          color: Colors.black,
-                                          width: 0.2,
-                                        ),
-                                        defaultVerticalAlignment:
-                                            TableCellVerticalAlignment.middle,
-                                        columnWidths: const <int,
-                                            TableColumnWidth>{
-                                          0: FixedColumnWidth(30.0),
-                                          1: FixedColumnWidth(90.0),
-                                          2: FixedColumnWidth(40.0),
-                                          3: FixedColumnWidth(73.0),
-                                        },
-                                        children: [
-                                          TableRow(
-                                            children: [
-                                              Container(
-                                                height: 50,
-                                                padding: EdgeInsets.fromLTRB(
-                                                    2, 0, 0, 0),
-                                                child: snapshot.data[index]
-                                                            ['tracking_type'] ==
-                                                        "2"
-                                                    ? IconButton(
-                                                        padding:
-                                                            EdgeInsets.all(0),
-                                                        onPressed: () {
-                                                          SerialDialog
-                                                              .showSerialDialog(
-                                                                  context,
-                                                                  snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'serial_list']);
-                                                        },
-                                                        icon: Icon(
-                                                          Icons.search,
-                                                          color: Colors.green,
-                                                        ),
-                                                      )
-                                                    : Container(),
-                                              ),
-                                              Text(
-                                                "${snapshot.data[index]['item_name']}",
-                                                style:
-                                                    TextStyle(fontSize: 16.0),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              Text(
-                                                "${snapshot.data[index]['item_quantity']}",
-                                                style:
-                                                    TextStyle(fontSize: 16.0),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              Text(
-                                                "${snapshot.data[index]['item_receive_qty']}",
-                                                style:
-                                                    TextStyle(fontSize: 16.0),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              Column(
-                                                children: [
-                                                  Container(
-                                                    width: width,
-                                                    child: StmsStyleButton(
-                                                      title: 'SCAN',
-                                                      height: height * 0.05,
-                                                      width: width * 0.015,
-                                                      backgroundColor:
-                                                          Colors.blueAccent,
-                                                      textColor: Colors.white,
-                                                      onPressed: () async {
-                                                        SharedPreferences
-                                                            prefs =
-                                                            await SharedPreferences
-                                                                .getInstance();
-
-                                                        selectedItem = snapshot
-                                                                .data[index][
-                                                            'item_inventory_id'];
-                                                        prefs.setString(
-                                                            'selectedPaIvID',
-                                                            selectedItem);
-
-                                                        prefs.setString(
-                                                            'paivTracking',
-                                                            snapshot.data[index]
-                                                                [
-                                                                'tracking_type']);
-                                                        var tracking = snapshot
-                                                                .data[index]
-                                                            ['tracking_type'];
-                                                        var typeScan = 'scan';
-                                                        itemName =
-                                                            snapshot.data[index]
-                                                                ['item_name'];
-                                                        snapshot.data[index][
-                                                                    'tracking_type'] ==
-                                                                "2"
-                                                            ? serialList =
-                                                                snapshot.data[
-                                                                        index][
-                                                                    'serial_list']
-                                                            : serialList = [];
-
-                                                        snapshot.data[index][
-                                                                    'tracking_type'] ==
-                                                                "2"
-                                                            ? checkLocation(
-                                                                tracking,
-                                                                typeScan)
-                                                            : SkuUpcDialog
-                                                                    .showSkuUpcDialog(
-                                                                        context)
-                                                                .then((value) {
-                                                                checkLocation(
-                                                                    tracking,
-                                                                    typeScan);
-                                                              });
-                                                      },
+                                      return Material(
+                                        // color: index % 2 == 0 ? Colors.white : Colors.grey[400],
+                                        child: Table(
+                                          border: TableBorder.all(
+                                            color: Colors.black,
+                                            width: 0.2,
+                                          ),
+                                          defaultVerticalAlignment:
+                                          TableCellVerticalAlignment.middle,
+                                          columnWidths: const <int,
+                                              TableColumnWidth>{
+                                            0: FixedColumnWidth(80.0),
+                                            1: FixedColumnWidth(45.0),
+                                            2: FixedColumnWidth(45.0),
+                                            3: FixedColumnWidth(45.0),
+                                            4: FixedColumnWidth(40.0),
+                                          },
+                                          children: [
+                                            TableRow(
+                                              children: [
+                                                Container(
+                                                  height: 50,
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      2, 0, 0, 0),
+                                                  child: snapshot.data[index]
+                                                  ['tracking_type'] ==
+                                                      "2"
+                                                      ? IconButton(
+                                                    padding:
+                                                    EdgeInsets.all(0),
+                                                    onPressed: () {
+                                                      SerialDialog
+                                                          .showSerialDialog(
+                                                          context,
+                                                          snapshot.data[
+                                                          index]
+                                                          [
+                                                          'serial_list']);
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.search,
+                                                      color: Colors.green,
                                                     ),
-                                                  ),
-                                                  snapshot.data[index][
-                                                              'tracking_type'] ==
-                                                          "2"
-                                                      ? Column(
-                                                          children: [
-                                                            Container(
-                                                              width: width,
-                                                              child:
-                                                                  ElevatedButton(
-                                                                style: ElevatedButton
-                                                                    .styleFrom(
-                                                                  primary: Colors
-                                                                      .blueAccent,
-                                                                  minimumSize: Size(
-                                                                      width *
-                                                                          0.015,
-                                                                      height *
-                                                                          0.05),
-                                                                ),
-                                                                onPressed:
-                                                                    () async {
-                                                                  SharedPreferences
-                                                                      prefs =
-                                                                      await SharedPreferences
-                                                                          .getInstance();
+                                                  )
+                                                      : Container(),
+                                                ),
+                                                Text(
+                                                  "${snapshot.data[index]['item_name']}",
+                                                  style:
+                                                  TextStyle(fontSize: 14.0),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                Text(
+                                                  "${snapshot.data[index]['item_quantity']}",
+                                                  style:
+                                                  TextStyle(fontSize: 14.0),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                Text(
+                                                  "${snapshot.data[index]['item_receive_qty']}",
+                                                  style:
+                                                  TextStyle(fontSize: 14.0),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                Text(
+                                                  "",
+                                                  style:
+                                                  TextStyle(fontSize: 14.0),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    Container(
+                                                      width: width,
+                                                      child: StmsStyleButton(
+                                                        title: 'SCAN',
+                                                        height: height * 0.05,
+                                                        width: width * 0.015,
+                                                        backgroundColor:
+                                                        Colors.blueAccent,
+                                                        textColor: Colors.white,
+                                                        onPressed: () async {
+                                                          SharedPreferences
+                                                          prefs =
+                                                          await SharedPreferences
+                                                              .getInstance();
 
-                                                                  prefs.setString(
-                                                                      'paiv_serialList',
-                                                                      json.encode(
-                                                                          snapshot.data[index]
-                                                                              [
-                                                                              'serial_list']));
+                                                          selectedItem = snapshot
+                                                              .data[index][
+                                                          'item_inventory_id'];
+                                                          prefs.setString(
+                                                              'selectedPaIvID',
+                                                              selectedItem);
 
-                                                                  selectedItem =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'item_inventory_id'];
-                                                                  prefs.setString(
-                                                                      'selectedPaIvID',
-                                                                      selectedItem);
+                                                          prefs.setString(
+                                                              'paivTracking',
+                                                              snapshot.data[index]
+                                                              [
+                                                              'tracking_type']);
+                                                          var tracking = snapshot
+                                                              .data[index]
+                                                          ['tracking_type'];
+                                                          var typeScan = 'scan';
+                                                          itemName =
+                                                          snapshot.data[index]
+                                                          ['item_name'];
+                                                          snapshot.data[index][
+                                                          'tracking_type'] ==
+                                                              "2"
+                                                              ? serialList =
+                                                          snapshot.data[
+                                                          index][
+                                                          'serial_list']
+                                                              : serialList = [];
 
-                                                                  prefs.setString(
-                                                                      'paivTracking',
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'tracking_type']);
-                                                                  var tracking =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'tracking_type'];
-                                                                  var typeScan =
-                                                                      'manual';
-                                                                  itemName = snapshot
-                                                                              .data[
-                                                                          index]
-                                                                      [
-                                                                      'item_name'];
-
-                                                                  checkLocation(
-                                                                    tracking,
-                                                                    typeScan,
-                                                                  );
-                                                                },
-                                                                child: Text(
-                                                                  'MANUAL',
-                                                                  style:
-                                                                      TextStyle(
-                                                                    fontSize:
-                                                                        16.0,
-                                                                    color: Colors
-                                                                        .white,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            Container(
-                                                              width: width,
-                                                              child:
-                                                                  ElevatedButton(
-                                                                style: ElevatedButton
-                                                                    .styleFrom(
-                                                                  primary: Colors
-                                                                      .green,
-                                                                  minimumSize: Size(
-                                                                      width *
-                                                                          0.015,
-                                                                      height *
-                                                                          0.05),
-                                                                ),
-                                                                onPressed: () {
-                                                                  viewBarcode(snapshot
-                                                                              .data[
-                                                                          index]
-                                                                      [
-                                                                      'item_inventory_id']);
-                                                                },
-                                                                child: Text(
-                                                                  'VIEW',
-                                                                  style:
-                                                                      TextStyle(
-                                                                    fontSize:
-                                                                        18.0,
-                                                                    color: Colors
-                                                                        .white,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            )
-                                                          ],
-                                                        )
-                                                      : Container(
+                                                          snapshot.data[index][
+                                                          'tracking_type'] ==
+                                                              "2"
+                                                              ? checkLocation(
+                                                              tracking,
+                                                              typeScan)
+                                                              : SkuUpcDialog
+                                                              .showSkuUpcDialog(
+                                                              context)
+                                                              .then((value) {
+                                                            checkLocation(
+                                                                tracking,
+                                                                typeScan);
+                                                          });
+                                                        },
+                                                      ),
+                                                    ),
+                                                    snapshot.data[index][
+                                                    'tracking_type'] ==
+                                                        "2"
+                                                        ? Column(
+                                                      children: [
+                                                        Container(
                                                           width: width,
-                                                          child: ElevatedButton(
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
+                                                          child:
+                                                          ElevatedButton(
+                                                            style: ElevatedButton
+                                                                .styleFrom(
                                                               primary: Colors
                                                                   .blueAccent,
                                                               minimumSize: Size(
-                                                                  width * 0.015,
+                                                                  width *
+                                                                      0.015,
                                                                   height *
                                                                       0.05),
                                                             ),
                                                             onPressed:
                                                                 () async {
                                                               SharedPreferences
-                                                                  prefs =
-                                                                  await SharedPreferences
-                                                                      .getInstance();
+                                                              prefs =
+                                                              await SharedPreferences
+                                                                  .getInstance();
+
+                                                              prefs.setString(
+                                                                  'paiv_serialList',
+                                                                  json.encode(
+                                                                      snapshot.data[index]
+                                                                      [
+                                                                      'serial_list']));
 
                                                               selectedItem =
-                                                                  snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'item_inventory_id'];
+                                                              snapshot.data[
+                                                              index]
+                                                              [
+                                                              'item_inventory_id'];
                                                               prefs.setString(
                                                                   'selectedPaIvID',
                                                                   selectedItem);
@@ -502,91 +415,194 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                               prefs.setString(
                                                                   'paivTracking',
                                                                   snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'tracking_type']);
+                                                                  index]
+                                                                  [
+                                                                  'tracking_type']);
                                                               var tracking =
-                                                                  snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'tracking_type'];
+                                                              snapshot.data[
+                                                              index]
+                                                              [
+                                                              'tracking_type'];
                                                               var typeScan =
                                                                   'manual';
                                                               itemName = snapshot
-                                                                          .data[
-                                                                      index]
-                                                                  ['item_name'];
-                                                              snapshot.data[index]
-                                                                          [
-                                                                          'tracking_type'] ==
-                                                                      "2"
-                                                                  ? serialList =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'serial_list']
-                                                                  : serialList =
-                                                                      [];
+                                                                  .data[
+                                                              index]
+                                                              [
+                                                              'item_name'];
 
-                                                              SkuUpcDialog
-                                                                      .showSkuUpcDialog(
-                                                                          context)
-                                                                  .then(
-                                                                      (value) {
-                                                                checkLocation(
-                                                                    tracking,
-                                                                    typeScan);
-                                                              });
+                                                              checkLocation(
+                                                                tracking,
+                                                                typeScan,
+                                                              );
                                                             },
                                                             child: Text(
                                                               'MANUAL',
-                                                              style: TextStyle(
-                                                                fontSize: 16.0,
+                                                              style:
+                                                              TextStyle(
+                                                                fontSize:
+                                                                14.0,
                                                                 color: Colors
                                                                     .white,
                                                               ),
                                                             ),
                                                           ),
                                                         ),
-                                                ],
-                                              ),
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              }
-                            },
+                                                        Container(
+                                                          width: width,
+                                                          child:
+                                                          ElevatedButton(
+                                                            style: ElevatedButton
+                                                                .styleFrom(
+                                                              primary: Colors
+                                                                  .green,
+                                                              minimumSize: Size(
+                                                                  width *
+                                                                      0.015,
+                                                                  height *
+                                                                      0.05),
+                                                            ),
+                                                            onPressed: () {
+                                                              viewBarcode(snapshot
+                                                                  .data[
+                                                              index]
+                                                              [
+                                                              'item_inventory_id']);
+                                                            },
+                                                            child: Text(
+                                                              'VIEW',
+                                                              style:
+                                                              TextStyle(
+                                                                fontSize:
+                                                                14.0,
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    )
+                                                        : Container(
+                                                      width: width,
+                                                      child: FittedBox(
+                                                        child: ElevatedButton(
+                                                          style:
+                                                          ElevatedButton
+                                                              .styleFrom(
+                                                            primary: Colors
+                                                                .blueAccent,
+                                                            minimumSize: Size(
+                                                                width * 0.015,
+                                                                height *
+                                                                    0.05),
+                                                          ),
+                                                          onPressed:
+                                                              () async {
+                                                            SharedPreferences
+                                                            prefs =
+                                                            await SharedPreferences
+                                                                .getInstance();
+
+                                                            selectedItem =
+                                                            snapshot.data[
+                                                            index]
+                                                            [
+                                                            'item_inventory_id'];
+                                                            prefs.setString(
+                                                                'selectedPaIvID',
+                                                                selectedItem);
+
+                                                            prefs.setString(
+                                                                'paivTracking',
+                                                                snapshot.data[
+                                                                index]
+                                                                [
+                                                                'tracking_type']);
+                                                            var tracking =
+                                                            snapshot.data[
+                                                            index]
+                                                            [
+                                                            'tracking_type'];
+                                                            var typeScan =
+                                                                'manual';
+                                                            itemName = snapshot
+                                                                .data[
+                                                            index]
+                                                            ['item_name'];
+                                                            snapshot.data[index]
+                                                            [
+                                                            'tracking_type'] ==
+                                                                "2"
+                                                                ? serialList =
+                                                            snapshot.data[
+                                                            index]
+                                                            [
+                                                            'serial_list']
+                                                                : serialList =
+                                                            [];
+
+                                                            SkuUpcDialog
+                                                                .showSkuUpcDialog(
+                                                                context)
+                                                                .then(
+                                                                    (value) {
+                                                                  checkLocation(
+                                                                      tracking,
+                                                                      typeScan);
+                                                                });
+                                                          },
+                                                          child: Text(
+                                                            'MANUAL',
+                                                            style: TextStyle(
+                                                              fontSize: 14.0,
+                                                              color: Colors
+                                                                  .white,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                        child: ButtonTheme(
-                          minWidth: 200,
-                          height: 50,
-                          child: StmsStyleButton(
-                            title: 'UPLOAD',
-                            backgroundColor: Colors.amber,
-                            textColor: Colors.black,
-                            onPressed: () {
-                              uploadData();
-                            },
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                          child: ButtonTheme(
+                            minWidth: 200,
+                            height: 50,
+                            child: StmsStyleButton(
+                              title: 'UPLOAD',
+                              backgroundColor: Colors.amber,
+                              textColor: Colors.black,
+                              onPressed: () {
+                                uploadData();
+                              },
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            )
           );
         },
       ),
