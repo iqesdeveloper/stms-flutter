@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -87,15 +88,124 @@ class _PoItemListViewState extends State<PoItemListView> {
   final TextEditingController vendorNoController = TextEditingController();
   final GlobalKey<StmsInputFieldState> vendorNoKey = GlobalKey();
 
+  final _flashOnController = TextEditingController(text: 'Flash on');
+  final _flashOffController = TextEditingController(text: 'Flash off');
+  final _cancelOnController = TextEditingController(text: 'Cancel');
+  ScanResult? scanResult;
+  var _aspectTolerance = 0.00;
+  var _numberOfCameras = 0;
+  var _selectedCamera = -1;
+  var _useAutoFocus = true;
+  var _autoEnableFlash = false;
+
   @override
   void initState() {
     super.initState();
-
+    enterScan();
     formatDate = DateFormat('yyyy-MM-dd').format(date);
     getItemPo();
     getCommon();
+    Future.delayed(Duration.zero, () async {
+      _numberOfCameras = await BarcodeScanner.numberOfCameras;
+    });
     // getEnterQty();
     _future = getPurchaseOrderItem.getPurchaseOrderItem();
+  }
+
+  // scan the barcode and store into scanResult
+  // The result is then pass to enterScan() function
+  // It can capture a lot of data, but for this part, only focus on rawContent which is also the scan code or serial number
+  Future<void> _scan() async {
+    try {
+      final result = await BarcodeScanner.scan(
+        options: ScanOptions(
+          strings: {
+            'cancel': _cancelOnController.text,
+            'flash_on': _flashOnController.text,
+            'flash_off': _flashOffController.text,
+          },
+          useCamera: _selectedCamera,
+          autoEnableFlash: _autoEnableFlash,
+          android: AndroidOptions(
+            aspectTolerance: _aspectTolerance,
+            useAutoFocus: _useAutoFocus,
+          ),
+        ),
+      );
+      setState(() => scanResult = result);
+    } on PlatformException catch (e) {
+      setState(() {
+        scanResult = ScanResult(
+
+          type: ResultType.Error,
+          format: BarcodeFormat.unknown,
+          rawContent: e.code == BarcodeScanner.cameraAccessDenied
+              ? 'The user did not grant the camera permission!'
+              : 'Unknown error: $e',
+        );
+      });
+    }
+    enterScan();
+  }
+
+  // Get the data from the scanResult and put it into text or for this part, make it to how many time the same Serial Number (SN) is scanned.
+  // By comparing the data from API which is the inventory_item_id (InItI)
+  // The result will print the scan outcome in textname variable and in enteredqty, it will print the number of time the SN is scan.
+  enterScan(){
+    int? index;
+    print('TEST: $scanResult');
+    if(scanResult != null){
+      String textname = scanResult!.rawContent;
+      // print('TEST222222: $textname');
+      /*
+      if (scanResult.data[index]['tracking_type'] == '2') {
+        DBPoItem().getAllPoItem().then((value) {
+          if (value == null) {
+            enterQty = '0';
+          } else {
+            allPoItem = value;
+            var entering = allPoItem.firstWhereOrNull((element) =>
+              element['item_inventory_id'] == scanResult.data[index]['item_inventory_id']);
+
+            final List<String> list = [];
+            list.add(entering);
+            print('TEST: $list');
+            Map<String, int> count = {};
+            for(var i in list){
+              count[i] = (count[i] ?? 0) +1;
+              enterQty = count[i];
+              print('TEST: $enterQty');
+            }
+            enterQty = entering.length;
+          }
+        });
+      } else {
+        DBPoNonItem()
+            .getAllPoNonItem()
+            .then((value) {
+          if (value == null) {
+            enterQty = '0';
+          } else {
+            allPoItem = value;
+            var entering = allPoItem
+                .firstWhereOrNull((element) =>
+            element[
+            'item_inventory_id'] ==
+                scanResult.data[index]
+                ['item_inventory_id']);
+            final List<String> list = [];
+            list.add(entering);
+            Map<String, int> count = {};
+            for(var i in list){
+              count[i] = (count[i] ?? 0) +1;
+              enterQty = count[i];
+            }
+            enterQty = entering['non_tracking_qty'];
+          }
+        });
+      }
+      */
+    }
   }
 
   getItemPo() async {
@@ -136,13 +246,13 @@ class _PoItemListViewState extends State<PoItemListView> {
   }
 
   getEnterQty() {
-    // DBPoItem().getAllPoItem().then((value) {
-    //   if (value == null) {
-    //     enterQty = '0';
-    //   } else {
-    //     allPoItem = value;
-    //   }
-    // });
+    DBPoItem().getAllPoItem().then((value) {
+      if (value == null) {
+        enterQty = '0';
+      } else {
+        allPoItem = value;
+      }
+    });
 
     DBPoNonItem().getAllPoNonItem().then((value) {
       if (value == null) {
@@ -197,6 +307,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    FlatButton(onPressed: _scan, child: Text('PRESS')),
                     StmsCard(
                       title1: 'PO Doc No.',
                       subtitle1: '$poDoc',
@@ -316,6 +427,15 @@ class _PoItemListViewState extends State<PoItemListView> {
                                             'item_inventory_id'] ==
                                                 snapshot.data[index]
                                                 ['item_inventory_id']);
+                                            final List<String> list = [];
+                                            list.add(entering);
+                                            print('TEST: $list');
+                                            Map<String, int> count = {};
+                                            for(var i in list){
+                                              count[i] = (count[i] ?? 0) +1;
+                                              enterQty = count[i];
+                                              print('TEST: $enterQty');
+                                            }
                                             enterQty = entering.length;
                                           }
                                         });
@@ -333,8 +453,14 @@ class _PoItemListViewState extends State<PoItemListView> {
                                             'item_inventory_id'] ==
                                                 snapshot.data[index]
                                                 ['item_inventory_id']);
-                                            enterQty =
-                                            entering['non_tracking_qty'];
+                                            final List<String> list = [];
+                                            list.add(entering);
+                                            Map<String, int> count = {};
+                                            for(var i in list){
+                                              count[i] = (count[i] ?? 0) +1;
+                                              enterQty = count[i];
+                                            }
+                                            enterQty = entering['non_tracking_qty'];
                                           }
                                         });
                                       }
