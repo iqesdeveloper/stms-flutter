@@ -232,21 +232,17 @@ class _SrDownloadViewState extends State<SrDownloadView> {
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                child: ButtonTheme(
-                  minWidth: 200,
-                  height: 50,
-                  child: StmsStyleButton(
-                    title: 'SELECT',
-                    backgroundColor: Colors.amber,
-                    textColor: Colors.black,
-                    onPressed: () {
-                      // Navigator.of(context)
-                      //     .pushNamed(StmsRoutes.purchaseOrderItem);
-                      saveSr();
-                    },
-                  ),
+              child: Container(
+                height: MediaQuery.of(context).size.height*0.08,
+                child: StmsStyleButton(
+                  title: 'SELECT',
+                  backgroundColor: Colors.amber,
+                  textColor: Colors.black,
+                  onPressed: () {
+                    // Navigator.of(context)
+                    //     .pushNamed(StmsRoutes.purchaseOrderItem);
+                    saveSr();
+                  },
                 ),
               ),
             ),

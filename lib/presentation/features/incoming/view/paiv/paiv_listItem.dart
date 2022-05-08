@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -137,7 +138,9 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    StmsCard(
+                    Expanded(
+                      flex: 4,
+                      child: StmsCard(
                       title1: 'PAIV Doc No.',
                       subtitle1: '$paivDoc',
                       title2: 'Date',
@@ -146,8 +149,12 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                       subtitle3: '$formatDate',
                       title4: 'Vendor Name',
                       subtitle4: '$supplier',
+                    )
                     ),
-                    Container(
+                    // The table content
+                    Expanded(
+                      flex: 6,
+                        child: Container(
                       child: ListView(
                         physics: NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
@@ -160,10 +167,10 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                               border:
                               TableBorder.all(color: Colors.black, width: 1),
                               columnWidths: const <int, TableColumnWidth>{
-                                0: FixedColumnWidth(80.0),
-                                1: FixedColumnWidth(45.0),
-                                2: FixedColumnWidth(45.0),
-                                3: FixedColumnWidth(45.0),
+                                0: FixedColumnWidth(70.0),
+                                1: FixedColumnWidth(40.0),
+                                2: FixedColumnWidth(40.0),
+                                3: FixedColumnWidth(40.0),
                                 4: FixedColumnWidth(40.0),
                               },
                               children: [
@@ -249,10 +256,10 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                           TableCellVerticalAlignment.middle,
                                           columnWidths: const <int,
                                               TableColumnWidth>{
-                                            0: FixedColumnWidth(80.0),
-                                            1: FixedColumnWidth(45.0),
-                                            2: FixedColumnWidth(45.0),
-                                            3: FixedColumnWidth(45.0),
+                                            0: FixedColumnWidth(70.0),
+                                            1: FixedColumnWidth(40.0),
+                                            2: FixedColumnWidth(40.0),
+                                            3: FixedColumnWidth(40.0),
                                             4: FixedColumnWidth(40.0),
                                           },
                                           children: [
@@ -314,7 +321,7 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                       width: width,
                                                       child: StmsStyleButton(
                                                         title: 'SCAN',
-                                                        height: height * 0.05,
+                                                        height: height * 0.07,
                                                         width: width * 0.015,
                                                         backgroundColor:
                                                         Colors.blueAccent,
@@ -387,7 +394,7 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                                   width *
                                                                       0.015,
                                                                   height *
-                                                                      0.05),
+                                                                      0.07),
                                                             ),
                                                             onPressed:
                                                                 () async {
@@ -460,7 +467,7 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                                   width *
                                                                       0.015,
                                                                   height *
-                                                                      0.05),
+                                                                      0.07),
                                                             ),
                                                             onPressed: () {
                                                               viewBarcode(snapshot
@@ -485,83 +492,81 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                     )
                                                         : Container(
                                                       width: width,
-                                                      child: FittedBox(
-                                                        child: ElevatedButton(
-                                                          style:
-                                                          ElevatedButton
-                                                              .styleFrom(
-                                                            primary: Colors
-                                                                .blueAccent,
-                                                            minimumSize: Size(
-                                                                width * 0.015,
-                                                                height *
-                                                                    0.05),
-                                                          ),
-                                                          onPressed:
-                                                              () async {
-                                                            SharedPreferences
-                                                            prefs =
-                                                            await SharedPreferences
-                                                                .getInstance();
+                                                      child: ElevatedButton(
+                                                        style:
+                                                        ElevatedButton
+                                                            .styleFrom(
+                                                          primary: Colors
+                                                              .blueAccent,
+                                                          minimumSize: Size(
+                                                              width * 0.015,
+                                                              height *
+                                                                  0.05),
+                                                        ),
+                                                        onPressed:
+                                                            () async {
+                                                          SharedPreferences
+                                                          prefs =
+                                                          await SharedPreferences
+                                                              .getInstance();
 
-                                                            selectedItem =
-                                                            snapshot.data[
-                                                            index]
-                                                            [
-                                                            'item_inventory_id'];
-                                                            prefs.setString(
-                                                                'selectedPaIvID',
-                                                                selectedItem);
+                                                          selectedItem =
+                                                          snapshot.data[
+                                                          index]
+                                                          [
+                                                          'item_inventory_id'];
+                                                          prefs.setString(
+                                                              'selectedPaIvID',
+                                                              selectedItem);
 
-                                                            prefs.setString(
-                                                                'paivTracking',
-                                                                snapshot.data[
-                                                                index]
-                                                                [
-                                                                'tracking_type']);
-                                                            var tracking =
-                                                            snapshot.data[
-                                                            index]
-                                                            [
-                                                            'tracking_type'];
-                                                            var typeScan =
-                                                                'manual';
-                                                            itemName = snapshot
-                                                                .data[
-                                                            index]
-                                                            ['item_name'];
-                                                            snapshot.data[index]
-                                                            [
-                                                            'tracking_type'] ==
-                                                                "2"
-                                                                ? serialList =
-                                                            snapshot.data[
-                                                            index]
-                                                            [
-                                                            'serial_list']
-                                                                : serialList =
-                                                            [];
+                                                          prefs.setString(
+                                                              'paivTracking',
+                                                              snapshot.data[
+                                                              index]
+                                                              [
+                                                              'tracking_type']);
+                                                          var tracking =
+                                                          snapshot.data[
+                                                          index]
+                                                          [
+                                                          'tracking_type'];
+                                                          var typeScan =
+                                                              'manual';
+                                                          itemName = snapshot
+                                                              .data[
+                                                          index]
+                                                          ['item_name'];
+                                                          snapshot.data[index]
+                                                          [
+                                                          'tracking_type'] ==
+                                                              "2"
+                                                              ? serialList =
+                                                          snapshot.data[
+                                                          index]
+                                                          [
+                                                          'serial_list']
+                                                              : serialList =
+                                                          [];
 
-                                                            SkuUpcDialog
-                                                                .showSkuUpcDialog(
-                                                                context)
-                                                                .then(
-                                                                    (value) {
-                                                                  checkLocation(
-                                                                      tracking,
-                                                                      typeScan);
-                                                                });
-                                                          },
-                                                          child: Text(
-                                                            'MANUAL',
-                                                            style: TextStyle(
-                                                              fontSize: 14.0,
-                                                              color: Colors
-                                                                  .white,
-                                                            ),
+                                                          SkuUpcDialog
+                                                              .showSkuUpcDialog(
+                                                              context)
+                                                              .then(
+                                                                  (value) {
+                                                                checkLocation(
+                                                                    tracking,
+                                                                    typeScan);
+                                                              });
+                                                        },
+                                                        child: Text(
+                                                          'MANUAL',
+                                                          style: TextStyle(
+                                                            fontSize: 14.0,
+                                                            color: Colors
+                                                                .white,
                                                           ),
                                                         ),
-                                                      )
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -578,23 +583,22 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                           ),
                         ],
                       ),
+                    )
                     ),
+                    // Upload button
                     Expanded(
+                      flex: 1,
                       child: Container(
                         alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                          child: ButtonTheme(
-                            minWidth: 200,
-                            height: 50,
-                            child: StmsStyleButton(
-                              title: 'UPLOAD',
-                              backgroundColor: Colors.amber,
-                              textColor: Colors.black,
-                              onPressed: () {
-                                uploadData();
-                              },
-                            ),
+                        child: Container(
+                          height: height*0.08,
+                          child: StmsStyleButton(
+                            title: 'UPLOAD',
+                            backgroundColor: Colors.amber,
+                            textColor: Colors.black,
+                            onPressed: () {
+                              uploadData();
+                            },
                           ),
                         ),
                       ),
@@ -773,12 +777,19 @@ class _PaivItemListViewState extends State<PaivItemListView> {
   }
 
   Future<void> scanSKU() async {
-    String skuBarcode;
+    var skuBarcode;
     var typeScanning = Storage().typeScan;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      skuBarcode = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', '', true, ScanMode.BARCODE);
+      skuBarcode = await BarcodeScanner.scan(
+        options: ScanOptions(
+          android: AndroidOptions(
+            useAutoFocus: true,
+          )
+        )
+      );
+
+         // '#ff6666', '', true, ScanMode.BARCODE);
       print('skuBarcode: $skuBarcode');
       if (skuBarcode != '-1') {
         if (typeScanning == 'sku') {
@@ -915,11 +926,17 @@ class _PaivItemListViewState extends State<PaivItemListView> {
   }
 
   Future<void> scanBarcodeNormal() async {
-    String barcodeScanRes;
+    var barcodeScanRes;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', '', true, ScanMode.BARCODE);
+      barcodeScanRes = await BarcodeScanner.scan(
+        options: ScanOptions(
+          android: AndroidOptions(
+            useAutoFocus: true,
+          )
+        )
+      );
+         // '#ff6666', '', true, ScanMode.BARCODE);
       print('barcodeScanRes: $barcodeScanRes');
       if (barcodeScanRes != '-1') {
         print('barcode: $barcodeScanRes');

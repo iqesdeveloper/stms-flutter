@@ -102,7 +102,7 @@ class StmsCard extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     Container(
-                      width: MediaQuery.of(context).size.width*0.6,
+                      width: MediaQuery.of(context).size.width*0.5,
                       child: Text(
                         subtitle3!,
                         style: TextStyle(fontSize: 18),
@@ -129,7 +129,7 @@ class StmsCard extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     Container(
-                      width: MediaQuery.of(context).size.width*0.6,
+                      width: MediaQuery.of(context).size.width*0.5,
                       child: Text(
                         subtitle4!,
                         style: TextStyle(fontSize: 18),

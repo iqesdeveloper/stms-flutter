@@ -177,7 +177,6 @@ class _SiDownloadViewState extends State<SiDownloadView> {
                                   items: siList.map((item) {
                                     return new DropdownMenuItem(
                                       child: Container(
-                                        width: width * 0.75,
                                         child: Row(
                                           children: [
                                             Text('${item['si_doc']} - '),
@@ -213,21 +212,17 @@ class _SiDownloadViewState extends State<SiDownloadView> {
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                child: ButtonTheme(
-                  minWidth: 200,
-                  height: 50,
-                  child: StmsStyleButton(
-                    title: 'SELECT',
-                    backgroundColor: Colors.amber,
-                    textColor: Colors.black,
-                    onPressed: () {
-                      // Navigator.of(context)
-                      //     .pushNamed(StmsRoutes.purchaseOrderItem);
-                      saveSi();
-                    },
-                  ),
+              child: Container(
+                height: MediaQuery.of(context).size.height*0.08,
+                child: StmsStyleButton(
+                  title: 'SELECT',
+                  backgroundColor: Colors.amber,
+                  textColor: Colors.black,
+                  onPressed: () {
+                    // Navigator.of(context)
+                    //     .pushNamed(StmsRoutes.purchaseOrderItem);
+                    saveSi();
+                  },
                 ),
               ),
             ),

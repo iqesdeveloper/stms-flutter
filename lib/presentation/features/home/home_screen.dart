@@ -60,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   // crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    // Image for the IQES banner
                     Container(
                       // color: Colors.amber,
                       height: height * 0.13,
@@ -71,57 +72,72 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SizedBox(height: height * 0.03),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        StmsImageButton(
-                          title: 'Master File',
-                          assetImage: "assets/master.png",
-                          onPressed: () {
-                            Navigator.of(context).pushNamed(StmsRoutes.master);
-                          },
-                        ),
-                        StmsImageButton(
-                          title: 'Incoming',
-                          assetImage: "assets/incoming.png",
-                          onPressed: () {
-                            Navigator.of(context).pushNamed(StmsRoutes.incoming);
-                          },
-                        ),
-                      ],
+                    // The button for master file and incoming
+                    Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: StmsImageButton(
+                              title: 'Master File',
+                              assetImage: "assets/master.png",
+                              onPressed: () {
+                                Navigator.of(context).pushNamed(StmsRoutes.master);
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            child: StmsImageButton(
+                              title: 'Incoming',
+                              assetImage: "assets/incoming.png",
+                              onPressed: () {
+                                Navigator.of(context).pushNamed(StmsRoutes.incoming);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     SizedBox(height: 3),
+                    // Button for outgoing and transfer
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        StmsImageButton(
+                        Expanded(
+                            child: StmsImageButton(
                           title: 'Outgoing',
                           onPressed: () {
                             Navigator.of(context).pushNamed(StmsRoutes.outgoing);
                           },
                           assetImage: "assets/outgoing.png",
+                        )
                         ),
-                        StmsImageButton(
+                        Expanded(
+                            child: StmsImageButton(
                           title: 'Transfer',
                           assetImage: "assets/transfer.png",
                           onPressed: () {
                             Navigator.of(context)
                                 .pushNamed(StmsRoutes.transferItem);
                           },
+                        )
                         ),
                       ],
                     ),
                     SizedBox(height: 3),
+                    // Button for stock count
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        StmsImageButton(
+                        Expanded(
+                            child: StmsImageButton(
                           title: 'Stock Count',
                           onPressed: () {
                             // Navigator.of(context)
                             //     .pushNamed(StmsRoutes.stockCount);
                           },
                           assetImage: "assets/calculator.png",
+                        )
                         ),
                       ],
                     ),

@@ -336,19 +336,15 @@ class _VsrCreateViewState extends State<VsrCreateView> {
               Expanded(
                 child: Container(
                   alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                    child: ButtonTheme(
-                      minWidth: 200,
-                      height: 50,
-                      child: StmsStyleButton(
-                        title: 'ADD ITEM',
-                        backgroundColor: Colors.amber,
-                        textColor: Colors.black,
-                        onPressed: () async {
-                          createVendorReplace();
-                        },
-                      ),
+                  child: Container(
+                    height: height*0.08,
+                    child: StmsStyleButton(
+                      title: 'ADD ITEM',
+                      backgroundColor: Colors.amber,
+                      textColor: Colors.black,
+                      onPressed: () async {
+                        createVendorReplace();
+                      },
                     ),
                   ),
                 ),

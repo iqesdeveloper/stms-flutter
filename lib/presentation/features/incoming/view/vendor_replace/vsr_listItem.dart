@@ -1,3 +1,4 @@
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -358,21 +359,27 @@ class _VsrListItemState extends State<VsrListItem> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          StmsStyleButton(
-                            title: 'ADD ITEM',
-                            backgroundColor: Colors.amber,
-                            textColor: Colors.black,
-                            onPressed: () {
-                              addItem();
-                            },
+                          Container(
+                            height: height*0.08,
+                            child: StmsStyleButton(
+                              title: 'ADD ITEM',
+                              backgroundColor: Colors.amber,
+                              textColor: Colors.black,
+                              onPressed: () {
+                                addItem();
+                              },
+                            ),
                           ),
-                          StmsStyleButton(
-                            title: 'UPLOAD',
-                            backgroundColor: Colors.blueAccent,
-                            textColor: Colors.white,
-                            onPressed: () {
-                              uploadVendorReplace();
-                            },
+                          Container(
+                            height: height*0.08,
+                            child: StmsStyleButton(
+                              title: 'UPLOAD',
+                              backgroundColor: Colors.blueAccent,
+                              textColor: Colors.white,
+                              onPressed: () {
+                                uploadVendorReplace();
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -474,7 +481,7 @@ class _VsrListItemState extends State<VsrListItem> {
             ),
           ),
           content: Container(
-            height: height * 0.6,
+            height: height * 0.65,
             width: width,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -537,14 +544,13 @@ class _VsrListItemState extends State<VsrListItem> {
                     child: Column(
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            ButtonTheme(
-                              minWidth: width * 0.4,
-                              height: 50,
+                            Container(
+                              width: width*0.3,
+                              height: height*0.08,
                               child: StmsStyleButton(
                                 title: 'SCAN SKU',
-                                width: width * 0.35,
                                 backgroundColor: Colors.green,
                                 textColor: Colors.white,
                                 onPressed: () {
@@ -553,12 +559,11 @@ class _VsrListItemState extends State<VsrListItem> {
                                 },
                               ),
                             ),
-                            ButtonTheme(
-                              minWidth: width * 0.4,
-                              height: 50,
+                            Container(
+                              width: width*0.3,
+                              height: height*0.08,
                               child: StmsStyleButton(
                                 title: 'SCAN UPC',
-                                width: width * 0.35,
                                 backgroundColor: Colors.green,
                                 textColor: Colors.white,
                                 onPressed: () {
@@ -569,9 +574,8 @@ class _VsrListItemState extends State<VsrListItem> {
                             ),
                           ],
                         ),
-                        ButtonTheme(
-                          minWidth: 200,
-                          height: 50,
+                        Container(
+                          height: height*0.08,
                           child: StmsStyleButton(
                             title: 'SELECT',
                             backgroundColor: Colors.amber,
@@ -633,11 +637,17 @@ class _VsrListItemState extends State<VsrListItem> {
   }
 
   Future<void> scanBarcodeNormal(String typeScan) async {
-    String barcodeScanRes;
+    var barcodeScanRes;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', '', true, ScanMode.BARCODE);
+      barcodeScanRes = await BarcodeScanner.scan(
+        options: ScanOptions(
+          android: AndroidOptions(
+            useAutoFocus: true,
+          )
+        )
+      );
+        //  '#ff6666', '', true, ScanMode.BARCODE);
       print('barcodeScanRes: $barcodeScanRes');
       if (barcodeScanRes != '-1') {
         print('barcode: $barcodeScanRes');
