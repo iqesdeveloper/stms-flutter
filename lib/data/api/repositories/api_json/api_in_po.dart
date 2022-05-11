@@ -76,6 +76,7 @@ class IncomingService {
     var poVendor = prefs.getString('povendorNo');
     var poReceipt = prefs.getString('poReceiptType');
     var poLocation = prefs.getString('poLocation');
+    // var poItemLine = prefs.getString('poItemLine');
 
     HttpClient client = new HttpClient();
     client.connectionTimeout = const Duration(seconds: 10);
@@ -94,6 +95,7 @@ class IncomingService {
       "vendor_doc_number": poVendor,
       "receipt_type": poReceipt,
       "location": poLocation,
+     //  "total_item": poItemLine,
       "item": uploadData,
     };
 

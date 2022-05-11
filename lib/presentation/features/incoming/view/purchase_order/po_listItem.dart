@@ -96,12 +96,16 @@ class _PoItemListViewState extends State<PoItemListView> {
   @override
   void initState() {
     super.initState();
-
+    scanData();
     formatDate = DateFormat('yyyy-MM-dd').format(date);
     getItemPo();
     getCommon();
     // getEnterQty();
     _future = getPurchaseOrderItem.getPurchaseOrderItem();
+  }
+
+  scanData() async {
+    DBPoNonItem().getAllPoNonItem().then((value) => print(value));
   }
 
   getItemPo() async {
@@ -336,14 +340,17 @@ class _PoItemListViewState extends State<PoItemListView> {
                                             enterQty = '0';
                                           } else {
                                             allPoItem = value;
-                                            var entering = allPoItem
-                                                .firstWhereOrNull((element) =>
-                                            element[
-                                            'item_inventory_id'] ==
-                                                snapshot.data[index]
-                                                ['item_inventory_id']);
-                                            enterQty =
-                                            entering['non_tracking_qty'];
+                                            var entering = allPoItem.firstWhereOrNull((element) =>
+                                            element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']);
+
+                                            // Comparing entering and snapshot
+                                            if(entering['item_inventory_id'] == snapshot.data[index]['item_inventory_id']){
+                                              enterQty = entering['non_tracking_id'];
+                                              print('TTTTTT: $enterQty');
+                                            } else {
+                                              enterQty = '0';
+                                            }
+                                           // enterQty = entering['non_tracking_qty'];
                                           }
                                         });
                                       }
@@ -971,7 +978,7 @@ class _PoItemListViewState extends State<PoItemListView> {
           )
         )
       );
-      setState(() => skuBarcode = scanBarcode);
+      setState(() => skuBarcode = scanBarcode.rawContent);
 
       print('skuBarcode: $skuBarcode');
       if (skuBarcode != '-1') {
@@ -1135,7 +1142,7 @@ class _PoItemListViewState extends State<PoItemListView> {
           )
         )
       );
-      setState(() => barcodeScanRes = scanBarcode);
+      setState(() => barcodeScanRes = scanBarcode.rawContent);
 
       print('barcodeScanRes: $barcodeScanRes');
       if (barcodeScanRes != '-1') {

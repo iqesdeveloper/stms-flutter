@@ -22,6 +22,7 @@ class DBPoNonItem {
       onCreate: (Database db, int version) async {
         await db.execute('CREATE TABLE poNonItem('
             'item_inventory_id TEXT,'
+            'vendor_item_number,'
             'non_tracking_qty TEXT'
             ')');
       },
