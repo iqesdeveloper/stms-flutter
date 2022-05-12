@@ -46,6 +46,7 @@ class PoItemListView extends StatefulWidget {
 
 class _PoItemListViewState extends State<PoItemListView> {
   // barcode scan2 option and variable
+  ScanResult? scanResult;
   final _flashOnController = TextEditingController(text: 'Flash on');
   final _flashOffController = TextEditingController(text: 'Flash off');
   final _cancelController = TextEditingController(text: 'Cancel');
@@ -72,6 +73,7 @@ class _PoItemListViewState extends State<PoItemListView> {
       selectedTxn = '0',
       selectedStatus,
       selectedItem,
+      selectedVendorItem,
       selectedReceipt,
       selectedLoc,
       itemPO,
@@ -100,7 +102,8 @@ class _PoItemListViewState extends State<PoItemListView> {
     formatDate = DateFormat('yyyy-MM-dd').format(date);
     getItemPo();
     getCommon();
-    // getEnterQty();
+    // call the enterQty whenever at start of this page
+    getEnterQty();
     _future = getPurchaseOrderItem.getPurchaseOrderItem();
   }
 
@@ -124,6 +127,7 @@ class _PoItemListViewState extends State<PoItemListView> {
     });
   }
 
+  // Get master location and master inventory file
   getCommon() {
     DBMasterLocation().getAllMasterLoc().then((value) {
       // print('value loc: $value');
@@ -145,41 +149,29 @@ class _PoItemListViewState extends State<PoItemListView> {
     });
   }
 
+  // check and get all the purchase order item and purchase order non item
+  // POItem & PoNonItem
   getEnterQty() {
-    // DBPoItem().getAllPoItem().then((value) {
-    //   if (value == null) {
-    //     enterQty = '0';
-    //   } else {
-    //     allPoItem = value;
-    //   }
-    // });
+    DBPoItem().getAllPoItem().then((value) {
+      // make the PoItem is equal to the item store in scanDB
+      // It is the save info
+      setState(() {
+        allPoItem = value;
+      });
+    });
 
     DBPoNonItem().getAllPoNonItem().then((value) {
-      if (value == null) {
-        enterQty = '0';
-      } else {
+      setState(() {
+        // Display and get all the PoNonItem after scanDB collected.
+        // It is the save info
         allPoNonItem = value;
-      }
+      });
     });
   }
 
-  // checkBarcodeList() {
-  //   DBPoItem().getBarcodePoItem().then((value) {
-  //     print('getbarcode: $value');
-  //     if (value != null) {
-  //       setState(() {
-  //         _isDisable = false;
-  //       });
-  //     } else {
-  //       setState(() {
-  //         _isDisable = true;
-  //       });
-  //     }
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
+    // Height and width of the screen size is set in this variable
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
@@ -314,47 +306,6 @@ class _PoItemListViewState extends State<PoItemListView> {
                                           .data[index]['item_quantity']) -
                                           int.parse(receiveQty);
 
-                                      // ignore: unnecessary_null_comparison
-                                      if (snapshot.data[index]
-                                      ['tracking_type'] ==
-                                          '2') {
-                                        DBPoItem().getAllPoItem().then((value) {
-                                          if (value == null) {
-                                            enterQty = '0';
-                                          } else {
-                                            allPoItem = value;
-                                            var entering = allPoItem
-                                                .firstWhereOrNull((element) =>
-                                            element[
-                                            'item_inventory_id'] ==
-                                                snapshot.data[index]
-                                                ['item_inventory_id']);
-                                            enterQty = entering.length;
-                                          }
-                                        });
-                                      } else {
-                                        DBPoNonItem()
-                                            .getAllPoNonItem()
-                                            .then((value) {
-                                          if (value == null) {
-                                            enterQty = '0';
-                                          } else {
-                                            allPoItem = value;
-                                            var entering = allPoItem.firstWhereOrNull((element) =>
-                                            element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']);
-
-                                            // Comparing entering and snapshot
-                                            if(entering['item_inventory_id'] == snapshot.data[index]['item_inventory_id']){
-                                              enterQty = entering['non_tracking_id'];
-                                              print('TTTTTT: $enterQty');
-                                            } else {
-                                              enterQty = '0';
-                                            }
-                                           // enterQty = entering['non_tracking_qty'];
-                                          }
-                                        });
-                                      }
-
                                       return Material(
                                         // color: index % 2 == 0 ? Colors.white : Colors.grey[400],
                                         child: Table(
@@ -401,8 +352,49 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                   TextStyle(fontSize: 16.0),
                                                   textAlign: TextAlign.center,
                                                 ),
+                                                // Enter Quantity text
+                                                // Will display whether it pass in the value or not
+                                                // This s to check if Enter Quantity got value
+                                                // using the master file snapshot check
+                                                // THIS IS FOR ALLPOITEM
+                                                snapshot.data[index]['tracking_type'] == "2" ? Text(
+                                                  // to check if allPoItem got value or not
+                                                  // If got value, check in the master file snapshot and compare the item_inventory_id
+                                                  // Using the 'where' will go through the check process like a looping
+                                                  allPoItem.isNotEmpty ? allPoItem.where((element)
+                                                  => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).isNotEmpty
+                                                     // once check, if it is containing a value or the item_id in DB is same in the master file
+                                                     // Get the length of the item_id
+                                                      ? '${allPoItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).length}'
+                                                      // If there is no match, then the result is display '0'
+                                                      : '0'
+                                                  // If the overall result is default as nothing, the display will also show '0'
+                                                      : '0',
+                                                  style: TextStyle(
+                                                    fontSize: 16.0
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                )
+                                                : Text(
+                                                  // This one is to check if AllPoNonItem got value
+                                                  // ALLPONONITEM section
+                                                  // Need to check if there is a value after scan.
+                                                  // Comparing both the DB and master file to check if there is a value before and after scan
+                                                  allPoNonItem.isNotEmpty ? allPoNonItem.firstWhereOrNull((element) => 
+                                                  element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']) != null
+                                                  // If got value, then display the tracking_qty
+                                                      ? "${allPoNonItem[index]['non_tracking_qty']}"
+                                                  // If no value after scan, which means it is not the same as in DB, then display '0'
+                                                      : "0"
+                                                  // This is generally display '0' if no value is found
+                                                      : "0",
+                                                  style: TextStyle(
+                                                    fontSize: 16.0
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
                                                 Text(
-                                                  "$enterQty",
+                                                  '$enterQty',
                                                   style:
                                                   TextStyle(fontSize: 16.0),
                                                   textAlign: TextAlign.center,
@@ -453,6 +445,11 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           prefs.setString(
                                                               'selectedIvID',
                                                               selectedItem);
+
+                                                          // Save selected vendor item no
+                                                          selectedVendorItem = snapshot.data[index]['vendor_item_number'];
+                                                          prefs.setString('vendorItemNo', selectedVendorItem);
+
                                                           prefs.setString(
                                                               'poTracking',
                                                               snapshot.data[index]
@@ -504,6 +501,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           await SharedPreferences
                                                               .getInstance();
 
+                                                          // save selected item_inventory id
                                                           selectedItem =
                                                           snapshot.data[index]
                                                           [
@@ -511,6 +509,12 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           prefs.setString(
                                                               'selectedIvID',
                                                               selectedItem);
+
+                                                          // Save selected vendor item no
+                                                          selectedVendorItem = snapshot.data[index]['vendor_item_number'];
+                                                          prefs.setString('vendorItemNo', selectedVendorItem);
+
+                                                          // save selected tracking no
                                                           prefs.setString(
                                                               'poTracking',
                                                               snapshot.data[index]
@@ -577,6 +581,11 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                               prefs.setString(
                                                                   'selectedIvID',
                                                                   selectedItem);
+
+                                                              // Save selected vendor number
+                                                              selectedVendorItem = snapshot.data[index]['vendor_item_number'];
+                                                              prefs.setString('VendorItemNo', selectedVendorItem);
+
                                                               prefs.setString(
                                                                   'poTracking',
                                                                   snapshot.data[index]['tracking_type']);
@@ -671,6 +680,10 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                               snapshot.data[index]
                                                               [
                                                               'item_inventory_id']);
+
+                                                          // Save selected vendor item no
+                                                          selectedVendorItem = snapshot.data[index]['vendor_item_number'];
+                                                          prefs.setString('vendorItemNo', selectedVendorItem);
                                                           prefs.setString(
                                                               'poTracking',
                                                               snapshot.data[index]
@@ -960,41 +973,40 @@ class _PoItemListViewState extends State<PoItemListView> {
 
   // scan code
   Future<void> scanSKU() async {
-    // String skuBarcode;
-    var skuBarcode;
+    scanResult = this.scanResult;
     var typeScanning = Storage().typeScan;
-    // Platform messages may fail, so we use a try/catch PlatformException.
+
     try {
-      // skuBarcode = await FlutterBarcodeScanner.scanBarcode('#ff6666', '', true, ScanMode.BARCODE);
-      final scanBarcode = await BarcodeScanner.scan(
+      final result = await BarcodeScanner.scan(
         options: ScanOptions(
-            strings: {
-              'cancel': _cancelController.text,
-              'flash_on': _flashOnController.text,
-              'flash_off': _flashOffController.text,
-            },
+          strings: {
+            'cancel': _cancelController.text,
+            'flash_on': _flashOnController.text,
+            'flash_off': _flashOffController.text,
+          },
+          // restrictFormat: selectedFormats,
+          // useCamera: _selectedCamera,
+          autoEnableFlash: false,
           android: AndroidOptions(
             useAutoFocus: true,
-          )
-        )
+          ),
+        ),
       );
-      setState(() => skuBarcode = scanBarcode.rawContent);
-
-      print('skuBarcode: $skuBarcode');
-      if (skuBarcode != '-1') {
-        if (typeScanning == 'sku') {
-          searchSKU(skuBarcode);
+      setState(() => scanResult = result);
+      if (scanResult != null) {
+        if (scanResult!.type.toString() == 'Cancelled') {
+          ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
         } else {
-          searchUPC(skuBarcode);
+          if (typeScanning == 'sku') {
+            searchSKU(scanResult!.rawContent.toString());
+          } else {
+            searchUPC(scanResult!.rawContent.toString());
+          }
         }
-
-        // widget.changeView(changeType: ViewChangeType.Forward);
-      } else {
-        ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
       }
-    } on PlatformException catch(e){
+    } on PlatformException catch (e) {
       setState(() {
-        skuBarcode = ScanResult(
+        scanResult = ScanResult(
           type: ResultType.Error,
           format: BarcodeFormat.unknown,
           rawContent: e.code == BarcodeScanner.cameraAccessDenied
@@ -1002,18 +1014,9 @@ class _PoItemListViewState extends State<PoItemListView> {
               : 'Unknown error: $e',
         );
       });
-      skuBarcode = 'Failed to get platform version.';
     }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _scanBarcode = skuBarcode;
-    });
   }
+
 // search scan SKU code
   searchSKU(String skuBarcode) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1035,16 +1038,21 @@ class _PoItemListViewState extends State<PoItemListView> {
         var nonTrackingType = prefs.getString('nontypeScan');
         print("selectedItem: $selectedItem");
         if (nonTrackingType == 'scan') {
+          // Any update on the DB, need to call the value here as it will go and search through the model and db
+          // Removing and addition will need to change here
           DBPoNonItem().getPoNonItem(selectedItem).then((value) {
             if (value == null) {
               DBPoNonItem()
                   .createPoNonItem(PoNonItem(
                 itemInvId: selectedItem,
+                vendorItemName: selectedVendorItem,
                 nonTracking: '1',
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
                 showSuccess('Item Save');
+                // call and update the enterQty function
+                getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
@@ -1065,7 +1073,11 @@ class _PoItemListViewState extends State<PoItemListView> {
             }
           });
         } else {
-          Navigator.of(context).pushNamed(StmsRoutes.poItemDetail);
+          Navigator.of(context).pushNamed(StmsRoutes.poItemDetail)
+          .then((value){
+            var _duration = Duration(seconds: 1);
+            return Timer(_duration, getEnterQty);
+          });
         }
       }
     });
@@ -1087,16 +1099,21 @@ class _PoItemListViewState extends State<PoItemListView> {
         var nonTrackingType = prefs.getString('nontypeScan');
         print("selecteditem :$selectedItem");
         if (nonTrackingType == 'scan') {
+          // Any update on the DB, need to call the value here as it will go and search through the model and db
+          // Removing and addition will need to change here
           DBPoNonItem().getPoNonItem(selectedItem).then((value) {
             if (value == null) {
               DBPoNonItem()
                   .createPoNonItem(PoNonItem(
                 itemInvId: selectedItem,
+                vendorItemName: selectedVendorItem,
                 nonTracking: '1',
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
                 showSuccess('Item Save');
+                // call and update the enterQty function
+                getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
@@ -1117,44 +1134,46 @@ class _PoItemListViewState extends State<PoItemListView> {
             }
           });
         } else {
-          Navigator.of(context).pushNamed(StmsRoutes.poItemDetail);
+          Navigator.of(context).pushNamed(StmsRoutes.poItemDetail)
+          .then((value) {
+            var _duration = Duration(seconds: 1);
+            return Timer(_duration, getEnterQty);
+          });
         }
       }
     });
   }
 
-  // manual scan
+  // Scan for trackingType == '2'. Item that got serial no
   Future<void> scanBarcodeNormal() async {
-    // String barcodeScanRes;
-    var barcodeScanRes;
-    // Platform messages may fail, so we use a try/catch PlatformException.
+    scanResult = this.scanResult;
     try {
-      // barcodeScanRes = await FlutterBarcodeScanner.scanBarcode('#ff6666', '', true, ScanMode.BARCODE);
-      final scanBarcode = await BarcodeScanner.scan(
+      final result = await BarcodeScanner.scan(
         options: ScanOptions(
-            strings: {
-              'cancel': _cancelController.text,
-              'flash_on': _flashOnController.text,
-              'flash_off': _flashOffController.text,
-            },
+          strings: {
+            'cancel': _cancelController.text,
+            'flash_on': _flashOnController.text,
+            'flash_off': _flashOffController.text,
+          },
+          // restrictFormat: selectedFormats,
+          // useCamera: _selectedCamera,
+          autoEnableFlash: false,
           android: AndroidOptions(
             useAutoFocus: true,
-          )
-        )
+          ),
+        ),
       );
-      setState(() => barcodeScanRes = scanBarcode.rawContent);
-
-      print('barcodeScanRes: $barcodeScanRes');
-      if (barcodeScanRes != '-1') {
-        print('barcode: $barcodeScanRes');
-        saveData(barcodeScanRes);
-        // widget.changeView(changeType: ViewChangeType.Forward);
-      } else {
-        ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
+      setState(() => scanResult = result);
+      if (scanResult != null) {
+        if (scanResult!.type.toString() == 'Cancelled') {
+          ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
+        } else {
+          saveData(scanResult!.rawContent.toString());
+        }
       }
-    } on PlatformException catch(e){
+    } on PlatformException catch (e) {
       setState(() {
-        barcodeScanRes = ScanResult(
+        scanResult = ScanResult(
           type: ResultType.Error,
           format: BarcodeFormat.unknown,
           rawContent: e.code == BarcodeScanner.cameraAccessDenied
@@ -1162,18 +1181,7 @@ class _PoItemListViewState extends State<PoItemListView> {
               : 'Unknown error: $e',
         );
       });
-
-      barcodeScanRes = 'Failed to get platform version.';
     }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _scanBarcode = barcodeScanRes;
-    });
   }
 
   Future<void> saveData(String barcodeScanRes) async {
@@ -1191,9 +1199,8 @@ class _PoItemListViewState extends State<PoItemListView> {
           Navigator.of(context)
               .pushNamed(StmsRoutes.poItemDetail)
               .then((value) {
-            setState(() {
-              scanBarcodeNormal();
-            });
+            var _duration = Duration(seconds: 1);
+            return Timer(_duration, scanBarcodeNormal);
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
@@ -1203,9 +1210,9 @@ class _PoItemListViewState extends State<PoItemListView> {
 
         // await Future.delayed(const Duration(seconds: 3));
         Navigator.of(context).pushNamed(StmsRoutes.poItemDetail).then((value) {
-          setState(() {
-            scanBarcodeNormal();
-          });
+          getEnterQty();
+          var _duration = Duration(seconds: 1);
+          return Timer(_duration, scanBarcodeNormal);
         });
       }
     });
@@ -1234,7 +1241,7 @@ class _PoItemListViewState extends State<PoItemListView> {
     });
 
     DBPoNonItem().getUpload().then((value) {
-      // print('value non Po: $value');
+      print('value non Po: $value');
       poNonTrack = value;
       if (poSerial != null && poNonTrack != null) {
         combineUpdated = []

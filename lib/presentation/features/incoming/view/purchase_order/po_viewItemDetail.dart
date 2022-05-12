@@ -36,7 +36,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
   List<InventoryHive> inventoryList = [];
   List poItemList = [];
   // String _scanBarcode = 'Unknown';
-  var selectedInvtry, tracking;
+  var selectedInvtry, selectedVendorItem, tracking;
   final format = DateFormat("yyyy-MM-dd");
   final TextEditingController itemSNController = TextEditingController();
   final TextEditingController itemQtyController = TextEditingController();
@@ -57,6 +57,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
 
     selectedInvtry = prefs.getString('selectedIvID');
     // print("selectedInvtry : $selectedInvtry");
+    selectedVendorItem = prefs.getString('vendorItemNo');
     itemSNController.text = prefs.getString('itemBarcode')!;
     tracking = prefs.getString('poTracking');
   }
@@ -193,9 +194,12 @@ class _PoItemDetailsState extends State<PoItemDetails> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (tracking == "2") {
+        // follow the item listed in api -> models -> po
+        // any addition or subtraction occur at the models is adjusted here
         DBPoItem()
             .createPoItem(PoItem(
           itemInvId: selectedInvtry,
+          vendorItemNo: selectedVendorItem,
           itemSerialNo: itemSNController.text,
         ))
             .then((value) {
@@ -210,6 +214,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
             DBPoNonItem()
                 .createPoNonItem(PoNonItem(
               itemInvId: selectedInvtry,
+              vendorItemName: selectedVendorItem,
               nonTracking: itemQtyController.text,
             ))
                 .then((value) {
