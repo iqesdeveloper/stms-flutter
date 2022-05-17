@@ -11,8 +11,6 @@ class DBPoNonItem {
   Future<Database> get database async => _database ??= await initDB();
 
   // Create the database and the customer table
-  // any new info needed to be store need to add here following the key word at the database used (like 'item_inventory_id')
-  // Once add, need to reference or add the variable in po_model and po_non_model at api->models->incoming->po
   Future<Database> initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     final path = join(documentsDirectory.path, 'poNonItem.db');

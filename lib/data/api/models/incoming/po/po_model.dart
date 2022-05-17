@@ -21,14 +21,15 @@ class PoItem {
   });
 
   factory PoItem.fromJson(Map<String, dynamic> json) => PoItem(
-        itemInvId: json["item_inventory_id"],
-        vendorItemNo: json["vendor_item_number"],
-        itemSerialNo: json["item_serial_no"],
-      );
+    itemInvId: json["item_inventory_id"],
+    vendorItemNo: json["vendor_item_number"],
+    itemSerialNo: json["item_serial_no"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "item_inventory_id": itemInvId,
-        "vendor_item_number": vendorItemNo,
-        "item_serial_no": itemSerialNo,
-      };
+    "item_inventory_id": itemInvId,
+    "vendor_item_number": vendorItemNo,
+    "item_serial_no": itemSerialNo,
+  };
 }
+

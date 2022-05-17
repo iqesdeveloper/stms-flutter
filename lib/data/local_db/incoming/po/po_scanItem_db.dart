@@ -6,9 +6,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stms/data/api/models/incoming/po/po_model.dart';
 
-// Create the database and the customer table
-// any new info needed to be store need to add here following the key word at the database used (like 'item_inventory_id')
-// Once add, need to reference or add the variable in po_model and po_non_model at api->models->incoming->po
 class DBPoItem {
   static Database? _database;
   Future<Database> get database async => _database ??= await initDB();

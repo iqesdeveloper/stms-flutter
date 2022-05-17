@@ -47,7 +47,7 @@ class StmsCard extends StatelessWidget {
                 width: width * 0.3,
                 child: Text(
                   title1,
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 18),
                   textAlign: TextAlign.left,
                 ),
               ),
@@ -101,14 +101,11 @@ class StmsCard extends StatelessWidget {
                       style: TextStyle(fontSize: 18),
                       textAlign: TextAlign.center,
                     ),
-                    Container(
-                      width: MediaQuery.of(context).size.width*0.5,
-                      child: Text(
-                        subtitle3!,
-                        style: TextStyle(fontSize: 18),
-                        textAlign: TextAlign.left,
-                      ),
-                    )
+                    Text(
+                      subtitle3!,
+                      style: TextStyle(fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 )
               : Container(),
@@ -128,15 +125,11 @@ class StmsCard extends StatelessWidget {
                       style: TextStyle(fontSize: 18),
                       textAlign: TextAlign.center,
                     ),
-                    Container(
-                      width: MediaQuery.of(context).size.width*0.5,
-                      child: Text(
-                        subtitle4!,
-                        style: TextStyle(fontSize: 18),
-                        textAlign: TextAlign.left,
-                      ),
-                    )
-
+                    Text(
+                      subtitle4!,
+                      style: TextStyle(fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 )
               : Container(),

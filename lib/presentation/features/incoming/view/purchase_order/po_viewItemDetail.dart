@@ -128,7 +128,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
                               }).toList(),
                               isExpanded: false,
                               value:
-                                  selectedInvtry, // == "" ? "" : selectedTxn,
+                              selectedInvtry, // == "" ? "" : selectedTxn,
                               onChanged: null,
                               // (String? newValue) {
                               //   setState(() {
@@ -144,18 +144,18 @@ class _PoItemDetailsState extends State<PoItemDetails> {
                   ),
                   tracking == "2"
                       ? StmsInputField(
-                          key: itemSNKey,
-                          controller: itemSNController,
-                          hint: 'Item Serial No',
-                          validator: Validator.valueExists,
-                        )
+                    key: itemSNKey,
+                    controller: itemSNController,
+                    hint: 'Item Serial No',
+                    validator: Validator.valueExists,
+                  )
                       : StmsInputField(
-                          key: itemQtyKey,
-                          controller: itemQtyController,
-                          hint: 'Quantity',
-                          validator: Validator.valueExists,
-                          keyboard: TextInputType.number,
-                        ),
+                    key: itemQtyKey,
+                    controller: itemQtyController,
+                    hint: 'Quantity',
+                    validator: Validator.valueExists,
+                    keyboard: TextInputType.number,
+                  ),
                   Expanded(
                     child: Align(
                       alignment: Alignment.bottomCenter,

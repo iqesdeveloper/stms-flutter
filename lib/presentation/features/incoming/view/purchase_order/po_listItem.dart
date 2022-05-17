@@ -45,7 +45,6 @@ class PoItemListView extends StatefulWidget {
 }
 
 class _PoItemListViewState extends State<PoItemListView> {
-  // barcode scan2 option and variable
   ScanResult? scanResult;
   final _flashOnController = TextEditingController(text: 'Flash on');
   final _flashOffController = TextEditingController(text: 'Flash off');
@@ -363,24 +362,24 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                   // Using the 'where' will go through the check process like a looping
                                                   allPoItem.isNotEmpty ? allPoItem.where((element)
                                                   => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).isNotEmpty
-                                                     // once check, if it is containing a value or the item_id in DB is same in the master file
-                                                     // Get the length of the item_id
+                                                  // once check, if it is containing a value or the item_id in DB is same in the master file
+                                                  // Get the length of the item_id
                                                       ? '${allPoItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).length}'
-                                                      // If there is no match, then the result is display '0'
+                                                  // If there is no match, then the result is display '0'
                                                       : '0'
                                                   // If the overall result is default as nothing, the display will also show '0'
                                                       : '0',
                                                   style: TextStyle(
-                                                    fontSize: 16.0
+                                                      fontSize: 16.0
                                                   ),
                                                   textAlign: TextAlign.center,
                                                 )
-                                                : Text(
+                                                    : Text(
                                                   // This one is to check if AllPoNonItem got value
                                                   // ALLPONONITEM section
                                                   // Need to check if there is a value after scan.
                                                   // Comparing both the DB and master file to check if there is a value before and after scan
-                                                  allPoNonItem.isNotEmpty ? allPoNonItem.firstWhereOrNull((element) => 
+                                                  allPoNonItem.isNotEmpty ? allPoNonItem.firstWhereOrNull((element) =>
                                                   element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']) != null
                                                   // If got value, then display the tracking_qty
                                                       ? "${allPoNonItem.firstWhereOrNull((element) => element['item_inventory_id']
@@ -390,7 +389,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                   // This is generally display '0' if no value is found
                                                       : "0",
                                                   style: TextStyle(
-                                                    fontSize: 16.0
+                                                      fontSize: 16.0
                                                   ),
                                                   textAlign: TextAlign.center,
                                                 ),
@@ -408,32 +407,32 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                     'tracking_type'] ==
                                                         "2"
                                                         ? Container(
-                                                          width: width,
-                                                          child: ElevatedButton(
+                                                      width: width,
+                                                      child: ElevatedButton(
                                                         style: ElevatedButton.styleFrom(
                                                           primary: Colors.blueAccent,
                                                           minimumSize: Size(width * 0.015, height * 0.05),),
-                                                            onPressed: balQty == 0 || balQty < 0 ? () {
-                                                              ErrorDialog.showErrorDialog(context,
-                                                                  '${snapshot.data[index]['item_name']} is already received all qty.');}
-                                                                : () async {
-                                                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                        onPressed: balQty == 0 || balQty < 0 ? () {
+                                                          ErrorDialog.showErrorDialog(context,
+                                                              '${snapshot.data[index]['item_name']} is already received all qty.');}
+                                                            : () async {
+                                                          SharedPreferences prefs = await SharedPreferences.getInstance();
 
-                                                              selectedItem = snapshot.data[index]['item_inventory_id'];
-                                                              prefs.setString('selectedIvID', selectedItem);
+                                                          selectedItem = snapshot.data[index]['item_inventory_id'];
+                                                          prefs.setString('selectedIvID', selectedItem);
 
-                                                              // Save selected vendor item no
-                                                              selectedVendorItem = snapshot.data[index]['vendor_item_number'];
-                                                              prefs.setString('vendorItemNo', selectedVendorItem);
+                                                          // Save selected vendor item no
+                                                          selectedVendorItem = snapshot.data[index]['vendor_item_number'];
+                                                          prefs.setString('vendorItemNo', selectedVendorItem);
 
-                                                              prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
-                                                              var tracking = snapshot.data[index]['tracking_type'];
-                                                              var typeScan = 'scan';
-                                                              itemName = snapshot.data[index]['item_name'];
-                                                              checkReceiptType(tracking, typeScan);
+                                                          prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
+                                                          var tracking = snapshot.data[index]['tracking_type'];
+                                                          var typeScan = 'scan';
+                                                          itemName = snapshot.data[index]['item_name'];
+                                                          checkReceiptType(tracking, typeScan);
 
-                                                              // scanBarcodeNormal();
-                                                            },
+                                                          // scanBarcodeNormal();
+                                                        },
                                                         child: Text(
                                                           'SCAN',
                                                           style:
@@ -445,7 +444,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           ),
                                                         ),
                                                       ),
-                                                          /*
+                                                      /*
                                                           child: StmsStyleButton(
                                                             title: 'SCAN',
                                                             height: height * 0.05,
@@ -475,7 +474,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                         },
                                                       ),
                                                       */
-                                                      )
+                                                    )
                                                         : Container(
                                                       width: width,
                                                       child: ElevatedButton(
@@ -502,7 +501,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           var typeScan = 'scan';
                                                           itemName = snapshot.data[index]['item_name'];
                                                           SkuUpcDialog.showSkuUpcDialog(context).then((value) {
-                                                                checkReceiptType(tracking, typeScan);});
+                                                            checkReceiptType(tracking, typeScan);});
                                                           // scanBarcodeNormal();
                                                         },
                                                         child: Text(
@@ -776,20 +775,20 @@ class _PoItemListViewState extends State<PoItemListView> {
                     ),
                     // Upload Button
                     Expanded(
-                      flex: 1,
-                      // Align to the bottom
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        // Custom button style
-                        child: StmsStyleButton(
-                          title: 'UPLOAD',
-                          backgroundColor: Colors.amber,
-                          textColor: Colors.black,
-                          onPressed: () {
-                            uploadData();
-                          },
-                        ),
-                      )
+                        flex: 1,
+                        // Align to the bottom
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          // Custom button style
+                          child: StmsStyleButton(
+                            title: 'UPLOAD',
+                            backgroundColor: Colors.amber,
+                            textColor: Colors.black,
+                            onPressed: () {
+                              uploadData();
+                            },
+                          ),
+                        )
                     )
                   ],
                 ),
@@ -1119,7 +1118,7 @@ class _PoItemListViewState extends State<PoItemListView> {
           });
         } else {
           Navigator.of(context).pushNamed(StmsRoutes.poItemDetail)
-          .then((value){
+              .then((value){
             var _duration = Duration(seconds: 1);
             return Timer(_duration, getEnterQty);
           });
@@ -1181,7 +1180,7 @@ class _PoItemListViewState extends State<PoItemListView> {
           });
         } else {
           Navigator.of(context).pushNamed(StmsRoutes.poItemDetail)
-          .then((value) {
+              .then((value) {
             var _duration = Duration(seconds: 1);
             return Timer(_duration, getEnterQty);
           });
@@ -1336,4 +1335,3 @@ class _PoItemListViewState extends State<PoItemListView> {
     DBPoItem().deleteAllPoItem();
   }
 }
-

@@ -1,4 +1,3 @@
-import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -369,27 +368,21 @@ class _AoListItemState extends State<AoListItem> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Container(
-                            height: height*0.08,
-                            child: StmsStyleButton(
-                              title: 'ADD ITEM',
-                              backgroundColor: Colors.amber,
-                              textColor: Colors.black,
-                              onPressed: () {
-                                addItem();
-                              },
-                            ),
+                          StmsStyleButton(
+                            title: 'ADD ITEM',
+                            backgroundColor: Colors.amber,
+                            textColor: Colors.black,
+                            onPressed: () {
+                              addItem();
+                            },
                           ),
-                          Container(
-                            height: height*0.08,
-                            child: StmsStyleButton(
-                              title: 'UPLOAD',
-                              backgroundColor: Colors.blueAccent,
-                              textColor: Colors.white,
-                              onPressed: () {
-                                uploadAdjustOUT();
-                              },
-                            ),
+                          StmsStyleButton(
+                            title: 'UPLOAD',
+                            backgroundColor: Colors.blueAccent,
+                            textColor: Colors.white,
+                            onPressed: () {
+                              uploadAdjustOUT();
+                            },
                           ),
                         ],
                       ),
@@ -485,7 +478,7 @@ class _AoListItemState extends State<AoListItem> {
           ),
           content: SingleChildScrollView(
             child: Container(
-              height: height * 0.65,
+              height: height * 0.6,
               width: width,
               padding: EdgeInsets.all(5),
               child: Column(
@@ -567,11 +560,11 @@ class _AoListItemState extends State<AoListItem> {
                       child: Column(
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
-                                width: width*0.3,
-                                height: height*0.08,
+                              ButtonTheme(
+                                minWidth: width * 0.4,
+                                height: 50,
                                 child: StmsStyleButton(
                                   title: 'SCAN SKU',
                                   width: width * 0.35,
@@ -583,9 +576,9 @@ class _AoListItemState extends State<AoListItem> {
                                   },
                                 ),
                               ),
-                              Container(
-                                width: width*0.3,
-                                height: height*0.08,
+                              ButtonTheme(
+                                minWidth: width * 0.4,
+                                height: 50,
                                 child: StmsStyleButton(
                                   title: 'SCAN UPC',
                                   width: width * 0.35,
@@ -599,8 +592,9 @@ class _AoListItemState extends State<AoListItem> {
                               ),
                             ],
                           ),
-                          Container(
-                            height: height*0.08,
+                          ButtonTheme(
+                            minWidth: 200,
+                            height: 50,
                             child: StmsStyleButton(
                               title: 'SELECT',
                               backgroundColor: Colors.amber,
@@ -654,17 +648,11 @@ class _AoListItemState extends State<AoListItem> {
   }
 
   Future<void> scanBarcodeNormal(String typeScan) async {
-    var barcodeScanRes;
+    String barcodeScanRes;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      barcodeScanRes = await BarcodeScanner.scan(
-        options: ScanOptions(
-          android: AndroidOptions(
-            useAutoFocus: true,
-          )
-        )
-      );
-         // '#ff6666', '', true, ScanMode.BARCODE);
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', '', true, ScanMode.BARCODE);
       print('barcodeScanRes: $barcodeScanRes');
       if (barcodeScanRes != '-1') {
         print('barcode: $barcodeScanRes');

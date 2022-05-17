@@ -89,8 +89,6 @@ class _PoDownloadViewState extends State<PoDownloadView> {
     // var height = MediaQuery.of(context).size.height;
 
     return Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
       color: Colors.white,
       padding: EdgeInsets.all(10),
       child: Column(
@@ -102,7 +100,6 @@ class _PoDownloadViewState extends State<PoDownloadView> {
               alignment: Alignment.topCenter,
               child: Column(
                 children: [
-                  // Select Vendor drop down option
                   Container(
                     decoration: ShapeDecoration(
                       shape: ContinuousRectangleBorder(
@@ -124,7 +121,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                             decoration: InputDecoration(
                               labelText: 'Please Select Vendor',
                               errorText:
-                              state.hasError ? state.errorText : null,
+                                  state.hasError ? state.errorText : null,
                             ),
                             isEmpty: false,
                             child: SearchChoices.single(
@@ -151,8 +148,8 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                                   selectedVendor = value;
                                   print('selected vendor: $selectedVendor');
                                   var vendorId = vendorList.firstWhereOrNull(
-                                          (element) =>
-                                      element['name'] == selectedVendor);
+                                      (element) =>
+                                          element['name'] == selectedVendor);
                                   selectedPo = null;
                                   getPoList(vendorId['id']);
                                 });
@@ -182,7 +179,6 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                       },
                     ),
                   ),
-                  // Purchase Order drop down option
                   Container(
                     decoration: ShapeDecoration(
                       shape: ContinuousRectangleBorder(
@@ -204,7 +200,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                             decoration: InputDecoration(
                               labelText: 'Please Choose Purchase Order',
                               errorText:
-                              state.hasError ? state.errorText : null,
+                                  state.hasError ? state.errorText : null,
                             ),
                             isEmpty: false,
                             child: new DropdownButtonHideUnderline(
@@ -227,10 +223,10 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                                   value: selectedPo == "" ? "" : selectedPo,
                                   onChanged: selectedVendor != null
                                       ? (String? newValue) {
-                                    setState(() {
-                                      selectedPo = newValue!;
-                                    });
-                                  }
+                                          setState(() {
+                                            selectedPo = newValue!;
+                                          });
+                                        }
                                       : null,
                                   underline: Container(
                                     height: 0,
@@ -247,25 +243,28 @@ class _PoDownloadViewState extends State<PoDownloadView> {
               ),
             ),
           ),
-          // Select button
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: Container(
-                height: MediaQuery.of(context).size.height*0.08,
-                child: StmsStyleButton(
-                  title: 'SELECT',
-                  backgroundColor: Colors.amber,
-                  textColor: Colors.black,
-                  onPressed: () {
-                    // Navigator.of(context)
-                    //     .pushNamed(StmsRoutes.purchaseOrderItem);
-                    savePo();
-                  },
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                child: ButtonTheme(
+                  minWidth: 200,
+                  height: 50,
+                  child: StmsStyleButton(
+                    title: 'SELECT',
+                    backgroundColor: Colors.amber,
+                    textColor: Colors.black,
+                    onPressed: () {
+                      // Navigator.of(context)
+                      //     .pushNamed(StmsRoutes.purchaseOrderItem);
+                      savePo();
+                    },
+                  ),
                 ),
               ),
-              ),
             ),
+          )
         ],
       ),
     );

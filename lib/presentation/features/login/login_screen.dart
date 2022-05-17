@@ -95,24 +95,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     isPassword: true,
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                  Container(
-                    height: MediaQuery.of(context).size.height*0.08,
-                    child: StmsStyleButton(
-                      title: 'LOGIN',
-                      titleWeight: FontWeight.bold,
-                      textColor: Colors.black54,
-                      backgroundColor: Colors.amber,
-                      onPressed: _validateAndSend,
-                      // () {
-                      //   Navigator.of(context).pushAndRemoveUntil(
-                      //     MaterialPageRoute(
-                      //       builder: (BuildContext context) => HomeScreen(),
-                      //     ),
-                      //     (Route route) => false,
-                      //   );
-                      // },
-                    ),
-                  )
+                  StmsStyleButton(
+                    title: 'LOGIN',
+                    titleWeight: FontWeight.bold,
+                    textColor: Colors.black54,
+                    backgroundColor: Colors.amber,
+                    onPressed: _validateAndSend,
+                    // () {
+                    //   Navigator.of(context).pushAndRemoveUntil(
+                    //     MaterialPageRoute(
+                    //       builder: (BuildContext context) => HomeScreen(),
+                    //     ),
+                    //     (Route route) => false,
+                    //   );
+                    // },
+                  ),
                 ],
               ),
             ),

@@ -202,18 +202,15 @@ class _RcCreateItemState extends State<RcCreateItem> {
                       Expanded(
                         child: Container(
                           alignment: Alignment.bottomCenter,
-                          child: Container(
-                            height: height*0.08,
-                            child: StmsStyleButton(
-                              title: 'SAVE',
-                              backgroundColor: Colors.amber,
-                              textColor: Colors.black,
-                              onPressed: () {
-                                saveData();
-                                // Navigator.popUntil(context,
-                                //     ModalRoute.withName(StmsRoutes.aiItemList));
-                              },
-                            ),
+                          child: StmsStyleButton(
+                            title: 'SAVE',
+                            backgroundColor: Colors.amber,
+                            textColor: Colors.black,
+                            onPressed: () {
+                              saveData();
+                              // Navigator.popUntil(context,
+                              //     ModalRoute.withName(StmsRoutes.aiItemList));
+                            },
                           ),
                         ),
                       ),

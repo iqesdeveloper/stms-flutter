@@ -77,24 +77,24 @@ class StmsIconButton extends StatelessWidget {
     return Material(
       // color: Colors.amber,
       child: Container(
-        width: width * 0.4,
-        height: height*0.25,
+        width: width * 0.35,
+        height: height * 0.2,
         color: Colors.white,
         child: MaterialButton(
           onPressed: onPressed,
           child: Column(
             children: [
               Container(
-                width: width*0.5,
-                height: height*0.15,
+                width: 90.0,
+                height: 65.0,
                 child: Icon(
                   icon,
                   size: iconSize,
                 ),
               ),
               Container(
-                width: width*0.5, //width * 0.8,
-                height: height*0.1,
+                width: 200, //width * 0.8,
+                height: 80.0,
                 // alignment: Alignment.center,
                 child: Text(
                   title,

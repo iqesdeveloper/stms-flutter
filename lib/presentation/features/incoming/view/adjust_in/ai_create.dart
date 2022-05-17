@@ -197,15 +197,19 @@ class _AiCreateViewState extends State<AiCreateView> {
               Expanded(
                 child: Container(
                   alignment: Alignment.bottomCenter,
-                  child: Container(
-                    height: height*0.08,
-                    child: StmsStyleButton(
-                      title: 'ADD ITEM',
-                      backgroundColor: Colors.amber,
-                      textColor: Colors.black,
-                      onPressed: () async {
-                        createAdjustIn();
-                      },
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                    child: ButtonTheme(
+                      minWidth: 200,
+                      height: 50,
+                      child: StmsStyleButton(
+                        title: 'ADD ITEM',
+                        backgroundColor: Colors.amber,
+                        textColor: Colors.black,
+                        onPressed: () async {
+                          createAdjustIn();
+                        },
+                      ),
                     ),
                   ),
                 ),
