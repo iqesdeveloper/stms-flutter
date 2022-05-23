@@ -27,7 +27,9 @@ class ImCreateItem extends StatefulWidget {
 class _ImCreateItemState extends State<ImCreateItem> {
   List<InventoryHive> inventoryList = [];
   List reasonList = [];
-  var itemModifyTrack, selectedInvtry, selectedReason, selectedItem;
+  List allModifyItem = [];
+  List allModifyNonItem = [];
+  var itemModifyTrack, selectedInvtry, selectedReason;
   final TextEditingController itemSnController = TextEditingController();
   final TextEditingController itemNonQtyController = TextEditingController();
   final GlobalKey<StmsInputFieldState> itemSnKey = GlobalKey();
@@ -39,6 +41,7 @@ class _ImCreateItemState extends State<ImCreateItem> {
 
     getData();
     getCommon();
+    getItemModify();
   }
 
   getData() async {
@@ -74,6 +77,23 @@ class _ImCreateItemState extends State<ImCreateItem> {
     });
   }
 
+  getItemModify(){
+    DBItemModifyItem().getAllImItem().then((value){
+      setState(() {
+        allModifyItem = value;
+        print("ITTTTEEEMMM: $allModifyItem");
+      });
+    });
+
+    DBItemModifyNonItem().getAllImNonItem().then((value){
+      setState(() {
+        allModifyNonItem = value;
+        print("NOOONITEM: $allModifyNonItem");
+        print('LIST: $inventoryList');
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -102,6 +122,7 @@ class _ImCreateItemState extends State<ImCreateItem> {
                   height: height * 0.85,
                   child: Column(
                     children: [
+                      FlatButton(onPressed: getItemModify, child: Text('PRESS')),
                       FormField<String>(
                         builder: (FormFieldState<String> state) {
                           return InputDecorator(
@@ -250,31 +271,33 @@ class _ImCreateItemState extends State<ImCreateItem> {
         // need to compare if the SN already in DB or not
         // If already have in DB, need to show error
 
-        DBItemModifyItem().getAllImItem().then((value){
-          setState(() {
-            if(value == 1 && selectedInvtry == value.data['item_inventory_id']){
-              ErrorDialog.showErrorDialog(context, 'Similar Serial Number already added');
-            } else {
-              DBItemModifyItem()
-                  .createImItem(ItemModifyItem(
-                itemIvId: selectedInvtry,
-                itemSn: itemSnController.text,
-                itemReason: selectedReason,
-              ))
-                  .then((value) {
-                showSuccess('Item Save');
-                Navigator.popUntil(
-                    context, ModalRoute.withName(StmsRoutes.imItemList));
-              });
-            }
-          });
+        var currentItemInBD = allModifyItem.firstWhere((element) => element['item_inventory_id']);
+        print("VAAAAA: $currentItemInBD");
+
+        DBItemModifyItem()
+            .createImItem(ItemModifyItem(
+          itemIvId: selectedInvtry,
+          itemSn: itemSnController.text,
+          itemReason: selectedReason,
+        ))
+            .then((value) {
+          showSuccess('Item Save');
+          Navigator.popUntil(
+              context, ModalRoute.withName(StmsRoutes.imItemList));
         });
       } else {
 
         DBItemModifyNonItem().getAllImNonItem().then((value){
           setState(() {
-            if(value == 1 && selectedInvtry == value.data['item_inventory_id']){
-              ErrorDialog.showErrorDialog(context, 'Similar Serial Number already added');
+            allModifyNonItem = value;
+            print("NOOONITEM: $allModifyNonItem");
+            print("AAAAAAAA: $selectedInvtry");
+
+            var currentItemInBD = allModifyNonItem.where((element) => element['item_inventory_id'] == allModifyNonItem);
+            print('FAIL: $currentItemInBD');
+
+            if(currentItemInBD == selectedInvtry){
+              print('BBBBBBB: $currentItemInBD');
             } else {
               DBItemModifyNonItem()
                   .createImNonItem(
@@ -290,6 +313,7 @@ class _ImCreateItemState extends State<ImCreateItem> {
                     context, ModalRoute.withName(StmsRoutes.imItemList));
               });
             }
+
           });
         });
       }
