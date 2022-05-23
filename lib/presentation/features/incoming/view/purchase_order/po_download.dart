@@ -28,6 +28,8 @@ class _PoDownloadViewState extends State<PoDownloadView> {
   var testList;
   var selectedVendor, selectedPo;
 
+  // upon start this page, it will run the vendorList function
+  // vendorList function calls the item contain vendor in API
   @override
   void initState() {
     super.initState();
@@ -37,6 +39,8 @@ class _PoDownloadViewState extends State<PoDownloadView> {
     removeListItem();
   }
 
+  // vendor obtained from the portal and store into vendorList variable
+  // vendorList variable holds the content and will display under drop down menus
   getVendorList() {
     DBMasterSupplier().getAllMasterSupplier().then((value) {
       if (value == null) {
@@ -53,6 +57,8 @@ class _PoDownloadViewState extends State<PoDownloadView> {
     });
   }
 
+  // get the PO from the API and store into the poList variable
+  // poList variable holds the content and will display under drop down menu
   getPoList(String selectedVendor) {
     var token = Storage().token;
     getPurchaseOrder.getPurchaseOrderList(token).then((value) {
@@ -100,7 +106,9 @@ class _PoDownloadViewState extends State<PoDownloadView> {
               alignment: Alignment.topCenter,
               child: Column(
                 children: [
+                  // The vendor drop down section
                   Container(
+                    // design look of the drop down widget
                     decoration: ShapeDecoration(
                       shape: ContinuousRectangleBorder(
                         side: BorderSide(
@@ -115,8 +123,10 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                     margin: EdgeInsets.fromLTRB(10, 30, 10, 0),
                     child: FormField<String>(
                       builder: (FormFieldState<String> state) {
+                        // The function of the drop down widget
                         return Container(
                           padding: EdgeInsets.symmetric(horizontal: 10),
+                          // The text of the drop down menu
                           child: InputDecorator(
                             decoration: InputDecoration(
                               labelText: 'Please Select Vendor',
@@ -124,6 +134,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                                   state.hasError ? state.errorText : null,
                             ),
                             isEmpty: false,
+                            // Drop down arrow
                             child: SearchChoices.single(
                               displayClearIcon: false,
                               icon: Icon(
@@ -133,8 +144,10 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                               ),
                               // iconEnabledColor: Colors.amberAccent,
                               iconDisabledColor: Colors.grey[350],
+                              // using the vendorList content to map how many vendor list is present in the API
                               items: vendorList.map((item) {
                                 return new DropdownMenuItem(
+                                  // Only call the name of the vendor
                                   child: Text(
                                     item['name'],
                                     overflow: TextOverflow.ellipsis,
@@ -142,6 +155,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                                   value: item['name'],
                                 );
                               }).toList(),
+                              // calling the API and comparing if it return empty of value
                               value: selectedVendor,
                               onChanged: (value) {
                                 setState(() {
@@ -179,7 +193,9 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                       },
                     ),
                   ),
+                  // The PoList drop down section
                   Container(
+                    // design look of the drop down widget
                     decoration: ShapeDecoration(
                       shape: ContinuousRectangleBorder(
                         side: BorderSide(
@@ -194,8 +210,10 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                     margin: EdgeInsets.fromLTRB(10, 20, 10, 0),
                     child: FormField<String>(
                       builder: (FormFieldState<String> state) {
+                        // The function of the drop down widget
                         return Container(
                           padding: EdgeInsets.symmetric(horizontal: 10),
+                          // The text of the drop down menu
                           child: InputDecorator(
                             decoration: InputDecoration(
                               labelText: 'Please Choose Purchase Order',
@@ -210,6 +228,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                                   isDense: true,
                                   iconSize: 28,
                                   iconEnabledColor: Colors.amber,
+                                  // using the vendorList content to map how many vendor list is present in the API
                                   items: poList.map((item) {
                                     return new DropdownMenuItem(
                                       child: new Text(
@@ -219,6 +238,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                                       value: item['po_id'].toString(),
                                     );
                                   }).toList(),
+                                  // calling the API and comparing if it return empty of value
                                   isExpanded: false,
                                   value: selectedPo == "" ? "" : selectedPo,
                                   onChanged: selectedVendor != null
@@ -243,6 +263,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
               ),
             ),
           ),
+          // Save Button
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
@@ -270,6 +291,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
     );
   }
 
+  // the save function, calling and get the selected option to the next section
   Future<void> savePo() async {
     if (selectedPo == null) {
       ErrorDialog.showErrorDialog(context, 'Please select Purchase Order');

@@ -145,6 +145,12 @@ class _AoListItemState extends State<AoListItem> {
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),
+                                  // Enter Quantity text
+                                  Text(
+                                    'ENT Qty',
+                                    style: TextStyle(fontSize: 16.0),
+                                    textAlign: TextAlign.center,
+                                  ),
                                   Text(
                                     ' ',
                                     style: TextStyle(fontSize: 16.0),
@@ -225,6 +231,13 @@ class _AoListItemState extends State<AoListItem> {
                                                 "${snapshot.data[index]['item_serial_no']}",
                                                 style:
                                                     TextStyle(fontSize: 16.0),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              // Enter Quantity
+                                              Text(
+                                                "${snapshot.data[index]['non_tracking_qty']}",
+                                                style:
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Container(
@@ -326,6 +339,13 @@ class _AoListItemState extends State<AoListItem> {
                                                 "-",
                                                 style:
                                                     TextStyle(fontSize: 16.0),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              // Enter Quantity
+                                              Text(
+                                                "${snapshot.data[index]['non_tracking_qty']}",
+                                                style:
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Container(

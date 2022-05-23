@@ -50,6 +50,8 @@ class _PoItemListViewState extends State<PoItemListView> {
   final _flashOffController = TextEditingController(text: 'Flash off');
   final _cancelController = TextEditingController(text: 'Cancel');
 
+  var _selectedCamera = -1;
+
   var getPurchaseOrderItem = IncomingService();
   late Future<List<Map<String, dynamic>>> _future;
   DateTime date = DateTime.now();
@@ -94,6 +96,7 @@ class _PoItemListViewState extends State<PoItemListView> {
   final TextEditingController vendorNoController = TextEditingController();
   final GlobalKey<StmsInputFieldState> vendorNoKey = GlobalKey();
 
+  // call the function at start of page open
   @override
   void initState() {
     super.initState();
@@ -110,6 +113,7 @@ class _PoItemListViewState extends State<PoItemListView> {
     DBPoNonItem().getAllPoNonItem().then((value) => print(value));
   }
 
+  // get po from API
   getItemPo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     getPurchaseOrderItem.getPurchaseOrderItem().then((value) {
@@ -822,181 +826,179 @@ class _PoItemListViewState extends State<PoItemListView> {
                 Radius.circular(20),
               ),
             ),
-            content: SingleChildScrollView(
-              child: Container(
-                height: height * 0.65,
-                width: width,
-                padding: EdgeInsets.all(5),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      height: height / 13,
-                      child: FormField<String>(
-                        builder: (FormFieldState<String> state) {
-                          return Container(
-                            // padding: EdgeInsets.symmetric(horizontal: 5),
-                            child: InputDecorator(
-                              decoration: InputDecoration(
-                                labelText: 'Receipt Type',
-                                errorText:
-                                state.hasError ? state.errorText : null,
-                              ),
-                              isEmpty: false,
-                              child: StatefulBuilder(
-                                builder: (BuildContext context,
-                                    StateSetter setState) {
-                                  return DropdownButtonHideUnderline(
-                                    child: ButtonTheme(
-                                      child: DropdownButton<String>(
-                                        isDense: true,
-                                        iconSize: 28,
-                                        iconEnabledColor: Colors.amber,
-                                        items: receiptTypeList.map((item) {
-                                          return new DropdownMenuItem(
-                                            child: Text(
-                                              item['name'],
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            value: item['id'].toString(),
-                                          );
-                                        }).toList(),
-                                        isExpanded: false,
-                                        value: selectedReceipt == ""
-                                            ? ""
-                                            : selectedReceipt,
-                                        onChanged: (String? newValue) {
-                                          setState(() {
-                                            selectedReceipt = newValue;
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    StmsInputField(
-                      key: vendorNoKey,
-                      controller: vendorNoController,
-                      hint: 'Vendor Doc No',
-                      validator: Validator.valueExists,
-                    ),
-                    FormField<String>(
+            content: Container(
+              height: height * 0.65,
+              width: width,
+              padding: EdgeInsets.all(5),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    height: height / 13,
+                    child: FormField<String>(
                       builder: (FormFieldState<String> state) {
-                        return InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: 'Item Location',
-                            errorText: state.hasError ? state.errorText : null,
-                          ),
-                          isEmpty: false,
-                          child: SearchChoices.single(
-                            padding: 0,
-                            displayClearIcon: false,
-                            icon: Icon(
-                              Icons.arrow_drop_down,
-                              color: Colors.amber,
-                              size: 28,
+                        return Container(
+                          // padding: EdgeInsets.symmetric(horizontal: 5),
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: 'Receipt Type',
+                              errorText:
+                              state.hasError ? state.errorText : null,
                             ),
-                            // iconEnabledColor: Colors.amberAccent,
-                            iconDisabledColor: Colors.grey[350],
-                            items: locList.map((item) {
-                              return new DropdownMenuItem(
-                                child: Text(
-                                  item['name'],
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                value: item['name'],
-                              );
-                            }).toList(),
-                            value: selectedLoc,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedLoc = value;
-                                var locId = locList.firstWhereOrNull(
-                                        (element) => element['name'] == value);
-                                locationId = locId['id'];
-                              });
-                            },
-                            isExpanded: true,
-                            searchInputDecoration: InputDecoration(
-                              border: OutlineInputBorder(),
+                            isEmpty: false,
+                            child: StatefulBuilder(
+                              builder: (BuildContext context,
+                                  StateSetter setState) {
+                                return DropdownButtonHideUnderline(
+                                  child: ButtonTheme(
+                                    child: DropdownButton<String>(
+                                      isDense: true,
+                                      iconSize: 28,
+                                      iconEnabledColor: Colors.amber,
+                                      items: receiptTypeList.map((item) {
+                                        return new DropdownMenuItem(
+                                          child: Text(
+                                            item['name'],
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          value: item['id'].toString(),
+                                        );
+                                      }).toList(),
+                                      isExpanded: false,
+                                      value: selectedReceipt == ""
+                                          ? ""
+                                          : selectedReceipt,
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedReceipt = newValue;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                            underline: Container(
-                              height: 0,
-                              padding: EdgeInsets.zero,
-                            ),
-                            selectedValueWidgetFn: (item) {
-                              return Container(
-                                alignment: Alignment.centerLeft,
-                                padding: const EdgeInsets.all(0),
-                                child: Text(
-                                  item.toString(),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            },
                           ),
                         );
                       },
                     ),
-                    // Select button
-                    Expanded(
-                      flex: 1,
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: StmsStyleButton(
-                          title: 'SELECT',
-                          backgroundColor: Colors.amber,
-                          textColor: Colors.black,
-                          onPressed: () async {
-                            if (selectedReceipt == null) {
-                              ErrorDialog.showErrorDialog(
-                                  context, 'Please select receipt type');
-                            } else if (vendorNoKey.currentState
-                                ?.validate() !=
-                                null) {
-                              ErrorDialog.showErrorDialog(context,
-                                  'Vendor doc no. cannot be empty');
-                            } else if (selectedLoc == null) {
-                              ErrorDialog.showErrorDialog(
-                                  context, 'Please select Location');
-                            } else {
-                              SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-                              prefs.setString(
-                                  'poReceiptType', selectedReceipt);
-                              prefs.setString(
-                                  'povendorNo', vendorNoController.text);
-                              prefs.setString('poLocation', locationId);
-
-                              print('location: $locationId');
-                              Navigator.pop(context);
-
-                              if (tracking == "2" && typeScan == 'scan') {
-                                scanBarcodeNormal();
-                              } else if (tracking == "2" &&
-                                  typeScan == 'manual') {
-                                Navigator.of(context)
-                                    .pushNamed(StmsRoutes.poItemManual);
-                              } else {
-                                prefs.setString('nontypeScan', typeScan);
-                                scanSKU();
-                                // Navigator.of(context)
-                                //     .pushNamed(StmsRoutes.poItemDetail);
-                              }
-                            }
+                  ),
+                  StmsInputField(
+                    key: vendorNoKey,
+                    controller: vendorNoController,
+                    hint: 'Vendor Doc No',
+                    validator: Validator.valueExists,
+                  ),
+                  FormField<String>(
+                    builder: (FormFieldState<String> state) {
+                      return InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Item Location',
+                          errorText: state.hasError ? state.errorText : null,
+                        ),
+                        isEmpty: false,
+                        child: SearchChoices.single(
+                          padding: 0,
+                          displayClearIcon: false,
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.amber,
+                            size: 28,
+                          ),
+                          // iconEnabledColor: Colors.amberAccent,
+                          iconDisabledColor: Colors.grey[350],
+                          items: locList.map((item) {
+                            return new DropdownMenuItem(
+                              child: Text(
+                                item['name'],
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              value: item['name'],
+                            );
+                          }).toList(),
+                          value: selectedLoc,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedLoc = value;
+                              var locId = locList.firstWhereOrNull(
+                                      (element) => element['name'] == value);
+                              locationId = locId['id'];
+                            });
+                          },
+                          isExpanded: true,
+                          searchInputDecoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          underline: Container(
+                            height: 0,
+                            padding: EdgeInsets.zero,
+                          ),
+                          selectedValueWidgetFn: (item) {
+                            return Container(
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.all(0),
+                              child: Text(
+                                item.toString(),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
                           },
                         ),
+                      );
+                    },
+                  ),
+                  // Select button
+                  Expanded(
+                    flex: 1,
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: StmsStyleButton(
+                        title: 'SELECT',
+                        backgroundColor: Colors.amber,
+                        textColor: Colors.black,
+                        onPressed: () async {
+                          if (selectedReceipt == null) {
+                            ErrorDialog.showErrorDialog(
+                                context, 'Please select receipt type');
+                          } else if (vendorNoKey.currentState
+                              ?.validate() !=
+                              null) {
+                            ErrorDialog.showErrorDialog(context,
+                                'Vendor doc no. cannot be empty');
+                          } else if (selectedLoc == null) {
+                            ErrorDialog.showErrorDialog(
+                                context, 'Please select Location');
+                          } else {
+                            SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                            prefs.setString(
+                                'poReceiptType', selectedReceipt);
+                            prefs.setString(
+                                'povendorNo', vendorNoController.text);
+                            prefs.setString('poLocation', locationId);
+
+                            print('location: $locationId');
+                            Navigator.pop(context);
+
+                            if (tracking == "2" && typeScan == 'scan') {
+                              scanBarcodeNormal();
+                            } else if (tracking == "2" &&
+                                typeScan == 'manual') {
+                              Navigator.of(context)
+                                  .pushNamed(StmsRoutes.poItemManual);
+                            } else {
+                              prefs.setString('nontypeScan', typeScan);
+                              scanSKU();
+                              // Navigator.of(context)
+                              //     .pushNamed(StmsRoutes.poItemDetail);
+                            }
+                          }
+                        },
                       ),
-                    )
-                  ],
-                ),
+                    ),
+                  )
+                ],
               ),
             ),
           );
@@ -1016,48 +1018,79 @@ class _PoItemListViewState extends State<PoItemListView> {
 
   // scan code
   Future<void> scanSKU() async {
-    scanResult = this.scanResult;
+    String skuBarcode;
     var typeScanning = Storage().typeScan;
-
+    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      final result = await BarcodeScanner.scan(
-        options: ScanOptions(
-          strings: {
-            'cancel': _cancelController.text,
-            'flash_on': _flashOnController.text,
-            'flash_off': _flashOffController.text,
-          },
-          // restrictFormat: selectedFormats,
-          // useCamera: _selectedCamera,
-          autoEnableFlash: false,
-          android: AndroidOptions(
-            useAutoFocus: true,
-          ),
-        ),
-      );
-      setState(() => scanResult = result);
-      if (scanResult != null) {
-        if (scanResult!.type.toString() == 'Cancelled') {
-          ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
+      skuBarcode = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', '', true, ScanMode.BARCODE);
+      print('skuBarcode: $skuBarcode');
+      if (skuBarcode != '-1') {
+        if (typeScanning == 'sku') {
+          searchSKU(skuBarcode);
         } else {
-          if (typeScanning == 'sku') {
-            searchSKU(scanResult!.rawContent.toString());
-          } else {
-            searchUPC(scanResult!.rawContent.toString());
-          }
+          searchUPC(skuBarcode);
         }
+        // widget.changeView(changeType: ViewChangeType.Forward);
+      } else {
+        ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
       }
-    } on PlatformException catch (e) {
-      setState(() {
-        scanResult = ScanResult(
-          type: ResultType.Error,
-          format: BarcodeFormat.unknown,
-          rawContent: e.code == BarcodeScanner.cameraAccessDenied
-              ? 'The user did not grant the camera permission!'
-              : 'Unknown error: $e',
-        );
-      });
+    } on PlatformException {
+      skuBarcode = 'Failed to get platform version.';
     }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _scanBarcode = skuBarcode;
+    });
+    //
+    // scanResult = this.scanResult;
+    // var typeScanning = Storage().typeScan;
+    //
+    // try {
+    //   final result = await BarcodeScanner.scan(
+    //     options: ScanOptions(
+    //       s
+    //       strings: {
+    //         'cancel': _cancelController.text,
+    //         'flash_on': _flashOnController.text,
+    //         'flash_off': _flashOffController.text,
+    //       },
+    //       // restrictFormat: selectedFormats,
+    //       // useCamera: _selectedCamera,
+    //       autoEnableFlash: false,
+    //       android: AndroidOptions(
+    //         useAutoFocus: true,
+    //       ),
+    //     ),
+    //   );
+    //   setState(() => scanResult = result);
+    //   if (scanResult != null) {
+    //     if (scanResult!.type.toString() == 'Cancelled') {
+    //       ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
+    //     } else {
+    //       if (typeScanning == 'sku') {
+    //         searchSKU(scanResult!.rawContent.toString());
+    //       } else {
+    //         searchUPC(scanResult!.rawContent.toString());
+    //       }
+    //     }
+    //   }
+    // } on PlatformException catch (e) {
+    //   setState(() {
+    //     scanResult = ScanResult(
+    //       type: ResultType.Error,
+    //       format: BarcodeFormat.unknown,
+    //       rawContent: e.code == BarcodeScanner.cameraAccessDenied
+    //           ? 'The user did not grant the camera permission!'
+    //           : 'Unknown error: $e',
+    //     );
+    //   });
+    // }
   }
 
 // search scan SKU code
@@ -1191,42 +1224,69 @@ class _PoItemListViewState extends State<PoItemListView> {
 
   // Scan for trackingType == '2'. Item that got serial no
   Future<void> scanBarcodeNormal() async {
-    scanResult = this.scanResult;
+
+    String barcodeScanRes;
+    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      final result = await BarcodeScanner.scan(
-        options: ScanOptions(
-          strings: {
-            'cancel': _cancelController.text,
-            'flash_on': _flashOnController.text,
-            'flash_off': _flashOffController.text,
-          },
-          // restrictFormat: selectedFormats,
-          // useCamera: _selectedCamera,
-          autoEnableFlash: false,
-          android: AndroidOptions(
-            useAutoFocus: true,
-          ),
-        ),
-      );
-      setState(() => scanResult = result);
-      if (scanResult != null) {
-        if (scanResult!.type.toString() == 'Cancelled') {
-          ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
-        } else {
-          saveData(scanResult!.rawContent.toString());
-        }
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', '', true, ScanMode.BARCODE);
+      print('barcodeScanRes: $barcodeScanRes');
+      if (barcodeScanRes != '-1') {
+        print('barcode: $barcodeScanRes');
+        saveData(barcodeScanRes);
+        // widget.changeView(changeType: ViewChangeType.Forward);
+      } else {
+        ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
       }
-    } on PlatformException catch (e) {
-      setState(() {
-        scanResult = ScanResult(
-          type: ResultType.Error,
-          format: BarcodeFormat.unknown,
-          rawContent: e.code == BarcodeScanner.cameraAccessDenied
-              ? 'The user did not grant the camera permission!'
-              : 'Unknown error: $e',
-        );
-      });
+    } on PlatformException {
+      barcodeScanRes = 'Failed to get platform version.';
     }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _scanBarcode = barcodeScanRes;
+    });
+    //
+    // scanResult = this.scanResult;
+    // try {
+    //   final result = await BarcodeScanner.scan(
+    //     options: ScanOptions(
+    //       strings: {
+    //         'cancel': _cancelController.text,
+    //         'flash_on': _flashOnController.text,
+    //         'flash_off': _flashOffController.text,
+    //       },
+    //       // restrictFormat: selectedFormats,
+    //       // useCamera: _selectedCamera,
+    //       autoEnableFlash: false,
+    //       android: AndroidOptions(
+    //         useAutoFocus: true,
+    //       ),
+    //     ),
+    //   );
+    //   setState(() => scanResult = result);
+    //   if (scanResult != null) {
+    //     if (scanResult!.type.toString() == 'Cancelled') {
+    //       ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
+    //     } else {
+    //       saveData(scanResult!.rawContent.toString());
+    //     }
+    //   }
+    // } on PlatformException catch (e) {
+    //   setState(() {
+    //     scanResult = ScanResult(
+    //       type: ResultType.Error,
+    //       format: BarcodeFormat.unknown,
+    //       rawContent: e.code == BarcodeScanner.cameraAccessDenied
+    //           ? 'The user did not grant the camera permission!'
+    //           : 'Unknown error: $e',
+    //     );
+    //   });
+    // }
   }
 
   Future<void> saveData(String barcodeScanRes) async {

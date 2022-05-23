@@ -27,7 +27,7 @@ class ImCreateItem extends StatefulWidget {
 class _ImCreateItemState extends State<ImCreateItem> {
   List<InventoryHive> inventoryList = [];
   List reasonList = [];
-  var itemModifyTrack, selectedInvtry, selectedReason;
+  var itemModifyTrack, selectedInvtry, selectedReason, selectedItem;
   final TextEditingController itemSnController = TextEditingController();
   final TextEditingController itemNonQtyController = TextEditingController();
   final GlobalKey<StmsInputFieldState> itemSnKey = GlobalKey();
@@ -224,45 +224,73 @@ class _ImCreateItemState extends State<ImCreateItem> {
   }
 
   Future<void> saveData() async {
+    // If there is no inventory id selected
     if (selectedInvtry == null) {
       ErrorDialog.showErrorDialog(context, 'Please select item Inventory ID');
+
+      // SN cannot be empty
     } else if (itemModifyTrack == "Serial Number" &&
         itemSnKey.currentState?.validate() != null) {
       ErrorDialog.showErrorDialog(context, 'Serial Number cannot be empty');
+
+      // If quantity is empty
     } else if (itemModifyTrack != "Serial Number" &&
         itemNonQtyKey.currentState?.validate() != null) {
       ErrorDialog.showErrorDialog(context, 'Quantity cannot be empty');
+
+      // If reason code is empty
     } else if (selectedReason == null) {
       ErrorDialog.showErrorDialog(context, 'Please select Reason Code');
     } else if (itemModifyTrack != 'Serial Number' &&
         int.parse(itemNonQtyController.text) <= 0) {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
+      // if SN present
       if (itemModifyTrack == "Serial Number") {
-        DBItemModifyItem()
-            .createImItem(ItemModifyItem(
-          itemIvId: selectedInvtry,
-          itemSn: itemSnController.text,
-          itemReason: selectedReason,
-        ))
-            .then((value) {
-          showSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.imItemList));
+        // need to compare if the SN already in DB or not
+        // If already have in DB, need to show error
+
+        DBItemModifyItem().getAllImItem().then((value){
+          setState(() {
+            if(value == 1 && selectedInvtry == value.data['item_inventory_id']){
+              ErrorDialog.showErrorDialog(context, 'Similar Serial Number already added');
+            } else {
+              DBItemModifyItem()
+                  .createImItem(ItemModifyItem(
+                itemIvId: selectedInvtry,
+                itemSn: itemSnController.text,
+                itemReason: selectedReason,
+              ))
+                  .then((value) {
+                showSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.imItemList));
+              });
+            }
+          });
         });
       } else {
-        DBItemModifyNonItem()
-            .createImNonItem(
-          ItemModifyNonItem(
-            itemIvId: selectedInvtry,
-            itemNonQty: itemNonQtyController.text,
-            itemReason: selectedReason,
-          ),
-        )
-            .then((value) {
-          showSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.imItemList));
+
+        DBItemModifyNonItem().getAllImNonItem().then((value){
+          setState(() {
+            if(value == 1 && selectedInvtry == value.data['item_inventory_id']){
+              ErrorDialog.showErrorDialog(context, 'Similar Serial Number already added');
+            } else {
+              DBItemModifyNonItem()
+                  .createImNonItem(
+                ItemModifyNonItem(
+                  itemIvId: selectedInvtry,
+                  itemNonQty: itemNonQtyController.text,
+                  itemReason: selectedReason,
+                ),
+              )
+                  .then((value) {
+                showSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.imItemList));
+              });
+            }
+          });
         });
       }
     }
