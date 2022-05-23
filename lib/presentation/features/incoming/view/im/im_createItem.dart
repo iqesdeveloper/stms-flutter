@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:collection/collection.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/incoming/im/imItem_model.dart';
 import 'package:stms/data/api/models/incoming/im/im_non_model.dart';
@@ -79,6 +80,7 @@ class _ImCreateItemState extends State<ImCreateItem> {
 
   // get itemModify in DB
   getItemModify(){
+    print("AAAAAAAA: $selectedInvtry");
     DBItemModifyItem().getAllImItem().then((value){
       setState(() {
         allModifyItem = value;
@@ -294,7 +296,7 @@ class _ImCreateItemState extends State<ImCreateItem> {
             print("NOOONITEM: $allModifyNonItem");
             print("AAAAAAAA: $selectedInvtry");
 
-            var currentItemInBD = allModifyNonItem.where((element) => element['item_inventory_id'] == allModifyNonItem);
+            var currentItemInBD = allModifyNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == selectedInvtry);
             print('MMMMMMA: $currentItemInBD');
 
             if(currentItemInBD == selectedInvtry){
