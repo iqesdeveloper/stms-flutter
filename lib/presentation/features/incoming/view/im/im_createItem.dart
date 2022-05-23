@@ -77,6 +77,7 @@ class _ImCreateItemState extends State<ImCreateItem> {
     });
   }
 
+  // get itemModify in DB
   getItemModify(){
     DBItemModifyItem().getAllImItem().then((value){
       setState(() {
@@ -271,8 +272,8 @@ class _ImCreateItemState extends State<ImCreateItem> {
         // need to compare if the SN already in DB or not
         // If already have in DB, need to show error
 
-        var currentItemInBD = allModifyItem.firstWhere((element) => element['item_inventory_id']);
-        print("VAAAAA: $currentItemInBD");
+        // var currentItemInBD = allModifyItem.firstWhere((element) => element['item_inventory_id']);
+        // print("VAAAAA: $currentItemInBD");
 
         DBItemModifyItem()
             .createImItem(ItemModifyItem(
@@ -294,10 +295,10 @@ class _ImCreateItemState extends State<ImCreateItem> {
             print("AAAAAAAA: $selectedInvtry");
 
             var currentItemInBD = allModifyNonItem.where((element) => element['item_inventory_id'] == allModifyNonItem);
-            print('FAIL: $currentItemInBD');
+            print('MMMMMMA: $currentItemInBD');
 
             if(currentItemInBD == selectedInvtry){
-              print('BBBBBBB: $currentItemInBD');
+              print('FAILLLLLL: $currentItemInBD');
             } else {
               DBItemModifyNonItem()
                   .createImNonItem(
