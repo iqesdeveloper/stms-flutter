@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -45,13 +44,6 @@ class PoItemListView extends StatefulWidget {
 }
 
 class _PoItemListViewState extends State<PoItemListView> {
-  ScanResult? scanResult;
-  final _flashOnController = TextEditingController(text: 'Flash on');
-  final _flashOffController = TextEditingController(text: 'Flash off');
-  final _cancelController = TextEditingController(text: 'Cancel');
-
-  var _selectedCamera = -1;
-
   var getPurchaseOrderItem = IncomingService();
   late Future<List<Map<String, dynamic>>> _future;
   DateTime date = DateTime.now();

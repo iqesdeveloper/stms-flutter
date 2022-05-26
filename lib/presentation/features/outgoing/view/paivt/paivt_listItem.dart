@@ -51,6 +51,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
   List<InventoryHive> paivtSkuListing = [];
   List paivtSerialNo = [];
   List serialList = [];
+  List allPaivtItem = [];
+  List allPaivtNonItem = [];
   // ignore: unused_field
   String _scanBarcode = 'Unknown';
   var formatDate,
@@ -74,6 +76,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
 
     getCommon();
     getItemPaivt();
+    // call the enterQty whenever at start of this page
+    getEnterQty();
     // checkBarcodeList();
     _future = getPaivtItem.getPaivtItem();
     formatDate = DateFormat('yyyy-MM-dd').format(date);
@@ -105,6 +109,26 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
         // paivtShipDate = getInfoPaivt['ship_date'];
         paivtDoc = getInfoPaivt['out_paiv_doc'];
         supplier = getInfoPaivt['supplier_name'];
+      });
+    });
+  }
+
+  // check and get all the purchase order item and purchase order non item
+  // POItem & PoNonItem
+  getEnterQty() {
+    DBPaivtItem().getAllPaivtItem().then((value) {
+      // make the PoItem is equal to the item store in scanDB
+      // It is the save info
+      setState(() {
+        allPaivtItem = value;
+      });
+    });
+
+    DBPaivtNonItem().getAllPaivtNonItem().then((value) {
+      setState(() {
+        // Display and get all the PoNonItem after scanDB collected.
+        // It is the save info
+        allPaivtNonItem = value;
       });
     });
   }
@@ -157,10 +181,11 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                             border:
                                 TableBorder.all(color: Colors.black, width: 1),
                             columnWidths: const <int, TableColumnWidth>{
-                              0: FixedColumnWidth(30.0),
-                              1: FixedColumnWidth(90.0),
+                              0: FixedColumnWidth(70.0),
+                              1: FixedColumnWidth(40.0),
                               2: FixedColumnWidth(40.0),
-                              3: FixedColumnWidth(73.0),
+                              3: FixedColumnWidth(40.0),
+                              4: FixedColumnWidth(40.0),
                             },
                             children: [
                               TableRow(
@@ -188,6 +213,11 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                   ),
                                   Text(
                                     'Received Qty',
+                                    style: TextStyle(fontSize: 16.0),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    'ENT Qty',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),
@@ -232,10 +262,11 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                             TableCellVerticalAlignment.middle,
                                         columnWidths: const <int,
                                             TableColumnWidth>{
-                                          0: FixedColumnWidth(30.0),
-                                          1: FixedColumnWidth(90.0),
+                                          0: FixedColumnWidth(70.0),
+                                          1: FixedColumnWidth(40.0),
                                           2: FixedColumnWidth(40.0),
-                                          3: FixedColumnWidth(73.0),
+                                          3: FixedColumnWidth(40.0),
+                                          4: FixedColumnWidth(40.0),
                                         },
                                         children: [
                                           TableRow(
@@ -282,6 +313,48 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                                 "${snapshot.data[index]['item_receive_qty']}",
                                                 style:
                                                     TextStyle(fontSize: 16.0),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              // Enter Quantity text
+                                              // Will display whether it pass in the value or not
+                                              // This s to check if Enter Quantity got value
+                                              // using the master file snapshot check
+                                              // THIS IS FOR ALLPaivtITEM
+                                              snapshot.data[index]['tracking_type'] == "2" ? Text(
+                                                // to check if allPoItem got value or not
+                                                // If got value, check in the master file snapshot and compare the item_inventory_id
+                                                // Using the 'where' will go through the check process like a looping
+                                                allPaivtItem.isNotEmpty ? allPaivtItem.where((element)
+                                                => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).isNotEmpty
+                                                // once check, if it is containing a value or the item_id in DB is same in the master file
+                                                // Get the length of the item_id
+                                                    ? '${allPaivtItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).length}'
+                                                // If there is no match, then the result is display '0'
+                                                    : '0'
+                                                // If the overall result is default as nothing, the display will also show '0'
+                                                    : '0',
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              )
+                                                  : Text(
+                                                // This one is to check if AllPoNonItem got value
+                                                // ALLPaivtNONITEM section
+                                                // Need to check if there is a value after scan.
+                                                // Comparing both the DB and master file to check if there is a value before and after scan
+                                                allPaivtNonItem.isNotEmpty ? allPaivtNonItem.firstWhereOrNull((element) =>
+                                                element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']) != null
+                                                // If got value, then display the tracking_qty
+                                                    ? "${allPaivtNonItem.firstWhereOrNull((element) => element['item_inventory_id']
+                                                    == snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
+                                                // If no value after scan, which means it is not the same as in DB, then display '0'
+                                                    : "0"
+                                                // This is generally display '0' if no value is found
+                                                    : "0",
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Column(
@@ -797,6 +870,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
               ))
                   .then((value) {
                 showSuccess('Item Save');
+                // call and update the enterQty function
+                getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
@@ -812,13 +887,18 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                   .update(selectedItem, newQty.toString())
                   .then((value) {
                 showSuccess('Item Save');
+                // call and update the enterQty function
+                getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
             }
           });
         } else {
-          Navigator.of(context).pushNamed(StmsRoutes.paivtItemDetail);
+          Navigator.of(context).pushNamed(StmsRoutes.paivtItemDetail).then((value){
+            var _duration = Duration(seconds: 1);
+            return Timer(_duration, getEnterQty);
+          });
         }
       }
     });
@@ -849,6 +929,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
               ))
                   .then((value) {
                 showSuccess('Item Save');
+                // call and update the enterQty function
+                getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
@@ -864,13 +946,18 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                   .update(selectedItem, newQty.toString())
                   .then((value) {
                 showSuccess('Item Save');
+                // call and update the enterQty function
+                getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
             }
           });
         } else {
-          Navigator.of(context).pushNamed(StmsRoutes.paivtItemDetail);
+          Navigator.of(context).pushNamed(StmsRoutes.paivtItemDetail).then((value){
+            var _duration = Duration(seconds: 1);
+            return Timer(_duration, getEnterQty);
+          });
         }
       }
     });
@@ -928,9 +1015,10 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
             Navigator.of(context)
                 .pushNamed(StmsRoutes.paivtItemDetail)
                 .then((value) {
-              setState(() {
-                scanBarcodeNormal();
-              });
+              // call and update the enterQty function
+              getEnterQty();
+              var _duration = Duration(seconds: 1);
+              return Timer(_duration, scanSKU);
             });
           } else {
             ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
@@ -942,9 +1030,10 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
           Navigator.of(context)
               .pushNamed(StmsRoutes.paivtItemDetail)
               .then((value) {
-            setState(() {
-              scanBarcodeNormal();
-            });
+            // call and update the enterQty function
+            getEnterQty();
+            var _duration = Duration(seconds: 1);
+            return Timer(_duration, scanSKU);
           });
         }
       });

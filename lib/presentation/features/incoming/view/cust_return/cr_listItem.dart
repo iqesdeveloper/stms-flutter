@@ -122,7 +122,7 @@ class _CrListItemState extends State<CrListItem> {
                                     ),
                                   ),
                                   Text(
-                                    'Qty',
+                                    'Ent Qty',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),

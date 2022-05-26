@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:collection/collection.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
 import 'package:stms/data/api/models/outgoing/rric/rricItem_model.dart';
@@ -30,6 +30,8 @@ class RcCreateItem extends StatefulWidget {
 class _RcCreateItemState extends State<RcCreateItem> {
   List<InventoryHive> inventoryList = [];
   List reasonList = [];
+  List allReplaceCustomerItem = [];
+  List allReplaceCustomerNonItem = [];
   var rcTrack, selectedInvtry, selectedReason;
   final TextEditingController itemSnController = TextEditingController();
   final TextEditingController itemNonQtyController = TextEditingController();
@@ -240,35 +242,86 @@ class _RcCreateItemState extends State<RcCreateItem> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (rcTrack == "2") {
-        DBReplaceCustItem()
-            .createRricItem(
-          RricItem(
-            itemIvId: selectedInvtry,
-            itemSn: itemSnController.text,
-            // itemReason: selectedReason,
-          ),
-        )
-            .then((value) {
-          showSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.rcItemList));
+        // Get all value from DB
+        DBReplaceCustItem().getAllRricItem().then((value){
+          // First check if there is value or not
+          // If got value
+          // ignore: unnecessary_null_comparison
+          if(value != null){
+            setState(() {
+              // set the value to list
+              // variable allModifyItem is the list
+              allReplaceCustomerItem = value;
+
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allReplaceCustomerItem.firstWhereOrNull((
+                  element) => element['item_inventory_id'] == selectedInvtry);
+
+              // if already got item with the same item inventory id
+              if (currentItemInBD != null) {
+                // display popup error and show popup error of the item already exist
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.rcItemList));
+                ErrorDialog.showErrorDialog(
+                    context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
+                DBReplaceCustItem()
+                    .createRricItem(
+                  RricItem(
+                    itemIvId: selectedInvtry,
+                    itemSn: itemSnController.text,
+                    // itemReason: selectedReason,
+                  ),
+                )
+                    .then((value) {
+                  showSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.rcItemList));
+                });
+              }
+            });
+            // if no value in DB at all
+          } else {
+            DBReplaceCustItem()
+                .createRricItem(
+              RricItem(
+                itemIvId: selectedInvtry,
+                itemSn: itemSnController.text,
+                // itemReason: selectedReason,
+              ),
+            )
+                .then((value) {
+              showSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.rcItemList));
+            });
+          }
         });
       } else {
+        // Get all value from DB
         DBReplaceCustNonItem().getAllRricNonItem().then((value) {
+          // First check if there is value or not
+          // If got value
           // ignore: unnecessary_null_comparison
           if (value != null) {
-            print('listing: $value');
-            var listingRricNon = value;
+            setState(() {
+              // set the value to list
+              // variable allModifyNonItem is the list
+              allReplaceCustomerNonItem = value;
 
-            var itemRricNon = listingRricNon.firstWhereOrNull(
-                (element) => element['item_inventory_id'] == selectedInvtry);
-            print('itemRricNon check: $itemRricNon');
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allReplaceCustomerNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == selectedInvtry);
 
-            if (null == itemRricNon) {
-              String? getQty = prefs.getString('itemQty');
-              var currentQty = int.parse(getQty!);
-
-              if (int.parse(itemNonQtyController.text) <= currentQty) {
+              // if already got item with the same item inventory id
+              if(currentItemInBD != null){
+                // display popup error and show popup error of the item already exist
+                Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.rcItemList));
+                ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
                 DBReplaceCustNonItem()
                     .createRricNonItem(
                   RricNonItem(
@@ -282,16 +335,9 @@ class _RcCreateItemState extends State<RcCreateItem> {
                   Navigator.popUntil(
                       context, ModalRoute.withName(StmsRoutes.rcItemList));
                 });
-              } else {
-                ErrorDialog.showErrorDialog(
-                    context, 'Quantity cannot more than current quantity.');
               }
-            } else {
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.rcItemList));
-
-              ErrorDialog.showErrorDialog(context, 'This SKU already exists.');
-            }
+            });
+            // if no value in DB at all
           } else {
             DBReplaceCustNonItem()
                 .createRricNonItem(

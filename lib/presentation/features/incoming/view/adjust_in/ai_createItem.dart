@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:collection/collection.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/incoming/ai/aiItem_model.dart';
 import 'package:stms/data/api/models/incoming/ai/ai_non_model.dart';
@@ -27,6 +28,8 @@ class AiCreateItem extends StatefulWidget {
 class _AiCreateItemState extends State<AiCreateItem> {
   List<InventoryHive> inventoryList = [];
   List reasonList = [];
+  List allAdjustInItem = [];
+  List allAdjustInNonItem = [];
   var adjustInTrack, selectedInvtry, selectedReason;
   final TextEditingController itemSnController = TextEditingController();
   final TextEditingController itemNonQtyController = TextEditingController();
@@ -244,32 +247,115 @@ class _AiCreateItemState extends State<AiCreateItem> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (adjustInTrack == "Serial Number") {
-        DBAdjustInItem()
-            .createAiItem(
-          AdjustInItem(
-            itemIvId: selectedInvtry,
-            itemSn: itemSnController.text,
-            itemReason: selectedReason,
-          ),
-        )
-            .then((value) {
-          showSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.aiItemList));
+        // Get all value from DB
+        DBAdjustInItem().getAllAiItem().then((value){
+          // First check if there is value or not
+          // If got value
+          if(value != null){
+            setState(() {
+              // set the value to list
+              // variable allModifyItem is the list
+              allAdjustInItem = value;
+
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = adjustInTrack.firstWhereOrNull((
+                  element) => element['item_inventory_id'] == selectedInvtry);
+
+              // if already got item with the same item inventory id
+              if (currentItemInBD != null) {
+                // display popup error and show popup error of the item already exist
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.aiItemList));
+                ErrorDialog.showErrorDialog(
+                    context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
+                DBAdjustInItem()
+                    .createAiItem(
+                  AdjustInItem(
+                    itemIvId: selectedInvtry,
+                    itemSn: itemSnController.text,
+                    itemReason: selectedReason,
+                  ),
+                )
+                    .then((value) {
+                  showSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.aiItemList));
+                });
+              }
+            });
+            // if no value in DB at all
+          } else {
+            DBAdjustInItem()
+                .createAiItem(
+              AdjustInItem(
+                itemIvId: selectedInvtry,
+                itemSn: itemSnController.text,
+                itemReason: selectedReason,
+              ),
+            )
+                .then((value) {
+              showSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.aiItemList));
+            });
+          }
         });
       } else {
-        DBAdjustInNonItem()
-            .createAiNonItem(
-          AdjustInNonItem(
-            itemIvId: selectedInvtry,
-            itemNonQty: itemNonQtyController.text,
-            itemReason: selectedReason,
-          ),
-        )
-            .then((value) {
-          showSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.aiItemList));
+        // Get all value from DB
+        DBAdjustInNonItem().getAllAiNonItem().then((value){
+          // First check if there is value or not
+          // If got value
+          if(value != null){
+            setState(() {
+              // set the value to list
+              // variable allModifyNonItem is the list
+              allAdjustInNonItem = value;
+
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allAdjustInNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == selectedInvtry);
+
+              // if already got item with the same item inventory id
+              if(currentItemInBD != null){
+                // display popup error and show popup error of the item already exist
+                Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.aiItemList));
+                ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
+                DBAdjustInNonItem()
+                    .createAiNonItem(
+                  AdjustInNonItem(
+                    itemIvId: selectedInvtry,
+                    itemNonQty: itemNonQtyController.text,
+                    itemReason: selectedReason,
+                  ),
+                )
+                    .then((value) {
+                  showSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.aiItemList));
+                });
+              }
+            });
+            // if no value in DB at all
+          } else {
+            DBAdjustInNonItem()
+                .createAiNonItem(
+              AdjustInNonItem(
+                itemIvId: selectedInvtry,
+                itemNonQty: itemNonQtyController.text,
+                itemReason: selectedReason,
+              ),
+            )
+                .then((value) {
+              showSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.aiItemList));
+            });
+          }
         });
       }
     }

@@ -47,7 +47,6 @@ dependencies:
 
   # scanner
   flutter_barcode_scanner: ^2.0.0
-  barcode_scan2: any
 
   # Design
   font_awesome_flutter: ^9.1.0

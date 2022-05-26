@@ -147,7 +147,7 @@ class _RvListItemState extends State<RvListItem> {
                                     ),
                                   ),
                                   Text(
-                                    'Qty',
+                                    'Ent Qty',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),

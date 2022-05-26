@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:collection/collection.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/incoming/vsr/vsrItem_model.dart';
 import 'package:stms/data/api/models/incoming/vsr/vsr_non_model.dart';
@@ -29,6 +30,8 @@ class VsrCreateItem extends StatefulWidget {
 class _VsrCreateItemState extends State<VsrCreateItem> {
   List<InventoryHive> inventoryList = [];
   List reasonList = [];
+  List allVendorReplaceItem = [];
+  List allVendorReplaceNonItem = [];
   var vsrTrack, selectedInvtry, selectedReason;
   final TextEditingController itemSnController = TextEditingController();
   final TextEditingController itemNonQtyController = TextEditingController();
@@ -199,33 +202,86 @@ class _VsrCreateItemState extends State<VsrCreateItem> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (vsrTrack == "2") {
-        DBVendorReplaceItem()
-            .createVsrItem(
-          VsrItem(
-            itemIvId: selectedInvtry,
-            itemSn: itemSnController.text,
-            // itemReason: selectedReason,
-          ),
-        )
-            .then((value) {
-          showSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.vsrItemList));
+        // Get all value from DB
+        DBVendorReplaceItem().getAllVsrItem().then((value){
+          // First check if there is value or not
+          // If got value
+          // ignore: unnecessary_null_comparison
+          if(value != null){
+            setState(() {
+              // set the value to list
+              // variable allModifyItem is the list
+              allVendorReplaceItem = value;
+
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allVendorReplaceItem.firstWhereOrNull((
+                  element) => element['item_inventory_id'] == selectedInvtry);
+
+              // if already got item with the same item inventory id
+              if (currentItemInBD != null) {
+                // display popup error and show popup error of the item already exist
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.vsrItemList));
+                ErrorDialog.showErrorDialog(
+                    context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
+                DBVendorReplaceItem()
+                    .createVsrItem(
+                  VsrItem(
+                    itemIvId: selectedInvtry,
+                    itemSn: itemSnController.text,
+                    // itemReason: selectedReason,
+                  ),
+                )
+                    .then((value) {
+                  showSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.vsrItemList));
+                });
+              }
+            });
+            // if no value in DB at all
+          } else {
+            DBVendorReplaceItem()
+                .createVsrItem(
+              VsrItem(
+                itemIvId: selectedInvtry,
+                itemSn: itemSnController.text,
+                // itemReason: selectedReason,
+              ),
+            )
+                .then((value) {
+              showSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.vsrItemList));
+            });
+          }
         });
       } else {
+        // Get all value from DB
         DBVendorReplaceNonItem().getAllVsrNonItem().then((value) {
+          // First check if there is value or not
+          // If got value
           // ignore: unnecessary_null_comparison
-          if (value != null) {
-            var listingVsr = value;
+          if(value != null){
+            setState(() {
+              // set the value to list
+              // variable allModifyNonItem is the list
+              allVendorReplaceNonItem = value;
 
-            var itemVsr = listingVsr.firstWhereOrNull(
-                (element) => element['item_inventory_id'] == selectedInvtry);
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allVendorReplaceNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == selectedInvtry);
 
-            if (null == itemVsr) {
-              String? getQty = prefs.getString('itemQty');
-              var currentQty = int.parse(getQty!);
-
-              if (int.parse(itemNonQtyController.text) <= currentQty) {
+              // if already got item with the same item inventory id
+              if(currentItemInBD != null){
+                // display popup error and show popup error of the item already exist
+                Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.vsrItemList));
+                ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
                 DBVendorReplaceNonItem()
                     .createVsrNonItem(
                   VsrNonItem(
@@ -239,16 +295,9 @@ class _VsrCreateItemState extends State<VsrCreateItem> {
                   Navigator.popUntil(
                       context, ModalRoute.withName(StmsRoutes.vsrItemList));
                 });
-              } else {
-                ErrorDialog.showErrorDialog(
-                    context, 'Quantity cannot more than current quantity.');
               }
-            } else {
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.vsrItemList));
-
-              ErrorDialog.showErrorDialog(context, 'This SKU already exists.');
-            }
+            });
+            // if no value in DB at all
           } else {
             DBVendorReplaceNonItem()
                 .createVsrNonItem(

@@ -49,6 +49,8 @@ class _PrItemListViewState extends State<PrItemListView> {
   List prSerialNo = [];
   List<InventoryHive> prSkuListing = [];
   List serialList = [];
+  List allPurchaseReturnItem = [];
+  List allPurchaseReturnNonItem = [];
   // ignore: unused_field
   String _scanBarcode = 'Unknown';
   var selectedItem,
@@ -71,6 +73,8 @@ class _PrItemListViewState extends State<PrItemListView> {
 
     getItemPr();
     getCommon();
+    // call the enterQty whenever at start of this page
+    getEnterQty();
     _future = getPurchaseReturnItem.getPrItem();
   }
 
@@ -100,6 +104,26 @@ class _PrItemListViewState extends State<PrItemListView> {
           locList = value;
         });
       }
+    });
+  }
+
+  // check and get all the purchase order item and purchase order non item
+  // POItem & PoNonItem
+  getEnterQty() {
+    DBPurchaseReturnItem().getAllPrItem().then((value) {
+      // make the PoItem is equal to the item store in scanDB
+      // It is the save info
+      setState(() {
+        allPurchaseReturnItem = value;
+      });
+    });
+
+    DBPurchaseReturnNonItem().getAllPrNonItem().then((value) {
+      setState(() {
+        // Display and get all the PoNonItem after scanDB collected.
+        // It is the save info
+        allPurchaseReturnNonItem = value;
+      });
     });
   }
 
@@ -151,10 +175,11 @@ class _PrItemListViewState extends State<PrItemListView> {
                             border:
                                 TableBorder.all(color: Colors.black, width: 1),
                             columnWidths: const <int, TableColumnWidth>{
-                              0: FixedColumnWidth(30.0),
-                              1: FixedColumnWidth(90.0),
+                              0: FixedColumnWidth(70.0),
+                              1: FixedColumnWidth(40.0),
                               2: FixedColumnWidth(40.0),
-                              3: FixedColumnWidth(73.0),
+                              3: FixedColumnWidth(40.0),
+                              4: FixedColumnWidth(40.0),
                             },
                             children: [
                               TableRow(
@@ -182,6 +207,11 @@ class _PrItemListViewState extends State<PrItemListView> {
                                   ),
                                   Text(
                                     'Received Qty',
+                                    style: TextStyle(fontSize: 16.0),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    'ENT Qty',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),
@@ -226,10 +256,11 @@ class _PrItemListViewState extends State<PrItemListView> {
                                             TableCellVerticalAlignment.middle,
                                         columnWidths: const <int,
                                             TableColumnWidth>{
-                                          0: FixedColumnWidth(30.0),
-                                          1: FixedColumnWidth(90.0),
+                                          0: FixedColumnWidth(70.0),
+                                          1: FixedColumnWidth(40.0),
                                           2: FixedColumnWidth(40.0),
-                                          3: FixedColumnWidth(73.0),
+                                          3: FixedColumnWidth(40.0),
+                                          4: FixedColumnWidth(40.0),
                                         },
                                         children: [
                                           TableRow(
@@ -276,6 +307,48 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                 "${snapshot.data[index]['item_receive_qty']}",
                                                 style:
                                                     TextStyle(fontSize: 16.0),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              // Enter Quantity text
+                                              // Will display whether it pass in the value or not
+                                              // This s to check if Enter Quantity got value
+                                              // using the master file snapshot check
+                                              // THIS IS FOR ALLPRITEM
+                                              snapshot.data[index]['tracking_type'] == "2" ? Text(
+                                                // to check if allPoItem got value or not
+                                                // If got value, check in the master file snapshot and compare the item_inventory_id
+                                                // Using the 'where' will go through the check process like a looping
+                                                allPurchaseReturnItem.isNotEmpty ? allPurchaseReturnItem.where((element)
+                                                => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).isNotEmpty
+                                                // once check, if it is containing a value or the item_id in DB is same in the master file
+                                                // Get the length of the item_id
+                                                    ? '${allPurchaseReturnItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).length}'
+                                                // If there is no match, then the result is display '0'
+                                                    : '0'
+                                                // If the overall result is default as nothing, the display will also show '0'
+                                                    : '0',
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              )
+                                                  : Text(
+                                                // This one is to check if AllPoNonItem got value
+                                                // ALLPRNONITEM section
+                                                // Need to check if there is a value after scan.
+                                                // Comparing both the DB and master file to check if there is a value before and after scan
+                                                allPurchaseReturnNonItem.isNotEmpty ? allPurchaseReturnNonItem.firstWhereOrNull((element) =>
+                                                element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']) != null
+                                                // If got value, then display the tracking_qty
+                                                    ? "${allPurchaseReturnNonItem.firstWhereOrNull((element) => element['item_inventory_id']
+                                                    == snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
+                                                // If no value after scan, which means it is not the same as in DB, then display '0'
+                                                    : "0"
+                                                // This is generally display '0' if no value is found
+                                                    : "0",
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Column(
@@ -792,6 +865,8 @@ class _PrItemListViewState extends State<PrItemListView> {
               ))
                   .then((value) {
                 showSuccess('Item Save');
+                // call and update the enterQty function
+                getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
@@ -807,13 +882,18 @@ class _PrItemListViewState extends State<PrItemListView> {
                   .update(selectedItem, newQty.toString())
                   .then((value) {
                 showSuccess('Item Save');
+                // call and update the enterQty function
+                getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
             }
           });
         } else {
-          Navigator.of(context).pushNamed(StmsRoutes.prItemDetail);
+          Navigator.of(context).pushNamed(StmsRoutes.prItemDetail).then((value){
+            var _duration = Duration(seconds: 1);
+            return Timer(_duration, getEnterQty);
+          });
         }
       }
     });
@@ -844,6 +924,8 @@ class _PrItemListViewState extends State<PrItemListView> {
               ))
                   .then((value) {
                 showSuccess('Item Save');
+                // call and update the enterQty function
+                getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
@@ -859,13 +941,18 @@ class _PrItemListViewState extends State<PrItemListView> {
                   .update(selectedItem, newQty.toString())
                   .then((value) {
                 showSuccess('Item Save');
+                // call and update the enterQty function
+                getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
             }
           });
         } else {
-          Navigator.of(context).pushNamed(StmsRoutes.prItemDetail);
+          Navigator.of(context).pushNamed(StmsRoutes.prItemDetail).then((value){
+            var _duration = Duration(seconds: 1);
+            return Timer(_duration, getEnterQty);
+          });
         }
       }
     });
@@ -923,9 +1010,10 @@ class _PrItemListViewState extends State<PrItemListView> {
             Navigator.of(context)
                 .pushNamed(StmsRoutes.prItemDetail)
                 .then((value) {
-              setState(() {
-                scanBarcodeNormal();
-              });
+              // sent update Ent qty result
+              getEnterQty();
+              var _duration = Duration(seconds: 1);
+              return Timer(_duration, scanBarcodeNormal);
             });
           } else {
             ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
@@ -937,9 +1025,10 @@ class _PrItemListViewState extends State<PrItemListView> {
           Navigator.of(context)
               .pushNamed(StmsRoutes.prItemDetail)
               .then((value) {
-            setState(() {
-              scanBarcodeNormal();
-            });
+            // sent update Ent qty result
+            getEnterQty();
+            var _duration = Duration(seconds: 1);
+            return Timer(_duration, scanBarcodeNormal);
           });
         }
       });

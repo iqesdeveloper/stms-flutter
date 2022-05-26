@@ -206,7 +206,7 @@ class _RcListItemState extends State<RcListItem> {
                                     ),
                                   ),
                                   Text(
-                                    'Qty',
+                                    'Ent Qty',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),

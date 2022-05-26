@@ -42,7 +42,6 @@ class _ImCreateItemState extends State<ImCreateItem> {
 
     getData();
     getCommon();
-    getItemModify();
   }
 
   getData() async {
@@ -78,25 +77,6 @@ class _ImCreateItemState extends State<ImCreateItem> {
     });
   }
 
-  // get itemModify in DB
-  getItemModify(){
-    print("AAAAAAAA: $selectedInvtry");
-    DBItemModifyItem().getAllImItem().then((value){
-      setState(() {
-        allModifyItem = value;
-        print("ITTTTEEEMMM: $allModifyItem");
-      });
-    });
-
-    DBItemModifyNonItem().getAllImNonItem().then((value){
-      setState(() {
-        allModifyNonItem = value;
-        print("NOOONITEM: $allModifyNonItem");
-        print('LIST: $inventoryList');
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -125,7 +105,6 @@ class _ImCreateItemState extends State<ImCreateItem> {
                   height: height * 0.85,
                   child: Column(
                     children: [
-                      FlatButton(onPressed: getItemModify, child: Text('PRESS')),
                       FormField<String>(
                         builder: (FormFieldState<String> state) {
                           return InputDecorator(
@@ -271,53 +250,111 @@ class _ImCreateItemState extends State<ImCreateItem> {
     } else {
       // if SN present
       if (itemModifyTrack == "Serial Number") {
-        // need to compare if the SN already in DB or not
-        // If already have in DB, need to show error
+        // Get all value from ItemModifyNonDB
+        DBItemModifyItem().getAllImItem().then((value) {
+          // First check if there is value or not
+          // If got value
+          if (value != null) {
+            setState(() {
+              // set the value to list
+              // variable allModifyItem is the list
+              allModifyItem = value;
 
-        // var currentItemInBD = allModifyItem.firstWhere((element) => element['item_inventory_id']);
-        // print("VAAAAA: $currentItemInBD");
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allModifyItem.firstWhereOrNull((
+                  element) => element['item_inventory_id'] == selectedInvtry);
 
-        DBItemModifyItem()
-            .createImItem(ItemModifyItem(
-          itemIvId: selectedInvtry,
-          itemSn: itemSnController.text,
-          itemReason: selectedReason,
-        ))
-            .then((value) {
-          showSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.imItemList));
-        });
-      } else {
-
-        DBItemModifyNonItem().getAllImNonItem().then((value){
-          setState(() {
-            allModifyNonItem = value;
-            print("NOOONITEM: $allModifyNonItem");
-            print("AAAAAAAA: $selectedInvtry");
-
-            var currentItemInBD = allModifyNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == selectedInvtry);
-            print('MMMMMMA: $currentItemInBD');
-
-            if(currentItemInBD == selectedInvtry){
-              print('FAILLLLLL: $currentItemInBD');
-            } else {
-              DBItemModifyNonItem()
-                  .createImNonItem(
-                ItemModifyNonItem(
-                  itemIvId: selectedInvtry,
-                  itemNonQty: itemNonQtyController.text,
-                  itemReason: selectedReason,
-                ),
-              )
-                  .then((value) {
-                showSuccess('Item Save');
+              // if already got item with the same item inventory id
+              if (currentItemInBD != null) {
+                // display popup error and show popup error of the item already exist
                 Navigator.popUntil(
                     context, ModalRoute.withName(StmsRoutes.imItemList));
-              });
-            }
+                ErrorDialog.showErrorDialog(
+                    context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
+                DBItemModifyItem()
+                    .createImItem(ItemModifyItem(
+                  itemIvId: selectedInvtry,
+                  itemSn: itemSnController.text,
+                  itemReason: selectedReason,
+                ))
+                    .then((value) {
+                  showSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.imItemList));
+                });
+              }
+            });
+            // if no value in DB at all
+          } else {
+            DBItemModifyItem()
+                .createImItem(ItemModifyItem(
+              itemIvId: selectedInvtry,
+              itemSn: itemSnController.text,
+              itemReason: selectedReason,
+            ))
+                .then((value) {
+              showSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.imItemList));
+            });
+          }
+        });
+      } else {
+        // Get all value from ItemModifyNonDB
+        DBItemModifyNonItem().getAllImNonItem().then((value){
+          // First check if there is value or not
+          // If got value
+          if(value != null){
+            setState(() {
+              // set the value to list
+              // variable allModifyNonItem is the list
+              allModifyNonItem = value;
 
-          });
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allModifyNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == selectedInvtry);
+
+              // if already got item with the same item inventory id
+              if(currentItemInBD != null){
+                // display popup error and show popup error of the item already exist
+                Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.imItemList));
+                ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
+                DBItemModifyNonItem()
+                    .createImNonItem(
+                  ItemModifyNonItem(
+                    itemIvId: selectedInvtry,
+                    itemNonQty: itemNonQtyController.text,
+                    itemReason: selectedReason,
+                  ),
+                )
+                    .then((value) {
+                  showSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.imItemList));
+                });
+              }
+            });
+            // if no value in DB at all
+          } else {
+            DBItemModifyNonItem()
+                .createImNonItem(
+              ItemModifyNonItem(
+                itemIvId: selectedInvtry,
+                itemNonQty: itemNonQtyController.text,
+                itemReason: selectedReason,
+              ),
+            )
+                .then((value) {
+              showSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.imItemList));
+            });
+          }
         });
       }
     }

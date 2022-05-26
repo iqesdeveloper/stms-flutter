@@ -10,6 +10,7 @@ import 'package:stms/config/routes.dart';
 import 'package:stms/config/storage.dart';
 import 'package:stms/data/api/models/transfer/st_model.dart';
 import 'package:stms/data/api/repositories/api_json/api_transfer.dart';
+import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/data/local_db/master/master_location_db.dart';
 import 'package:stms/data/local_db/transfer/st_non_scanItem.dart';
 import 'package:stms/data/local_db/transfer/st_scanItem.dart';
@@ -72,7 +73,7 @@ class _TransferInViewState extends State<TransferInView> {
   }
 
   getCommon() {
-    DBMasterLocation().getAllMasterLoc().then((value) {
+    DBMasterInventoryHive().getAllInvHive().then((value) {
       print('value loc: $value');
       if (value == null) {
         ErrorDialog.showErrorDialog(

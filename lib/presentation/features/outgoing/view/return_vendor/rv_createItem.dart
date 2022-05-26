@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:collection/collection.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
 import 'package:stms/data/api/models/outgoing/rv/rvItem_model.dart';
@@ -29,6 +29,8 @@ class RvCreateItem extends StatefulWidget {
 class _RvCreateItemState extends State<RvCreateItem> {
   List<InventoryHive> inventoryList = [];
   List reasonList = [];
+  List allReturnVendorItem = [];
+  List allReturnVendorNonItem = [];
   var rvTrack, selectedInvtry, selectedReason;
   final TextEditingController itemSnController = TextEditingController();
   final TextEditingController itemNonQtyController = TextEditingController();
@@ -239,34 +241,86 @@ class _RvCreateItemState extends State<RvCreateItem> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (rvTrack == "2") {
-        DBReturnVendorItem()
-            .createRvItem(
-          RvItem(
-            itemIvId: selectedInvtry,
-            itemSn: itemSnController.text,
-            // itemReason: selectedReason,
-          ),
-        )
-            .then((value) {
-          showSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.rvItemList));
+        // Get all value from DB
+        DBReturnVendorItem().getAllRvItem().then((value){
+          // First check if there is value or not
+          // If got value
+          // ignore: unnecessary_null_comparison
+          if(value != null){
+            setState(() {
+              // set the value to list
+              // variable allModifyItem is the list
+              allReturnVendorItem = value;
+
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allReturnVendorItem.firstWhereOrNull((
+                  element) => element['item_inventory_id'] == selectedInvtry);
+
+              // if already got item with the same item inventory id
+              if (currentItemInBD != null) {
+                // display popup error and show popup error of the item already exist
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.rvItemList));
+                ErrorDialog.showErrorDialog(
+                    context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
+                DBReturnVendorItem()
+                    .createRvItem(
+                  RvItem(
+                    itemIvId: selectedInvtry,
+                    itemSn: itemSnController.text,
+                    // itemReason: selectedReason,
+                  ),
+                )
+                    .then((value) {
+                  showSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.rvItemList));
+                });
+              }
+            });
+            // if no value in DB at all
+          } else {
+            DBReturnVendorItem()
+                .createRvItem(
+              RvItem(
+                itemIvId: selectedInvtry,
+                itemSn: itemSnController.text,
+                // itemReason: selectedReason,
+              ),
+            )
+                .then((value) {
+              showSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.rvItemList));
+            });
+          }
         });
       } else {
+        // Get all value from DB
         DBReturnVendorNonItem().getAllRvNonItem().then((value) {
+          // First check if there is value or not
+          // If got value
           // ignore: unnecessary_null_comparison
-          if (value != null) {
-            print('listing: $value');
-            var listingRv = value;
+          if(value != null){
+            setState(() {
+              // set the value to list
+              // variable allModifyNonItem is the list
+              allReturnVendorNonItem = value;
 
-            var itemRv = listingRv.firstWhereOrNull(
-                (element) => element['item_inventory_id'] == selectedInvtry);
-            print('itemRv check: $itemRv');
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allReturnVendorNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == selectedInvtry);
 
-            if (null == itemRv) {
-              String? getQty = prefs.getString('itemQty');
-              var currentQty = int.parse(getQty!);
-              if (int.parse(itemNonQtyController.text) <= currentQty) {
+              // if already got item with the same item inventory id
+              if(currentItemInBD != null){
+                // display popup error and show popup error of the item already exist
+                Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.rvItemList));
+                ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
                 DBReturnVendorNonItem()
                     .createRvNonItem(
                   RvNonItem(
@@ -280,16 +334,9 @@ class _RvCreateItemState extends State<RvCreateItem> {
                   Navigator.popUntil(
                       context, ModalRoute.withName(StmsRoutes.rvItemList));
                 });
-              } else {
-                ErrorDialog.showErrorDialog(
-                    context, 'Quantity cannot more than current quantity.');
               }
-            } else {
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.rvItemList));
-
-              ErrorDialog.showErrorDialog(context, 'This SKU already exists.');
-            }
+            });
+            // if no value in DB at all
           } else {
             DBReturnVendorNonItem()
                 .createRvNonItem(

@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:collection/collection.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/incoming/cr/crItem_model.dart';
 import 'package:stms/data/api/models/incoming/cr/cr_non_model.dart';
@@ -27,6 +28,8 @@ class CrCreateItem extends StatefulWidget {
 class _CrCreateItemState extends State<CrCreateItem> {
   List<InventoryHive> inventoryList = [];
   List reasonList = [];
+  List allCustomerReturnItem = [];
+  List allCustomerReturnNonItem = [];
   var custRetTrack, selectedInvtry, selectedReason;
   final TextEditingController itemSnController = TextEditingController();
   final TextEditingController itemNonQtyController = TextEditingController();
@@ -174,6 +177,8 @@ class _CrCreateItemState extends State<CrCreateItem> {
   }
 
   Future<void> saveData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
     if (selectedInvtry == null) {
       ErrorDialog.showErrorDialog(context, 'Please select item Inventory ID');
     } else if (custRetTrack == "Serial Number" &&
@@ -187,45 +192,115 @@ class _CrCreateItemState extends State<CrCreateItem> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (custRetTrack == "Serial Number") {
-        DBCustReturnItem()
-            .createCrItem(
-          CustRetItem(
-            itemIvId: selectedInvtry,
-            itemSn: itemSnController.text,
-            // itemReason: selectedReason,
-          ),
-        )
-            .then((value) {
-          showSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.crItemList));
-        });
-      } else {
-        DBCustReturnNonItem().getAllCrNonItem().then((value) {
-          // ignore: unnecessary_null_comparison
-          if (value != null) {
-            print('value dbnon: $value');
-            var listingVsr = value;
+        // Get all value from DB
+        DBCustReturnItem().getAllCrItem().then((value){
+          // First check if there is value or not
+          // If got value
+          if(value != null){
+            setState(() {
+              // set the value to list
+              // variable allModifyItem is the list
+              allCustomerReturnItem = value;
 
-            var itemVsr = listingVsr.firstWhereOrNull(
-                (element) => element['item_inventory_id'] == selectedInvtry);
-            print('itemvsr check: $itemVsr');
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allCustomerReturnItem.firstWhereOrNull((
+                  element) => element['item_inventory_id'] == selectedInvtry);
 
-            if (null == itemVsr) {
-              DBCustReturnNonItem()
-                  .createCrNonItem(
-                CustRetNonItem(
-                  itemIvId: selectedInvtry,
-                  itemNonQty: itemNonQtyController.text,
-                  // itemReason: selectedReason,
-                ),
-              )
-                  .then((value) {
-                showSuccess('Item Save');
+              // if already got item with the same item inventory id
+              if (currentItemInBD != null) {
+                // display popup error and show popup error of the item already exist
                 Navigator.popUntil(
                     context, ModalRoute.withName(StmsRoutes.crItemList));
-              });
-            } else {}
+                ErrorDialog.showErrorDialog(
+                    context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
+                DBCustReturnItem()
+                    .createCrItem(
+                  CustRetItem(
+                    itemIvId: selectedInvtry,
+                    itemSn: itemSnController.text,
+                    // itemReason: selectedReason,
+                  ),
+                )
+                    .then((value) {
+                  showSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.crItemList));
+                });
+              }
+            });
+            // if no value in DB at all
+          } else {
+            DBCustReturnItem()
+                .createCrItem(
+              CustRetItem(
+                itemIvId: selectedInvtry,
+                itemSn: itemSnController.text,
+                // itemReason: selectedReason,
+              ),
+            )
+                .then((value) {
+              showSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.crItemList));
+            });
+          }
+        });
+      } else {
+        // Get all value from DB
+        DBCustReturnNonItem().getAllCrNonItem().then((value) {
+          // First check if there is value or not
+          // If got value
+          // ignore: unnecessary_null_comparison
+          if (value != null) {
+            setState(() {
+              // set the value to list
+              // variable allModifyNonItem is the list
+              allCustomerReturnNonItem = value;
+
+              // search in DB if got the same item inventory id or not
+              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+              var currentItemInBD = allCustomerReturnNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == selectedInvtry);
+
+              // if already got item with the same item inventory id
+              if(currentItemInBD != null){
+                // display popup error and show popup error of the item already exist
+                Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.crItemList));
+                ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+              } else {
+                // if no item with this item inventory id
+                DBCustReturnNonItem()
+                    .createCrNonItem(
+                  CustRetNonItem(
+                    itemIvId: selectedInvtry,
+                    itemNonQty: itemNonQtyController.text,
+                    // itemReason: selectedReason,
+                  ),
+                )
+                    .then((value) {
+                  showSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.crItemList));
+                });
+              }
+            });
+            // if no value in DB at all
+          } else {
+            DBCustReturnNonItem()
+                .createCrNonItem(
+              CustRetNonItem(
+                itemIvId: selectedInvtry,
+                itemNonQty: itemNonQtyController.text,
+                // itemReason: selectedReason,
+              ),
+            )
+                .then((value) {
+              showSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.crItemList));
+            });
           }
         });
       }
