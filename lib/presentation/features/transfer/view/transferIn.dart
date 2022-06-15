@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:stms/config/routes.dart';
 import 'package:stms/config/storage.dart';
+import 'package:stms/data/api/models/master/inventory_hive_model.dart';
 import 'package:stms/data/api/models/transfer/st_model.dart';
 import 'package:stms/data/api/repositories/api_json/api_transfer.dart';
 import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
@@ -30,6 +31,7 @@ class TransferInView extends StatefulWidget {
 
 class _TransferInViewState extends State<TransferInView> {
   DateTime date = DateTime.now();
+  List<InventoryHive> inventoryList = [];
   List locList = [];
   List transList = [];
   List txnType = [
@@ -72,15 +74,33 @@ class _TransferInViewState extends State<TransferInView> {
     prefs.remove('saveST');
   }
 
+  // getCommon() {
+  //   DBMasterInventoryHive().getAllInvHive().then((value) {
+  //     print('value loc: $value');
+  //     print('value loc: $locList');
+  //     if (value == null) {
+  //       ErrorDialog.showErrorDialog(
+  //           context, 'Please download location file at master page first');
+  //     } else {
+  //       setState(() {
+  //         inventoryList = value;
+  //         print('value loc: $locList');
+  //       });
+  //     }
+  //   });
+  // }
+
   getCommon() {
-    DBMasterInventoryHive().getAllInvHive().then((value) {
+    DBMasterLocation().getAllMasterLoc().then((value) {
       print('value loc: $value');
+      print('value loc: $locList');
       if (value == null) {
         ErrorDialog.showErrorDialog(
             context, 'Please download location file at master page first');
       } else {
         setState(() {
           locList = value;
+          print('value loc: $locList');
         });
       }
     });

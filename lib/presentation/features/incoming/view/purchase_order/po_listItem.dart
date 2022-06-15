@@ -67,6 +67,7 @@ class _PoItemListViewState extends State<PoItemListView> {
       selectedStatus,
       selectedItem,
       selectedVendorItem,
+      selectedItemSequence,
       selectedReceipt,
       selectedLoc,
       itemPO,
@@ -160,6 +161,7 @@ class _PoItemListViewState extends State<PoItemListView> {
         // Display and get all the PoNonItem after scanDB collected.
         // It is the save info
         allPoNonItem = value;
+        print('SHOW ALL PO: $allPoNonItem');
       });
     });
   }
@@ -376,10 +378,10 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                   // Need to check if there is a value after scan.
                                                   // Comparing both the DB and master file to check if there is a value before and after scan
                                                   allPoNonItem.isNotEmpty ? allPoNonItem.firstWhereOrNull((element) =>
-                                                  element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']) != null
+                                                  element['item_inventory_id'] == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] == snapshot.data[index]['line_seq_no']) != null
                                                   // If got value, then display the tracking_qty
                                                       ? "${allPoNonItem.firstWhereOrNull((element) => element['item_inventory_id']
-                                                      == snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
+                                                      == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] == snapshot.data[index]['line_seq_no'])['non_tracking_qty']}"
                                                   // If no value after scan, which means it is not the same as in DB, then display '0'
                                                       : "0"
                                                   // This is generally display '0' if no value is found
@@ -421,6 +423,10 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           selectedVendorItem = snapshot.data[index]['vendor_item_number'];
                                                           prefs.setString('vendorItemNo', selectedVendorItem);
 
+                                                          // Save selected item sequence no
+                                                          selectedItemSequence = snapshot.data[index]['line_seq_no'];
+                                                          prefs.setString('line_seq_no', selectedItemSequence);
+
                                                           prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
                                                           var tracking = snapshot.data[index]['tracking_type'];
                                                           var typeScan = 'scan';
@@ -440,36 +446,6 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           ),
                                                         ),
                                                       ),
-                                                      /*
-                                                          child: StmsStyleButton(
-                                                            title: 'SCAN',
-                                                            height: height * 0.05,
-                                                            width: width * 0.013,
-                                                            backgroundColor: Colors.blueAccent,
-                                                            textColor: Colors.white,
-                                                            onPressed: balQty == 0 || balQty < 0 ? () {
-                                                              ErrorDialog.showErrorDialog(context,
-                                                                  '${snapshot.data[index]['item_name']} is already received all qty.');}
-                                                                : () async {
-                                                              SharedPreferences prefs = await SharedPreferences.getInstance();
-
-                                                              selectedItem = snapshot.data[index]['item_inventory_id'];
-                                                              prefs.setString('selectedIvID', selectedItem);
-
-                                                          // Save selected vendor item no
-                                                          selectedVendorItem = snapshot.data[index]['vendor_item_number'];
-                                                          prefs.setString('vendorItemNo', selectedVendorItem);
-
-                                                          prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
-                                                          var tracking = snapshot.data[index]['tracking_type'];
-                                                          var typeScan = 'scan';
-                                                          itemName = snapshot.data[index]['item_name'];
-                                                          checkReceiptType(tracking, typeScan);
-
-                                                          // scanBarcodeNormal();
-                                                        },
-                                                      ),
-                                                      */
                                                     )
                                                         : Container(
                                                       width: width,
@@ -491,6 +467,10 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           selectedVendorItem = snapshot.data[index]['vendor_item_number'];
                                                           prefs.setString('vendorItemNo', selectedVendorItem);
 
+                                                          // Save selected item sequence no
+                                                          selectedItemSequence = snapshot.data[index]['line_seq_no'];
+                                                          prefs.setString('line_seq_no', selectedItemSequence);
+
                                                           // save selected tracking no
                                                           prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
                                                           var tracking = snapshot.data[index]['tracking_type'];
@@ -511,74 +491,6 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           ),
                                                         ),
                                                       ),
-                                                      /*
-                                                      child: StmsStyleButton(
-                                                        title: 'SCAN',
-                                                        height:
-                                                        height * 0.05,
-                                                        width:
-                                                        width * 0.013,
-                                                        backgroundColor:
-                                                        Colors
-                                                            .blueAccent,
-                                                        textColor:
-                                                        Colors.white,
-                                                        onPressed: balQty ==
-                                                            0 ||
-                                                            balQty < 0
-                                                            ? () {
-                                                          ErrorDialog.showErrorDialog(
-                                                              context,
-                                                              '${snapshot.data[index]['item_name']} is already received all qty.');
-                                                        }
-                                                            : () async {
-                                                          SharedPreferences
-                                                          prefs =
-                                                          await SharedPreferences
-                                                              .getInstance();
-
-                                                          // save selected item_inventory id
-                                                          selectedItem =
-                                                          snapshot.data[index]
-                                                          [
-                                                          'item_inventory_id'];
-                                                          prefs.setString(
-                                                              'selectedIvID',
-                                                              selectedItem);
-
-                                                          // Save selected vendor item no
-                                                          selectedVendorItem = snapshot.data[index]['vendor_item_number'];
-                                                          prefs.setString('vendorItemNo', selectedVendorItem);
-
-                                                          // save selected tracking no
-                                                          prefs.setString(
-                                                              'poTracking',
-                                                              snapshot.data[index]
-                                                              [
-                                                              'tracking_type']);
-                                                          var tracking =
-                                                          snapshot.data[index]
-                                                          [
-                                                          'tracking_type'];
-                                                          var typeScan =
-                                                              'scan';
-                                                          itemName =
-                                                          snapshot.data[index]
-                                                          [
-                                                          'item_name'];
-                                                          SkuUpcDialog.showSkuUpcDialog(
-                                                              context)
-                                                              .then(
-                                                                  (value) {
-                                                                checkReceiptType(
-                                                                    tracking,
-                                                                    typeScan);
-                                                              });
-
-                                                          // scanBarcodeNormal();
-                                                        },
-                                                      ),
-                                                      */
                                                     ),
                                                     // MANUAL BUTTON
                                                     snapshot.data[index][
@@ -623,6 +535,8 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                               // Save selected vendor number
                                                               selectedVendorItem = snapshot.data[index]['vendor_item_number'];
                                                               prefs.setString('VendorItemNo', selectedVendorItem);
+
+
 
                                                               prefs.setString(
                                                                   'poTracking',
@@ -1039,50 +953,6 @@ class _PoItemListViewState extends State<PoItemListView> {
     setState(() {
       _scanBarcode = skuBarcode;
     });
-    //
-    // scanResult = this.scanResult;
-    // var typeScanning = Storage().typeScan;
-    //
-    // try {
-    //   final result = await BarcodeScanner.scan(
-    //     options: ScanOptions(
-    //       s
-    //       strings: {
-    //         'cancel': _cancelController.text,
-    //         'flash_on': _flashOnController.text,
-    //         'flash_off': _flashOffController.text,
-    //       },
-    //       // restrictFormat: selectedFormats,
-    //       // useCamera: _selectedCamera,
-    //       autoEnableFlash: false,
-    //       android: AndroidOptions(
-    //         useAutoFocus: true,
-    //       ),
-    //     ),
-    //   );
-    //   setState(() => scanResult = result);
-    //   if (scanResult != null) {
-    //     if (scanResult!.type.toString() == 'Cancelled') {
-    //       ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
-    //     } else {
-    //       if (typeScanning == 'sku') {
-    //         searchSKU(scanResult!.rawContent.toString());
-    //       } else {
-    //         searchUPC(scanResult!.rawContent.toString());
-    //       }
-    //     }
-    //   }
-    // } on PlatformException catch (e) {
-    //   setState(() {
-    //     scanResult = ScanResult(
-    //       type: ResultType.Error,
-    //       format: BarcodeFormat.unknown,
-    //       rawContent: e.code == BarcodeScanner.cameraAccessDenied
-    //           ? 'The user did not grant the camera permission!'
-    //           : 'Unknown error: $e',
-    //     );
-    //   });
-    // }
   }
 
 // search scan SKU code
@@ -1108,12 +978,13 @@ class _PoItemListViewState extends State<PoItemListView> {
         if (nonTrackingType == 'scan') {
           // Any update on the DB, need to call the value here as it will go and search through the model and db
           // Removing and addition will need to change here
-          DBPoNonItem().getPoNonItem(selectedItem).then((value) {
+          DBPoNonItem().getPoNonItem(selectedItem, selectedItemSequence).then((value) {
             if (value == null) {
               DBPoNonItem()
                   .createPoNonItem(PoNonItem(
                 itemInvId: selectedItem,
                 vendorItemName: selectedVendorItem,
+                itemSequence: selectedItemSequence,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -1127,10 +998,11 @@ class _PoItemListViewState extends State<PoItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                      (element) => element['item_inventory_id'] == selectedItem);
-
+                      (element) => element['item_inventory_id'] == selectedItem
+                          && element['line_seq_no'] == selectedItemSequence);
+              print('HEEEEEEE: $selectedItemSequence');
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
-              var newQty = int.parse(getItem['non_tracking_qty']) + 1;
+              var newQty = int.parse(getItem['non_tracking_qty'])+1;
               DBPoNonItem()
                   .update(selectedItem, newQty.toString())
                   .then((value) {
@@ -1170,11 +1042,12 @@ class _PoItemListViewState extends State<PoItemListView> {
         if (nonTrackingType == 'scan') {
           // Any update on the DB, need to call the value here as it will go and search through the model and db
           // Removing and addition will need to change here
-          DBPoNonItem().getPoNonItem(selectedItem).then((value) {
+          DBPoNonItem().getPoNonItem(selectedItem, selectedItemSequence).then((value) {
             if (value == null) {
               DBPoNonItem()
                   .createPoNonItem(PoNonItem(
                 itemInvId: selectedItem,
+                itemSequence: selectedItemSequence,
                 vendorItemName: selectedVendorItem,
                 nonTracking: '1',
               ))
@@ -1242,43 +1115,6 @@ class _PoItemListViewState extends State<PoItemListView> {
     setState(() {
       _scanBarcode = barcodeScanRes;
     });
-    //
-    // scanResult = this.scanResult;
-    // try {
-    //   final result = await BarcodeScanner.scan(
-    //     options: ScanOptions(
-    //       strings: {
-    //         'cancel': _cancelController.text,
-    //         'flash_on': _flashOnController.text,
-    //         'flash_off': _flashOffController.text,
-    //       },
-    //       // restrictFormat: selectedFormats,
-    //       // useCamera: _selectedCamera,
-    //       autoEnableFlash: false,
-    //       android: AndroidOptions(
-    //         useAutoFocus: true,
-    //       ),
-    //     ),
-    //   );
-    //   setState(() => scanResult = result);
-    //   if (scanResult != null) {
-    //     if (scanResult!.type.toString() == 'Cancelled') {
-    //       ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
-    //     } else {
-    //       saveData(scanResult!.rawContent.toString());
-    //     }
-    //   }
-    // } on PlatformException catch (e) {
-    //   setState(() {
-    //     scanResult = ScanResult(
-    //       type: ResultType.Error,
-    //       format: BarcodeFormat.unknown,
-    //       rawContent: e.code == BarcodeScanner.cameraAccessDenied
-    //           ? 'The user did not grant the camera permission!'
-    //           : 'Unknown error: $e',
-    //     );
-    //   });
-    // }
   }
 
   Future<void> saveData(String barcodeScanRes) async {

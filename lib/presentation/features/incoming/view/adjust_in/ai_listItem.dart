@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
+import 'package:stms/data/api/repositories/api_json/api_common.dart';
 import 'package:stms/data/api/repositories/api_json/api_in_adjust.dart';
 import 'package:stms/data/local_db/incoming/adjust_in/ai_non_scanItem.dart';
 import 'package:stms/data/local_db/incoming/adjust_in/ai_scanItem.dart';
@@ -30,7 +31,7 @@ class AiListItem extends StatefulWidget {
 class _AiListItemState extends State<AiListItem> {
   // ignore: unused_field
   String _scanBarcode = 'Unknown';
-  List<InventoryHive> inventoryList = [];
+  List <InventoryHive>inventoryList = [];
   List aiItemListing = [];
   List reasonList = [];
   InventoryHive? invName;
@@ -63,10 +64,10 @@ class _AiListItemState extends State<AiListItem> {
       } else {
         setState(() {
           inventoryList = value;
+          print('SHOW INVENTORY: $inventoryList');
         });
       }
     });
-
     DBMasterReason().getAllMasterReason().then((value) {
       if (value == null) {
         ErrorDialog.showErrorDialog(
@@ -622,7 +623,7 @@ class _AiListItemState extends State<AiListItem> {
                                 } else {
                                   SharedPreferences prefs =
                                       await SharedPreferences.getInstance();
-                                  prefs.setString('adjustItem', inventoryId);
+                                  // prefs.setString('adjustItem', inventoryId);
 
                                   findInv(inventoryId);
                                 }
@@ -646,10 +647,14 @@ class _AiListItemState extends State<AiListItem> {
   Future<void> findInv(String selectedItem) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
+
     var itemAdjust =
         inventoryList.firstWhereOrNull((element) => element.id == selectedItem);
 
+    print('SHOW SELECTED INVENTORY: $itemAdjust');
+
     prefs.setString('adjustTracking', itemAdjust!.type);
+    prefs.setString('adjustItem', itemAdjust.sku);
 
     if (itemAdjust.type == 'Serial Number') {
       var typeScan = 'invId';
@@ -749,7 +754,7 @@ class _AiListItemState extends State<AiListItem> {
           context, 'SKU not match with master inventory');
     } else {
       prefs.setString('adjustTracking', itemAdjust.type);
-      prefs.setString('adjustItem', itemAdjust.id);
+      prefs.setString('adjustItem', itemAdjust.sku);
 
       if (itemAdjust.type == 'Serial Number') {
         scanItemSerial();
@@ -776,7 +781,7 @@ class _AiListItemState extends State<AiListItem> {
           context, 'UPC not match with master inventory');
     } else {
       prefs.setString('adjustTracking', itemAdjust.type);
-      prefs.setString('adjustItem', itemAdjust.id);
+      prefs.setString('adjustItem', itemAdjust.sku);
 
       if (itemAdjust.type == 'Serial Number') {
         scanItemSerial();

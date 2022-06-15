@@ -187,9 +187,10 @@ class _RcListItemState extends State<RcListItem> {
                             border:
                                 TableBorder.all(color: Colors.black, width: 1),
                             columnWidths: const <int, TableColumnWidth>{
-                              0: FixedColumnWidth(120.0),
-                              1: FixedColumnWidth(33.0),
-                              3: FixedColumnWidth(50.0),
+                              0: FixedColumnWidth(100.0),
+                              1: FixedColumnWidth(60.0),
+                              2: FixedColumnWidth(30.0),
+                              3: FixedColumnWidth(40.0),
                             },
                             children: [
                               TableRow(
@@ -206,12 +207,12 @@ class _RcListItemState extends State<RcListItem> {
                                     ),
                                   ),
                                   Text(
-                                    'Ent Qty',
+                                    'Serial Number',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),
                                   Text(
-                                    'Serial Number',
+                                    'Ent Qty',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),
@@ -262,9 +263,10 @@ class _RcListItemState extends State<RcListItem> {
                                             TableCellVerticalAlignment.middle,
                                         columnWidths: const <int,
                                             TableColumnWidth>{
-                                          0: FixedColumnWidth(120.0),
-                                          1: FixedColumnWidth(33.0),
-                                          3: FixedColumnWidth(50.0),
+                                          0: FixedColumnWidth(100.0),
+                                          1: FixedColumnWidth(60.0),
+                                          2: FixedColumnWidth(30.0),
+                                          3: FixedColumnWidth(40.0),
                                         },
                                         children: [
                                           TableRow(
@@ -283,15 +285,15 @@ class _RcListItemState extends State<RcListItem> {
                                                 ),
                                               ),
                                               Text(
-                                                "1",
+                                                "${snapshot.data[index]['item_serial_no']}",
                                                 style:
                                                     TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Text(
-                                                "${snapshot.data[index]['item_serial_no']}",
+                                                "1",
                                                 style:
-                                                    TextStyle(fontSize: 16.0),
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Container(
@@ -366,9 +368,10 @@ class _RcListItemState extends State<RcListItem> {
                                             TableCellVerticalAlignment.middle,
                                         columnWidths: const <int,
                                             TableColumnWidth>{
-                                          0: FixedColumnWidth(120.0),
-                                          1: FixedColumnWidth(33.0),
-                                          3: FixedColumnWidth(50.0),
+                                          0: FixedColumnWidth(100.0),
+                                          1: FixedColumnWidth(60.0),
+                                          2: FixedColumnWidth(30.0),
+                                          3: FixedColumnWidth(40.0),
                                         },
                                         children: [
                                           TableRow(
@@ -387,15 +390,15 @@ class _RcListItemState extends State<RcListItem> {
                                                 ),
                                               ),
                                               Text(
-                                                "${snapshot.data[index]['non_tracking_qty']}",
+                                                "-",
                                                 style:
                                                     TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Text(
-                                                "-",
+                                                "${snapshot.data[index]['non_tracking_qty']}",
                                                 style:
-                                                    TextStyle(fontSize: 16.0),
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Container(

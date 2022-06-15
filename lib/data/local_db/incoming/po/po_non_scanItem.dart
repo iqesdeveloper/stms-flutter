@@ -23,6 +23,7 @@ class DBPoNonItem {
         await db.execute('CREATE TABLE poNonItem('
             'item_inventory_id TEXT,'
             'vendor_item_number TEXT,'
+            'line_seq_no TEXT,'
             'non_tracking_qty TEXT'
             ')');
       },
@@ -60,10 +61,10 @@ class DBPoNonItem {
   }
 
   // Get list of certain PoItem
-  Future<dynamic> getPoNonItem(String id) async {
+  Future<dynamic> getPoNonItem(String id, String lineSeqNo) async {
     final db = await database;
     final res = await db
-        .rawQuery("SELECT * FROM poNonItem WHERE item_inventory_id = ?", [id]);
+        .rawQuery("SELECT * FROM poNonItem WHERE item_inventory_id = ? AND line_seq_no = ?", [id, lineSeqNo] );
 
     if (res.length > 0) {
       return res;

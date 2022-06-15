@@ -626,7 +626,7 @@ class _AoListItemState extends State<AoListItem> {
                                 } else {
                                   SharedPreferences prefs =
                                       await SharedPreferences.getInstance();
-                                  prefs.setString('adjustItem', inventoryId);
+                                  // prefs.setString('adjustItem', inventoryId);
 
                                   findInv(inventoryId);
                                 }
@@ -654,6 +654,7 @@ class _AoListItemState extends State<AoListItem> {
         inventoryList.firstWhereOrNull((element) => element.id == selectedItem);
 
     prefs.setString('adjustTracking', itemAdjust!.type);
+    prefs.setString('adjustItem', itemAdjust.sku);
 
     if (itemAdjust.type == 'Serial Number') {
       var typeScan = 'invId';
@@ -754,7 +755,7 @@ class _AoListItemState extends State<AoListItem> {
       ErrorDialog.showErrorDialog(context, "No SKU match!");
     } else {
       prefs.setString('adjustTracking', itemAdjust.type);
-      prefs.setString('adjustItem', itemAdjust.id);
+      prefs.setString('adjustItem', itemAdjust.sku);
 
       if (itemAdjust.type == 'Serial Number') {
         scanItemSerial();
@@ -780,7 +781,7 @@ class _AoListItemState extends State<AoListItem> {
       ErrorDialog.showErrorDialog(context, "No UPC match!");
     } else {
       prefs.setString('adjustTracking', itemAdjust.type);
-      prefs.setString('adjustItem', itemAdjust.id);
+      prefs.setString('adjustItem', itemAdjust.sku);
 
       if (itemAdjust.type == 'Serial Number') {
         scanItemSerial();

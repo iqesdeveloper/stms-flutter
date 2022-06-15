@@ -11,12 +11,14 @@ String poNonItemToJson(List<PoNonItem> data) =>
 class PoNonItem {
   String itemInvId;
   String vendorItemName;
+  String itemSequence;
   String nonTracking;
 
   PoNonItem({
     // this.id,
     required this.itemInvId,
     required this.vendorItemName,
+    required this.itemSequence,
     required this.nonTracking,
   });
 
@@ -24,6 +26,7 @@ class PoNonItem {
     // id: json["id"],
     itemInvId: json["item_inventory_id"],
     vendorItemName: json["vendor_item_number"],
+    itemSequence: json["line_seq_no"],
     nonTracking: json["non_tracking_qty"],
   );
 
@@ -31,6 +34,7 @@ class PoNonItem {
     // "id": id,
     "item_inventory_id": itemInvId,
     "vendor_item_number": vendorItemName,
+    "line_seq_no": itemSequence,
     "non_tracking_qty": nonTracking,
   };
 }

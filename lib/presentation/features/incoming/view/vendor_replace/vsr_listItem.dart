@@ -115,9 +115,10 @@ class _VsrListItemState extends State<VsrListItem> {
                             border:
                                 TableBorder.all(color: Colors.black, width: 1),
                             columnWidths: const <int, TableColumnWidth>{
-                              0: FixedColumnWidth(120.0),
-                              1: FixedColumnWidth(33.0),
-                              3: FixedColumnWidth(50.0),
+                              0: FixedColumnWidth(100.0),
+                              1: FixedColumnWidth(60.0),
+                              2: FixedColumnWidth(30.0),
+                              3: FixedColumnWidth(40.0),
                             },
                             children: [
                               TableRow(
@@ -134,12 +135,12 @@ class _VsrListItemState extends State<VsrListItem> {
                                     ),
                                   ),
                                   Text(
-                                    'Ent Qty',
+                                    'Serial Number',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),
                                   Text(
-                                    'Serial Number',
+                                    'Ent Qty',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),
@@ -189,9 +190,10 @@ class _VsrListItemState extends State<VsrListItem> {
                                             TableCellVerticalAlignment.middle,
                                         columnWidths: const <int,
                                             TableColumnWidth>{
-                                          0: FixedColumnWidth(120.0),
-                                          1: FixedColumnWidth(33.0),
-                                          3: FixedColumnWidth(50.0),
+                                          0: FixedColumnWidth(100.0),
+                                          1: FixedColumnWidth(60.0),
+                                          2: FixedColumnWidth(30.0),
+                                          3: FixedColumnWidth(40.0),
                                         },
                                         children: [
                                           TableRow(
@@ -210,15 +212,15 @@ class _VsrListItemState extends State<VsrListItem> {
                                                 ),
                                               ),
                                               Text(
-                                                "1",
+                                                "${snapshot.data[index]['item_serial_no']}",
                                                 style:
                                                     TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Text(
-                                                "${snapshot.data[index]['item_serial_no']}",
+                                                "1",
                                                 style:
-                                                    TextStyle(fontSize: 16.0),
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Container(
@@ -286,9 +288,10 @@ class _VsrListItemState extends State<VsrListItem> {
                                             TableCellVerticalAlignment.middle,
                                         columnWidths: const <int,
                                             TableColumnWidth>{
-                                          0: FixedColumnWidth(120.0),
-                                          1: FixedColumnWidth(33.0),
-                                          3: FixedColumnWidth(50.0),
+                                          0: FixedColumnWidth(100.0),
+                                          1: FixedColumnWidth(60.0),
+                                          2: FixedColumnWidth(30.0),
+                                          3: FixedColumnWidth(40.0),
                                         },
                                         children: [
                                           TableRow(
@@ -307,15 +310,15 @@ class _VsrListItemState extends State<VsrListItem> {
                                                 ),
                                               ),
                                               Text(
-                                                "${snapshot.data[index]['non_tracking_qty']}",
+                                                "-",
                                                 style:
                                                     TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Text(
-                                                "-",
+                                                "${snapshot.data[index]['non_tracking_qty']}",
                                                 style:
-                                                    TextStyle(fontSize: 16.0),
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Container(
@@ -584,7 +587,7 @@ class _VsrListItemState extends State<VsrListItem> {
                               } else {
                                 SharedPreferences prefs =
                                     await SharedPreferences.getInstance();
-                                prefs.setString('vsrItem', selectedItem);
+                                // prefs.setString('vsrItem', selectedItem);
 
                                 findInv(selectedItem);
                               }
@@ -607,30 +610,46 @@ class _VsrListItemState extends State<VsrListItem> {
   Future<void> findInv(var selectedItem) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var itemAdjust = inventoryList.firstWhereOrNull(
-        (element) => element['item_inventory_id'] == selectedItem);
+    var itemAdjust = masterInvList.firstWhereOrNull(
+        (element) => element.id == selectedItem);
 
-    prefs.setString('vsrTracking', itemAdjust['tracking_type']);
+    prefs.setString('vsrTracking', itemAdjust!.type);
+    prefs.setString('vsrItem', itemAdjust.sku);
 
-    if (itemAdjust == null) {
-      ErrorDialog.showErrorDialog(context, "No SKU match!");
+    if (itemAdjust.type == '2') {
+      var typeScan = 'invId';
+      scanBarcodeNormal(typeScan);
     } else {
-      if (itemAdjust['tracking_type'] == '2') {
-        var typeScan = 'invId';
-        scanBarcodeNormal(typeScan);
-      } else {
-        prefs.setString('itemQty', itemAdjust['item_quantity']);
+      // prefs.setString('itemQty', itemAdjust['item_quantity']);
 
-        Navigator.of(context)
-            .pushNamed(StmsRoutes.vsrItemCreate)
-            .whenComplete(() {
-          setState(() {
-            getVsrItem();
-            selectedItem = null;
-          });
+      Navigator.of(context)
+          .pushNamed(StmsRoutes.vsrItemCreate)
+          .whenComplete(() {
+        setState(() {
+          getVsrItem();
+          selectedItem = null;
         });
-      }
+      });
     }
+    // if (itemAdjust == null) {
+    //   ErrorDialog.showErrorDialog(context, "No SKU match!");
+    // } else {
+    //   if (itemAdjust.type == '2') {
+    //     var typeScan = 'invId';
+    //     scanBarcodeNormal(typeScan);
+    //   } else {
+    //    // prefs.setString('itemQty', itemAdjust['item_quantity']);
+    //
+    //     Navigator.of(context)
+    //         .pushNamed(StmsRoutes.vsrItemCreate)
+    //         .whenComplete(() {
+    //       setState(() {
+    //         getVsrItem();
+    //         selectedItem = null;
+    //       });
+    //     });
+    //   }
+    // }
   }
 
   Future<void> scanBarcodeNormal(String typeScan) async {
@@ -732,19 +751,19 @@ class _VsrListItemState extends State<VsrListItem> {
   Future<void> searchSku(String skuScan) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var itemAdjust = inventoryList.firstWhereOrNull((element) =>
-        element['item_name'] == skuScan); // || element['upc'] == skuScan
+    var itemAdjust = masterInvList.firstWhereOrNull((element) =>
+        element.sku == skuScan); // || element['upc'] == skuScan
 
     if (itemAdjust == null) {
       ErrorDialog.showErrorDialog(context, "No SKU match!");
     } else {
-      prefs.setString('vsrTracking', itemAdjust['tracking_type']);
-      prefs.setString('vsrItem', itemAdjust['item_inventory_id']);
+      prefs.setString('vsrTracking', itemAdjust.type);
+      prefs.setString('vsrItem', itemAdjust.sku);
 
-      if (itemAdjust['tracking_type'] == '2') {
+      if (itemAdjust.type == '2') {
         scanItemSerial();
       } else {
-        prefs.setString('itemQty', itemAdjust['item_quantity']);
+        // prefs.setString('itemQty', itemAdjust['item_quantity']);
 
         Navigator.of(context)
             .pushNamed(StmsRoutes.vsrItemCreate)
@@ -765,17 +784,14 @@ class _VsrListItemState extends State<VsrListItem> {
         masterInvList.firstWhereOrNull((element) => element.upc == skuScan);
     // print('itemUpc: ${itemUpc!.name}');
 
-    var itemSku = inventoryList
-        .firstWhereOrNull((element) => element['item_name'] == itemUpc!.sku);
+    if (itemUpc != null) {
+      prefs.setString('vsrTracking', itemUpc.type);
+      prefs.setString('vsrItem', itemUpc.sku);
 
-    if (itemUpc != null && itemSku != null) {
-      prefs.setString('vsrTracking', itemSku['tracking_type']);
-      prefs.setString('vsrItem', itemSku['item_inventory_id']);
-
-      if (itemSku['tracking_type'] == '2') {
+      if (itemUpc.type == '2') {
         scanItemSerial();
       } else {
-        prefs.setString('itemQty', itemSku['item_quantity']);
+        // prefs.setString('itemQty', itemSku['item_quantity']);
 
         Navigator.of(context)
             .pushNamed(StmsRoutes.vsrItemCreate)
@@ -789,6 +805,32 @@ class _VsrListItemState extends State<VsrListItem> {
     } else {
       ErrorDialog.showErrorDialog(context, "No UPC match!");
     }
+
+
+    // var itemSku = inventoryList
+    //     .firstWhereOrNull((element) => element['item_name'] == itemUpc!.sku);
+    //
+    // if (itemUpc != null && itemSku != null) {
+    //   prefs.setString('vsrTracking', itemSku['tracking_type']);
+    //   prefs.setString('vsrItem', itemSku['item_serial_no']);
+    //
+    //   if (itemSku['tracking_type'] == '2') {
+    //     scanItemSerial();
+    //   } else {
+    //     prefs.setString('itemQty', itemSku['item_quantity']);
+    //
+    //     Navigator.of(context)
+    //         .pushNamed(StmsRoutes.vsrItemCreate)
+    //         .whenComplete(() {
+    //       setState(() {
+    //         getVsrItem();
+    //         selectedItem = null;
+    //       });
+    //     });
+    //   }
+    // } else {
+    //   ErrorDialog.showErrorDialog(context, "No UPC match!");
+    // }
   }
 
   Future scanItemSerial() async {

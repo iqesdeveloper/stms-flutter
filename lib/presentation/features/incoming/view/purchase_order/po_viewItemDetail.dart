@@ -36,12 +36,14 @@ class _PoItemDetailsState extends State<PoItemDetails> {
   List<InventoryHive> inventoryList = [];
   List poItemList = [];
   // String _scanBarcode = 'Unknown';
-  var selectedInvtry, selectedVendorItem, tracking;
+  var selectedInvtry, selectedVendorItem, selectedItemSequence,tracking;
   final format = DateFormat("yyyy-MM-dd");
   final TextEditingController itemSNController = TextEditingController();
   final TextEditingController itemQtyController = TextEditingController();
+  final TextEditingController itemSelectedInventory = TextEditingController();
   final GlobalKey<StmsInputFieldState> itemSNKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemQtyKey = GlobalKey();
+  final GlobalKey<StmsInputFieldState> itemSelectedInvKey = GlobalKey();
 
   @override
   void initState() {
@@ -56,10 +58,11 @@ class _PoItemDetailsState extends State<PoItemDetails> {
     // serialNo = prefs.getString('itemBarcode')!;
 
     selectedInvtry = prefs.getString('selectedIvID');
-    // print("selectedInvtry : $selectedInvtry");
     selectedVendorItem = prefs.getString('vendorItemNo');
     itemSNController.text = prefs.getString('itemBarcode')!;
+    itemSelectedInventory.text = selectedVendorItem;
     tracking = prefs.getString('poTracking');
+    print("selectedInvtry : $selectedVendorItem");
   }
 
   getCommon() {
@@ -100,47 +103,58 @@ class _PoItemDetailsState extends State<PoItemDetails> {
               padding: EdgeInsets.all(10),
               child: Column(
                 children: [
-                  FormField<String>(
-                    builder: (FormFieldState<String> state) {
-                      return InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: 'Item Inventory ID',
-                          errorText: state.hasError ? state.errorText : null,
-                        ),
-                        isEmpty: false,
-                        child: new DropdownButtonHideUnderline(
-                          child: ButtonTheme(
-                            child: DropdownButton<String>(
-                              isDense: true,
-                              iconSize: 28,
-                              iconEnabledColor: Colors.amber,
-                              items: inventoryList.map((item) {
-                                return new DropdownMenuItem(
-                                  child: Container(
-                                    width: width * 0.8,
-                                    child: Text(
-                                      item.sku,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  value: item.id.toString(),
-                                );
-                              }).toList(),
-                              isExpanded: false,
-                              value:
-                              selectedInvtry, // == "" ? "" : selectedTxn,
-                              onChanged: null,
-                              // (String? newValue) {
-                              //   setState(() {
-                              //     selectedLoc = newValue!;
-                              //     // print('transfer type: $transferType');
-                              //   });
-                              // },
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                  // FormField<String>(
+                  //   builder: (FormFieldState<String> state) {
+                  //     return InputDecorator(
+                  //       decoration: InputDecoration(
+                  //         labelText: 'Item Inventory ID',
+                  //         errorText: state.hasError ? state.errorText : null,
+                  //       ),
+                  //       isEmpty: false,
+                  //       child: new DropdownButtonHideUnderline(
+                  //         child: ButtonTheme(
+                  //           child: DropdownButton<String>(
+                  //             isDense: true,
+                  //             iconSize: 28,
+                  //             iconEnabledColor: Colors.amber,
+                  //             items: inventoryList.map((item) {
+                  //               return new DropdownMenuItem(
+                  //                 child: Container(
+                  //                   width: width * 0.8,
+                  //                   child: Text(
+                  //                     item.sku,
+                  //                     overflow: TextOverflow.ellipsis,
+                  //                   ),
+                  //                 ),
+                  //                 value: item.id.toString(),
+                  //               );
+                  //             }).toList(),
+                  //             isExpanded: false,
+                  //             value:
+                  //             selectedInvtry, // == "" ? "" : selectedTxn,
+                  //             onChanged: null,
+                  //             // (String? newValue) {
+                  //             //   setState(() {
+                  //             //     selectedLoc = newValue!;
+                  //             //     // print('transfer type: $transferType');
+                  //             //   });
+                  //             // },
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
+                  TextField(
+                    controller: itemSelectedInventory,
+                    key: itemSelectedInvKey,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                        labelText: 'Item Inventory ID',
+                    ),
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
                   ),
                   tracking == "2"
                       ? StmsInputField(
@@ -209,12 +223,13 @@ class _PoItemDetailsState extends State<PoItemDetails> {
               context, ModalRoute.withName(StmsRoutes.poItemList));
         });
       } else {
-        DBPoNonItem().getPoNonItem(selectedInvtry).then((value) {
+        DBPoNonItem().getPoNonItem(selectedInvtry, selectedItemSequence).then((value) {
           if (value == null) {
             DBPoNonItem()
                 .createPoNonItem(PoNonItem(
               itemInvId: selectedInvtry,
               vendorItemName: selectedVendorItem,
+              itemSequence: selectedItemSequence,
               nonTracking: itemQtyController.text,
             ))
                 .then((value) {

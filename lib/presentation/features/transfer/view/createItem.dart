@@ -4,9 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/config/storage.dart';
+import 'package:stms/data/api/models/master/inventory_hive_model.dart';
 import 'package:stms/data/api/models/transfer/stItem_model.dart';
 import 'package:stms/data/api/models/transfer/st_non_model.dart';
 import 'package:stms/data/local_db/master/master_inventory_db.dart';
+import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/data/local_db/master/master_reason_db.dart';
 import 'package:stms/data/local_db/transfer/st_non_scanItem.dart';
 import 'package:stms/data/local_db/transfer/st_scanItem.dart';
@@ -26,7 +28,7 @@ class StCreateItem extends StatefulWidget {
 }
 
 class _StCreateItemState extends State<StCreateItem> {
-  List inventoryList = [];
+  List<InventoryHive> inventoryList = [];
   List reasonList = [];
   var transferTrack, selectedInvtry, selectedReason;
   final TextEditingController itemSnController = TextEditingController();
@@ -50,7 +52,7 @@ class _StCreateItemState extends State<StCreateItem> {
   }
 
   getCommon() {
-    DBMasterInventory().getAllMasterInv().then((value) {
+    DBMasterInventoryHive().getAllInvHive().then((value) {
       if (value == null) {
         ErrorDialog.showErrorDialog(
             context, 'Please download inventory file at master page first');
@@ -123,8 +125,8 @@ class _StCreateItemState extends State<StCreateItem> {
                                     return new DropdownMenuItem(
                                       child: Container(
                                           width: width * 0.8,
-                                          child: Text(item['sku'])),
-                                      value: item['id'].toString(),
+                                          child: Text(item.sku)),
+                                      value: item.id.toString(),
                                     );
                                   }).toList(),
                                   isExpanded: false,

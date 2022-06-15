@@ -77,7 +77,7 @@ class StmsIconButton extends StatelessWidget {
     return Material(
       // color: Colors.amber,
       child: Container(
-        width: width * 0.35,
+        width: width * 0.4,
         height: height * 0.2,
         color: Colors.white,
         child: MaterialButton(
@@ -86,7 +86,7 @@ class StmsIconButton extends StatelessWidget {
             children: [
               Container(
                 width: 90.0,
-                height: 65.0,
+                height: 60.0,
                 child: Icon(
                   icon,
                   size: iconSize,
@@ -94,13 +94,13 @@ class StmsIconButton extends StatelessWidget {
               ),
               Container(
                 width: 200, //width * 0.8,
-                height: 80.0,
+                height: 50.0,
                 // alignment: Alignment.center,
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                   ),
                 ),
               )

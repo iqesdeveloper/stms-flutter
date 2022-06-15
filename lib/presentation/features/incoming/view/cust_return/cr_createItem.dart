@@ -33,8 +33,10 @@ class _CrCreateItemState extends State<CrCreateItem> {
   var custRetTrack, selectedInvtry, selectedReason;
   final TextEditingController itemSnController = TextEditingController();
   final TextEditingController itemNonQtyController = TextEditingController();
+  final TextEditingController itemSelectedInventory = TextEditingController();
   final GlobalKey<StmsInputFieldState> itemSnKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemNonQtyKey = GlobalKey();
+  final GlobalKey<StmsInputFieldState> itemSelectedInvKey = GlobalKey();
 
   @override
   void initState() {
@@ -48,6 +50,7 @@ class _CrCreateItemState extends State<CrCreateItem> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     custRetTrack = prefs.getString('crTracking');
     selectedInvtry = prefs.getString('crItem');
+    itemSelectedInventory.text = selectedInvtry;
     itemSnController.text = prefs.getString('itemBarcode')!;
   }
 
@@ -92,49 +95,22 @@ class _CrCreateItemState extends State<CrCreateItem> {
                   height: height * 0.85,
                   child: Column(
                     children: [
-                      FormField<String>(
-                        builder: (FormFieldState<String> state) {
-                          return InputDecorator(
-                            decoration: InputDecoration(
-                              labelText: 'Item Inventory ID',
-                              errorText:
-                                  state.hasError ? state.errorText : null,
-                            ),
-                            isEmpty: false,
-                            child: new DropdownButtonHideUnderline(
-                              child: ButtonTheme(
-                                child: DropdownButton<String>(
-                                  isDense: true,
-                                  iconSize: 28,
-                                  iconEnabledColor: Colors.amber,
-                                  items: inventoryList.map((item) {
-                                    return new DropdownMenuItem(
-                                      child: Container(
-                                        width: width * 0.8,
-                                        child: Text(
-                                          item.sku,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      value: item.id.toString(),
-                                    );
-                                  }).toList(),
-                                  isExpanded: false,
-                                  value:
-                                      selectedInvtry, // == "" ? "" : selectedTxn,
-                                  onChanged: null,
-                                  // (String? newValue) {
-                                  //   setState(() {
-                                  //     selectedInvtry = newValue!;
-                                  //     // print('transfer type: $transferType');
-                                  //   });
-                                  // },
-                                ),
-                              ),
-                            ),
-                          );
-                        },
+                      // Text field for Item Inventory ID
+                      TextField(
+                        controller: itemSelectedInventory,
+                        key: itemSelectedInvKey,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                            labelText: 'Item Inventory ID',
+                            labelStyle: TextStyle(
+                              color: Colors.blue,
+                            )
+                        ),
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
                       ),
+                      // TextField for Quantity or Serial Number
                       custRetTrack == 'Serial Number'
                           ? StmsInputField(
                               controller: itemSnController,
@@ -149,6 +125,7 @@ class _CrCreateItemState extends State<CrCreateItem> {
                               keyboard: TextInputType.number,
                               validator: Validator.valueExists,
                             ),
+                      // Save Button
                       Expanded(
                         child: Container(
                           alignment: Alignment.bottomCenter,
@@ -176,6 +153,7 @@ class _CrCreateItemState extends State<CrCreateItem> {
     );
   }
 
+  // Save Data option
   Future<void> saveData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -194,6 +172,9 @@ class _CrCreateItemState extends State<CrCreateItem> {
       if (custRetTrack == "Serial Number") {
         // Get all value from DB
         DBCustReturnItem().getAllCrItem().then((value){
+          // Compare item name from DB
+          var itemAdjust = inventoryList.firstWhereOrNull((element) => element.sku == selectedInvtry);
+
           // First check if there is value or not
           // If got value
           if(value != null){
@@ -202,55 +183,63 @@ class _CrCreateItemState extends State<CrCreateItem> {
               // variable allModifyItem is the list
               allCustomerReturnItem = value;
 
-              // search in DB if got the same item inventory id or not
-              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
-              var currentItemInBD = allCustomerReturnItem.firstWhereOrNull((
-                  element) => element['item_inventory_id'] == selectedInvtry);
+              // Check if SKU name present
+              if(itemAdjust != null){
+                // search in DB if got the same item inventory id or not
+                // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+                var currentItemInBD = allCustomerReturnItem.firstWhereOrNull((
+                    element) => element['item_inventory_id'] == itemAdjust.id);
 
-              // if already got item with the same item inventory id
-              if (currentItemInBD != null) {
-                // display popup error and show popup error of the item already exist
-                Navigator.popUntil(
-                    context, ModalRoute.withName(StmsRoutes.crItemList));
-                ErrorDialog.showErrorDialog(
-                    context, 'Item SKU already exists.');
-              } else {
-                // if no item with this item inventory id
-                DBCustReturnItem()
-                    .createCrItem(
-                  CustRetItem(
-                    itemIvId: selectedInvtry,
-                    itemSn: itemSnController.text,
-                    // itemReason: selectedReason,
-                  ),
-                )
-                    .then((value) {
-                  showSuccess('Item Save');
+                // if already got item with the same item inventory id
+                if (currentItemInBD != null) {
+                  // display popup error and show popup error of the item already exist
                   Navigator.popUntil(
                       context, ModalRoute.withName(StmsRoutes.crItemList));
-                });
+                  ErrorDialog.showErrorDialog(
+                      context, 'Item SKU already exists.');
+                } else {
+                  // if no item with this item inventory id
+                  DBCustReturnItem()
+                      .createCrItem(
+                    CustRetItem(
+                      itemIvId: itemAdjust.id,
+                      itemSn: itemSnController.text,
+                      // itemReason: selectedReason,
+                    ),
+                  )
+                      .then((value) {
+                    showSuccess('Item Save');
+                    Navigator.popUntil(
+                        context, ModalRoute.withName(StmsRoutes.crItemList));
+                  });
+                }
               }
             });
             // if no value in DB at all
           } else {
-            DBCustReturnItem()
-                .createCrItem(
-              CustRetItem(
-                itemIvId: selectedInvtry,
-                itemSn: itemSnController.text,
-                // itemReason: selectedReason,
-              ),
-            )
-                .then((value) {
-              showSuccess('Item Save');
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.crItemList));
-            });
+            if(itemAdjust != null){
+              DBCustReturnItem()
+                  .createCrItem(
+                CustRetItem(
+                  itemIvId: itemAdjust.id,
+                  itemSn: itemSnController.text,
+                  // itemReason: selectedReason,
+                ),
+              )
+                  .then((value) {
+                showSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.crItemList));
+              });
+            }
           }
         });
       } else {
         // Get all value from DB
         DBCustReturnNonItem().getAllCrNonItem().then((value) {
+          var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+          element.sku == selectedInvtry);
+
           // First check if there is value or not
           // If got value
           // ignore: unnecessary_null_comparison
@@ -260,47 +249,53 @@ class _CrCreateItemState extends State<CrCreateItem> {
               // variable allModifyNonItem is the list
               allCustomerReturnNonItem = value;
 
-              // search in DB if got the same item inventory id or not
-              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
-              var currentItemInBD = allCustomerReturnNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == selectedInvtry);
+              // Check if SKU name present
+              if(itemAdjust != null) {
+                // search in DB if got the same item inventory id or not
+                // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+                var currentItemInBD = allCustomerReturnNonItem.firstWhereOrNull((element)
+                => element['item_inventory_id'] == itemAdjust.id);
 
-              // if already got item with the same item inventory id
-              if(currentItemInBD != null){
-                // display popup error and show popup error of the item already exist
-                Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.crItemList));
-                ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
-              } else {
-                // if no item with this item inventory id
-                DBCustReturnNonItem()
-                    .createCrNonItem(
-                  CustRetNonItem(
-                    itemIvId: selectedInvtry,
-                    itemNonQty: itemNonQtyController.text,
-                    // itemReason: selectedReason,
-                  ),
-                )
-                    .then((value) {
-                  showSuccess('Item Save');
-                  Navigator.popUntil(
-                      context, ModalRoute.withName(StmsRoutes.crItemList));
-                });
+                // if already got item with the same item inventory id
+                if(currentItemInBD != null){
+                  // display popup error and show popup error of the item already exist
+                  Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.crItemList));
+                  ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+                } else {
+                  // if no item with this item inventory id
+                  DBCustReturnNonItem()
+                      .createCrNonItem(
+                    CustRetNonItem(
+                      itemIvId: itemAdjust.id,
+                      itemNonQty: itemNonQtyController.text,
+                      // itemReason: selectedReason,
+                    ),
+                  )
+                      .then((value) {
+                    showSuccess('Item Save');
+                    Navigator.popUntil(
+                        context, ModalRoute.withName(StmsRoutes.crItemList));
+                  });
+                }
               }
             });
             // if no value in DB at all
           } else {
-            DBCustReturnNonItem()
-                .createCrNonItem(
-              CustRetNonItem(
-                itemIvId: selectedInvtry,
-                itemNonQty: itemNonQtyController.text,
-                // itemReason: selectedReason,
-              ),
-            )
-                .then((value) {
-              showSuccess('Item Save');
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.crItemList));
-            });
+            if(itemAdjust != null) {
+              DBCustReturnNonItem()
+                  .createCrNonItem(
+                CustRetNonItem(
+                  itemIvId: itemAdjust.id,
+                  itemNonQty: itemNonQtyController.text,
+                  // itemReason: selectedReason,
+                ),
+              )
+                  .then((value) {
+                showSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.crItemList));
+              });
+            }
           }
         });
       }

@@ -79,6 +79,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
     });
   }
 
+  // remove item
   removeListItem() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     DBPoItem().deleteAllPoItem();
@@ -89,6 +90,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
     prefs.remove('poLocation');
   }
 
+  // UI layout
   @override
   Widget build(BuildContext context) {
     // var width = MediaQuery.of(context).size.width;

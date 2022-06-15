@@ -128,9 +128,10 @@ class _RvListItemState extends State<RvListItem> {
                             border:
                                 TableBorder.all(color: Colors.black, width: 1),
                             columnWidths: const <int, TableColumnWidth>{
-                              0: FixedColumnWidth(120.0),
-                              1: FixedColumnWidth(33.0),
-                              3: FixedColumnWidth(50.0),
+                              0: FixedColumnWidth(100.0),
+                              1: FixedColumnWidth(60.0),
+                              2: FixedColumnWidth(30.0),
+                              3: FixedColumnWidth(40.0),
                             },
                             children: [
                               TableRow(
@@ -147,12 +148,12 @@ class _RvListItemState extends State<RvListItem> {
                                     ),
                                   ),
                                   Text(
-                                    'Ent Qty',
+                                    'Serial Number',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),
                                   Text(
-                                    'Serial Number',
+                                    'Ent Qty',
                                     style: TextStyle(fontSize: 16.0),
                                     textAlign: TextAlign.center,
                                   ),
@@ -202,9 +203,10 @@ class _RvListItemState extends State<RvListItem> {
                                             TableCellVerticalAlignment.middle,
                                         columnWidths: const <int,
                                             TableColumnWidth>{
-                                          0: FixedColumnWidth(120.0),
-                                          1: FixedColumnWidth(33.0),
-                                          3: FixedColumnWidth(50.0),
+                                          0: FixedColumnWidth(100.0),
+                                          1: FixedColumnWidth(60.0),
+                                          2: FixedColumnWidth(30.0),
+                                          3: FixedColumnWidth(40.0),
                                         },
                                         children: [
                                           TableRow(
@@ -299,9 +301,10 @@ class _RvListItemState extends State<RvListItem> {
                                             TableCellVerticalAlignment.middle,
                                         columnWidths: const <int,
                                             TableColumnWidth>{
-                                          0: FixedColumnWidth(120.0),
-                                          1: FixedColumnWidth(33.0),
-                                          3: FixedColumnWidth(50.0),
+                                          0: FixedColumnWidth(100.0),
+                                          1: FixedColumnWidth(60.0),
+                                          2: FixedColumnWidth(30.0),
+                                          3: FixedColumnWidth(40.0),
                                         },
                                         children: [
                                           TableRow(
@@ -592,7 +595,7 @@ class _RvListItemState extends State<RvListItem> {
                               } else {
                                 SharedPreferences prefs =
                                     await SharedPreferences.getInstance();
-                                prefs.setString('rvItem', selectedItem);
+                                // prefs.setString('rvItem', selectedItem);
 
                                 findInv(selectedItem);
                               }
@@ -615,16 +618,17 @@ class _RvListItemState extends State<RvListItem> {
   Future<void> findInv(String selectedItem) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var itemAdjust = inventoryList.firstWhereOrNull(
-        (element) => element['item_inventory_id'] == selectedItem);
+    var itemAdjust = invMasterList.firstWhereOrNull(
+        (element) => element.id == selectedItem);
 
-    prefs.setString('rvTracking', itemAdjust['tracking_type']);
+    prefs.setString('rvTracking', itemAdjust!.type);
+    prefs.setString('rvItem', itemAdjust.sku);
 
-    if (itemAdjust['tracking_type'] == '2') {
+    if (itemAdjust.type == '2') {
       var typeScan = 'invId';
       scanBarcodeNormal(typeScan);
     } else {
-      prefs.setString('itemQty', itemAdjust['item_quantity']);
+      // prefs.setString('itemQty', itemAdjust['item_quantity']);
       Navigator.of(context).pushNamed(StmsRoutes.rvItemCreate).whenComplete(() {
         setState(() {
           getRvItem();
@@ -729,19 +733,19 @@ class _RvListItemState extends State<RvListItem> {
   Future<void> searchSku(String skuScan) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var itemAdjust = inventoryList
-        .firstWhereOrNull((element) => element['item_name'] == skuScan);
+    var itemAdjust = invMasterList
+        .firstWhereOrNull((element) => element.sku == skuScan);
 
     if (itemAdjust == null) {
       ErrorDialog.showErrorDialog(context, "No SKU match!");
     } else {
-      prefs.setString('rvTracking', itemAdjust['tracking_type']);
-      prefs.setString('rvItem', itemAdjust['item_inventory_id']);
+      prefs.setString('rvTracking', itemAdjust.type);
+      prefs.setString('rvItem', itemAdjust.sku);
 
-      if (itemAdjust['tracking_type'] == '2') {
+      if (itemAdjust.type == '2') {
         scanItemSerial();
       } else {
-        prefs.setString('itemQty', itemAdjust['item_quantity']);
+        //prefs.setString('itemQty', itemAdjust['item_quantity']);
         Navigator.of(context)
             .pushNamed(StmsRoutes.rvItemCreate)
             .whenComplete(() {
@@ -762,28 +766,45 @@ class _RvListItemState extends State<RvListItem> {
     if (itemAdjustUpc == null) {
       ErrorDialog.showErrorDialog(context, "No UPC match!");
     } else {
-      var itemAdjust = inventoryList.firstWhereOrNull(
-          (element) => element['item_name'] == itemAdjustUpc.sku);
 
-      if (itemAdjust != null) {
-        prefs.setString('rvTracking', itemAdjust['tracking_type']);
-        prefs.setString('rvItem', itemAdjust['item_inventory_id']);
+      prefs.setString('rvTracking', itemAdjustUpc.type);
+      prefs.setString('rvItem', itemAdjustUpc.sku);
 
-        if (itemAdjust['tracking_type'] == '2') {
-          scanItemSerial();
-        } else {
-          prefs.setString('itemQty', itemAdjust['item_quantity']);
-          Navigator.of(context)
-              .pushNamed(StmsRoutes.rvItemCreate)
-              .whenComplete(() {
-            setState(() {
-              getRvItem();
-            });
-          });
-        }
+      if (itemAdjustUpc.type == '2') {
+        scanItemSerial();
       } else {
-        ErrorDialog.showErrorDialog(context, "No UPC match!");
+       //  prefs.setString('itemQty', itemAdjust['item_quantity']);
+        Navigator.of(context)
+            .pushNamed(StmsRoutes.rvItemCreate)
+            .whenComplete(() {
+          setState(() {
+            getRvItem();
+          });
+        });
       }
+
+      // var itemAdjust = inventoryList.firstWhereOrNull(
+      //     (element) => element['item_name'] == itemAdjustUpc.sku);
+
+      // if (itemAdjust != null) {
+      //   prefs.setString('rvTracking', itemAdjust['tracking_type']);
+      //   prefs.setString('rvItem', itemAdjust['item_inventory_id']);
+      //
+      //   if (itemAdjust['tracking_type'] == '2') {
+      //     scanItemSerial();
+      //   } else {
+      //     prefs.setString('itemQty', itemAdjust['item_quantity']);
+      //     Navigator.of(context)
+      //         .pushNamed(StmsRoutes.rvItemCreate)
+      //         .whenComplete(() {
+      //       setState(() {
+      //         getRvItem();
+      //       });
+      //     });
+      //   }
+      // } else {
+      //   ErrorDialog.showErrorDialog(context, "No UPC match!");
+      // }
     }
   }
 

@@ -33,8 +33,10 @@ class _ImCreateItemState extends State<ImCreateItem> {
   var itemModifyTrack, selectedInvtry, selectedReason;
   final TextEditingController itemSnController = TextEditingController();
   final TextEditingController itemNonQtyController = TextEditingController();
+  final TextEditingController itemSelectedInventory = TextEditingController();
   final GlobalKey<StmsInputFieldState> itemSnKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemNonQtyKey = GlobalKey();
+  final GlobalKey<StmsInputFieldState> itemSelectedInvKey = GlobalKey();
 
   @override
   void initState() {
@@ -48,6 +50,7 @@ class _ImCreateItemState extends State<ImCreateItem> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     itemModifyTrack = prefs.getString('imTracking');
     selectedInvtry = prefs.getString('imItem');
+    itemSelectedInventory.text = selectedInvtry;
     itemSnController.text = prefs.getString('itemBarcode')!;
   }
 
@@ -105,47 +108,20 @@ class _ImCreateItemState extends State<ImCreateItem> {
                   height: height * 0.85,
                   child: Column(
                     children: [
-                      FormField<String>(
-                        builder: (FormFieldState<String> state) {
-                          return InputDecorator(
-                            decoration: InputDecoration(
-                              labelText: 'Item Inventory ID',
-                              errorText:
-                                  state.hasError ? state.errorText : null,
-                            ),
-                            isEmpty: false,
-                            child: new DropdownButtonHideUnderline(
-                              child: ButtonTheme(
-                                child: DropdownButton<String>(
-                                  isDense: true,
-                                  iconSize: 28,
-                                  iconEnabledColor: Colors.amber,
-                                  items: inventoryList.map((item) {
-                                    return new DropdownMenuItem(
-                                      child: Container(
-                                        width: width * 0.8,
-                                        child: Text(
-                                          item.sku,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      value: item.id.toString(),
-                                    );
-                                  }).toList(),
-                                  isExpanded: false,
-                                  value:
-                                      selectedInvtry, // == "" ? "" : selectedTxn,
-                                  onChanged: null,
-                                  // (String? newValue) {
-                                  //   setState(() {
-                                  //     selectedInvtry = newValue!;
-                                  //   });
-                                  // },
-                                ),
-                              ),
-                            ),
-                          );
-                        },
+                      // Text field for Item Inventory ID
+                      TextField(
+                        controller: itemSelectedInventory,
+                        key: itemSelectedInvKey,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                            labelText: 'Item Inventory ID',
+                            labelStyle: TextStyle(
+                              color: Colors.blue,
+                            )
+                        ),
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
                       ),
                       itemModifyTrack == 'Serial Number'
                           ? StmsInputField(
@@ -252,6 +228,10 @@ class _ImCreateItemState extends State<ImCreateItem> {
       if (itemModifyTrack == "Serial Number") {
         // Get all value from ItemModifyNonDB
         DBItemModifyItem().getAllImItem().then((value) {
+          // Compare item name from DB
+          var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+          element.sku == selectedInvtry);
+
           // First check if there is value or not
           // If got value
           if (value != null) {
@@ -260,51 +240,60 @@ class _ImCreateItemState extends State<ImCreateItem> {
               // variable allModifyItem is the list
               allModifyItem = value;
 
-              // search in DB if got the same item inventory id or not
-              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
-              var currentItemInBD = allModifyItem.firstWhereOrNull((
-                  element) => element['item_inventory_id'] == selectedInvtry);
+              // Check if SKU name present
+              if(itemAdjust != null){
+                // search in DB if got the same item inventory id or not
+                // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+                var currentItemInBD = allModifyItem.firstWhereOrNull((
+                    element) => element['item_inventory_id'] == itemAdjust.id);
 
-              // if already got item with the same item inventory id
-              if (currentItemInBD != null) {
-                // display popup error and show popup error of the item already exist
-                Navigator.popUntil(
-                    context, ModalRoute.withName(StmsRoutes.imItemList));
-                ErrorDialog.showErrorDialog(
-                    context, 'Item SKU already exists.');
-              } else {
-                // if no item with this item inventory id
-                DBItemModifyItem()
-                    .createImItem(ItemModifyItem(
-                  itemIvId: selectedInvtry,
-                  itemSn: itemSnController.text,
-                  itemReason: selectedReason,
-                ))
-                    .then((value) {
-                  showSuccess('Item Save');
+                // if already got item with the same item inventory id
+                if (currentItemInBD != null) {
+                  // display popup error and show popup error of the item already exist
                   Navigator.popUntil(
                       context, ModalRoute.withName(StmsRoutes.imItemList));
-                });
+                  ErrorDialog.showErrorDialog(
+                      context, 'Item SKU already exists.');
+                } else {
+                  // if no item with this item inventory id
+                  DBItemModifyItem()
+                      .createImItem(ItemModifyItem(
+                    itemIvId: itemAdjust.id,
+                    itemSn: itemSnController.text,
+                    itemReason: selectedReason,
+                  ))
+                      .then((value) {
+                    showSuccess('Item Save');
+                    Navigator.popUntil(
+                        context, ModalRoute.withName(StmsRoutes.imItemList));
+                  });
+                }
               }
             });
             // if no value in DB at all
           } else {
-            DBItemModifyItem()
-                .createImItem(ItemModifyItem(
-              itemIvId: selectedInvtry,
-              itemSn: itemSnController.text,
-              itemReason: selectedReason,
-            ))
-                .then((value) {
-              showSuccess('Item Save');
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.imItemList));
-            });
-          }
+            if(itemAdjust != null){
+              DBItemModifyItem()
+                  .createImItem(ItemModifyItem(
+                itemIvId: itemAdjust.id,
+                itemSn: itemSnController.text,
+                itemReason: selectedReason,
+              ))
+                  .then((value) {
+                showSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.imItemList));
+              });
+            }
+            }
         });
       } else {
         // Get all value from ItemModifyNonDB
         DBItemModifyNonItem().getAllImNonItem().then((value){
+          // Compare item name from DB
+          var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+          element.sku == selectedInvtry);
+
           // First check if there is value or not
           // If got value
           if(value != null){
@@ -313,47 +302,53 @@ class _ImCreateItemState extends State<ImCreateItem> {
               // variable allModifyNonItem is the list
               allModifyNonItem = value;
 
-              // search in DB if got the same item inventory id or not
-              // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
-              var currentItemInBD = allModifyNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == selectedInvtry);
+              // Check if SKU name present
+              if(itemAdjust != null){
+                // search in DB if got the same item inventory id or not
+                // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
+                var currentItemInBD = allModifyNonItem.firstWhereOrNull((element) =>
+                element['item_inventory_id'] == itemAdjust.id);
 
-              // if already got item with the same item inventory id
-              if(currentItemInBD != null){
-                // display popup error and show popup error of the item already exist
-                Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.imItemList));
-                ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
-              } else {
-                // if no item with this item inventory id
-                DBItemModifyNonItem()
-                    .createImNonItem(
-                  ItemModifyNonItem(
-                    itemIvId: selectedInvtry,
-                    itemNonQty: itemNonQtyController.text,
-                    itemReason: selectedReason,
-                  ),
-                )
-                    .then((value) {
-                  showSuccess('Item Save');
-                  Navigator.popUntil(
-                      context, ModalRoute.withName(StmsRoutes.imItemList));
-                });
+                // if already got item with the same item inventory id
+                if(currentItemInBD != null){
+                  // display popup error and show popup error of the item already exist
+                  Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.imItemList));
+                  ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+                } else {
+                  // if no item with this item inventory id
+                  DBItemModifyNonItem()
+                      .createImNonItem(
+                    ItemModifyNonItem(
+                      itemIvId: itemAdjust.id,
+                      itemNonQty: itemNonQtyController.text,
+                      itemReason: selectedReason,
+                    ),
+                  )
+                      .then((value) {
+                    showSuccess('Item Save');
+                    Navigator.popUntil(
+                        context, ModalRoute.withName(StmsRoutes.imItemList));
+                  });
+                }
               }
             });
             // if no value in DB at all
           } else {
-            DBItemModifyNonItem()
-                .createImNonItem(
-              ItemModifyNonItem(
-                itemIvId: selectedInvtry,
-                itemNonQty: itemNonQtyController.text,
-                itemReason: selectedReason,
-              ),
-            )
-                .then((value) {
-              showSuccess('Item Save');
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.imItemList));
-            });
+            if(itemAdjust != null){
+              DBItemModifyNonItem()
+                  .createImNonItem(
+                ItemModifyNonItem(
+                  itemIvId: itemAdjust.id,
+                  itemNonQty: itemNonQtyController.text,
+                  itemReason: selectedReason,
+                ),
+              )
+                  .then((value) {
+                showSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.imItemList));
+              });
+            }
           }
         });
       }

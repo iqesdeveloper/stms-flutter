@@ -8,8 +8,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:stms/config/routes.dart';
 import 'package:stms/config/storage.dart';
+import 'package:stms/data/api/models/master/inventory_hive_model.dart';
 import 'package:stms/data/api/repositories/api_json/api_transfer.dart';
 import 'package:stms/data/local_db/master/master_inventory_db.dart';
+import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/data/local_db/master/master_reason_db.dart';
 import 'package:stms/data/local_db/transfer/st_non_scanItem.dart';
 import 'package:stms/data/local_db/transfer/st_scanItem.dart';
@@ -30,7 +32,7 @@ class StListItem extends StatefulWidget {
 class _StListItemState extends State<StListItem> {
   // ignore: unused_field
   String _scanBarcode = 'Unknown';
-  List inventoryList = [];
+  List<InventoryHive> inventoryList = [];
   List inventoryInList = [];
   List reasonList = [];
   List stItemListing = [];
@@ -53,13 +55,14 @@ class _StListItemState extends State<StListItem> {
   }
 
   getCommon() {
-    DBMasterInventory().getAllMasterInv().then((value) {
+    DBMasterInventoryHive().getAllInvHive().then((value) {
       if (value == null) {
         ErrorDialog.showErrorDialog(
             context, 'Please download inventory file at master page first');
       } else {
         setState(() {
           inventoryList = value;
+          print('value: $inventoryList');
         });
       }
     });
@@ -188,7 +191,7 @@ class _StListItemState extends State<StListItem> {
                                       (BuildContext context, int index) {
                                     invName = inventoryList.firstWhereOrNull(
                                         (element) =>
-                                            element['id'] ==
+                                            element.id ==
                                             snapshot.data[index]
                                                 ['item_inventory_id']);
                                     reasonName = reasonList.firstWhereOrNull(
@@ -289,7 +292,7 @@ class _StListItemState extends State<StListItem> {
                                       (BuildContext context, int index) {
                                     invName = inventoryList.firstWhereOrNull(
                                         (element) =>
-                                            element['id'] ==
+                                            element.id ==
                                             snapshot.data[index]
                                                 ['item_inventory_id']);
                                     reasonName = reasonList.firstWhereOrNull(
@@ -648,10 +651,10 @@ class _StListItemState extends State<StListItem> {
                                         items: inventoryList.map((item) {
                                           return new DropdownMenuItem(
                                             child: Text(
-                                              item['sku'],
+                                              item.sku,
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                            value: item['sku'],
+                                            value: item.sku,
                                           );
                                         }).toList(),
                                         value: selectedItem,
@@ -660,8 +663,8 @@ class _StListItemState extends State<StListItem> {
                                             selectedItem = value;
                                             var invId = inventoryList
                                                 .firstWhereOrNull((element) =>
-                                                    element['sku'] == value);
-                                            inventoryId = invId['id'];
+                                                    element.sku == value);
+                                            inventoryId = invId!.id;
                                           });
                                         },
                                         isExpanded: true,
@@ -754,7 +757,7 @@ class _StListItemState extends State<StListItem> {
       transferId = itemTransfer['item_inventory_id'];
     } else {
       itemTransfer = inventoryList
-          .firstWhereOrNull((element) => element['id'] == selectedItem);
+          .firstWhereOrNull((element) => element.id == selectedItem);
       trackingType = itemTransfer['type'];
       transferId = itemTransfer['id'];
     }
@@ -955,7 +958,7 @@ class _StListItemState extends State<StListItem> {
     } else {
       print('transfer type: out');
       itemTransfer = inventoryList
-          .firstWhereOrNull((element) => element['sku'] == skuScan);
+          .firstWhereOrNull((element) => element.sku == skuScan);
       print('item transfer: $itemTransfer');
 
       if (itemTransfer == null) {

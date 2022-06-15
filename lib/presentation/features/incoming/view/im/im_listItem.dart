@@ -628,7 +628,7 @@ class _ImListItemState extends State<ImListItem> {
                                 } else {
                                   SharedPreferences prefs =
                                       await SharedPreferences.getInstance();
-                                  prefs.setString('imItem', inventoryId);
+                                  // prefs.setString('imItem', inventoryId);
 
                                   findInv(inventoryId);
                                 }
@@ -656,6 +656,7 @@ class _ImListItemState extends State<ImListItem> {
         inventoryList.firstWhereOrNull((element) => element.id == selectedItem);
 
     prefs.setString('imTracking', itemModify!.type);
+    prefs.setString('imItem', itemModify.sku);
 
     if (itemModify.type == 'Serial Number') {
       var typeScan = 'invId';
@@ -755,7 +756,7 @@ class _ImListItemState extends State<ImListItem> {
           context, 'SKU not match with master inventory');
     } else {
       prefs.setString('imTracking', itemAdjust.type);
-      prefs.setString('imItem', itemAdjust.id);
+      prefs.setString('imItem', itemAdjust.sku);
 
       if (itemAdjust.type == 'Serial Number') {
         scanItemSerial();
@@ -782,7 +783,7 @@ class _ImListItemState extends State<ImListItem> {
           context, 'UPC not match with master inventory');
     } else {
       prefs.setString('imTracking', itemAdjust.type);
-      prefs.setString('imItem', itemAdjust.id);
+      prefs.setString('imItem', itemAdjust.sku);
 
       if (itemAdjust.type == 'Serial Number') {
         scanItemSerial();
