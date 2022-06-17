@@ -721,7 +721,7 @@ class _ImListItemState extends State<ImListItem> {
             setState(() {
               var typeScan = 'invId';
               getModifyItem();
-              scanBarcodeNormal(typeScan);
+             // scanBarcodeNormal(typeScan);
             });
           });
         } else {
@@ -738,7 +738,7 @@ class _ImListItemState extends State<ImListItem> {
           setState(() {
             var typeScan = 'invId';
             getModifyItem();
-            scanBarcodeNormal(typeScan);
+           //  scanBarcodeNormal(typeScan);
           });
         });
       }

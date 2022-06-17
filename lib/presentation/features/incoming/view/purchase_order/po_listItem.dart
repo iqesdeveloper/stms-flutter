@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
@@ -23,6 +24,7 @@ import 'package:stms/data/local_db/master/master_location_db.dart';
 import 'package:stms/domain/validator.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
 import 'package:stms/presentation/widgets/independent/card_text.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/input_field.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
@@ -100,6 +102,9 @@ class _PoItemListViewState extends State<PoItemListView> {
     // call the enterQty whenever at start of this page
     getEnterQty();
     _future = getPurchaseOrderItem.getPurchaseOrderItem();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   scanData() async {
@@ -416,6 +421,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                             : () async {
                                                           SharedPreferences prefs = await SharedPreferences.getInstance();
 
+                                                          // save selected item_inventory id
                                                           selectedItem = snapshot.data[index]['item_inventory_id'];
                                                           prefs.setString('selectedIvID', selectedItem);
 
@@ -526,11 +532,9 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                               prefs =
                                                               await SharedPreferences.getInstance();
 
-                                                              selectedItem =
-                                                              snapshot.data[index]['item_inventory_id'];
-                                                              prefs.setString(
-                                                                  'selectedIvID',
-                                                                  selectedItem);
+                                                              // save selected item_inventory id
+                                                              selectedItem = snapshot.data[index]['item_inventory_id'];
+                                                              prefs.setString('selectedIvID', selectedItem);
 
                                                               // Save selected vendor number
                                                               selectedVendorItem = snapshot.data[index]['vendor_item_number'];
@@ -628,11 +632,9 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           var typeScan =
                                                               'manual';
 
-                                                          prefs.setString(
-                                                              'selectedIvID',
-                                                              snapshot.data[index]
-                                                              [
-                                                              'item_inventory_id']);
+                                                          // save selected item_inventory id
+                                                          selectedItem = snapshot.data[index]['item_inventory_id'];
+                                                          // prefs.setString('selectedIvID', selectedItem);
 
                                                           // Save selected vendor item no
                                                           selectedVendorItem = snapshot.data[index]['vendor_item_number'];
@@ -989,7 +991,7 @@ class _PoItemListViewState extends State<PoItemListView> {
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -1006,7 +1008,7 @@ class _PoItemListViewState extends State<PoItemListView> {
               DBPoNonItem()
                   .update(selectedItem, newQty.toString())
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
@@ -1053,7 +1055,7 @@ class _PoItemListViewState extends State<PoItemListView> {
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -1070,7 +1072,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                   .update(selectedItem, newQty.toString())
                   .then((value) {
                 getEnterQty();
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });

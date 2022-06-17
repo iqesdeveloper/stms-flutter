@@ -12,6 +12,7 @@ import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/data/local_db/master/master_reason_db.dart';
 import 'package:stms/domain/validator.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/input_field.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
@@ -373,7 +374,7 @@ class _AiCreateItemState extends State<AiCreateItem> {
                       ),
                     )
                         .then((value) {
-                      showSuccess('Item Save');
+                      showCustomSuccess('Item Save');
                       Navigator.popUntil(
                           context, ModalRoute.withName(StmsRoutes.aiItemList));
                     });
@@ -392,7 +393,7 @@ class _AiCreateItemState extends State<AiCreateItem> {
                 ),
               )
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 Navigator.popUntil(
                     context, ModalRoute.withName(StmsRoutes.aiItemList));
               });

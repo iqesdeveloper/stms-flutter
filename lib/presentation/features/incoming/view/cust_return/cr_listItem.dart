@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:search_choices/search_choices.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,6 +14,7 @@ import 'package:stms/data/local_db/incoming/cr/cr_non_scanItem.dart';
 import 'package:stms/data/local_db/incoming/cr/cr_scanItem.dart';
 import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/style_button.dart';
@@ -45,6 +47,9 @@ class _CrListItemState extends State<CrListItem> {
 
     getCrItem();
     getCommon();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   getCrItem() {
@@ -677,7 +682,7 @@ class _CrListItemState extends State<CrListItem> {
             setState(() {
               var typeScan = 'invId';
               getCrItem();
-              scanBarcodeNormal(typeScan);
+              // scanBarcodeNormal(typeScan);
             });
           });
         } else {
@@ -694,7 +699,7 @@ class _CrListItemState extends State<CrListItem> {
           setState(() {
             var typeScan = 'invId';
             getCrItem();
-            scanBarcodeNormal(typeScan);
+            // scanBarcodeNormal(typeScan);
           });
         });
       }

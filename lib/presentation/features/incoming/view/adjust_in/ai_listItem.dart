@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:search_choices/search_choices.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,6 +16,7 @@ import 'package:stms/data/local_db/incoming/adjust_in/ai_scanItem.dart';
 import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/data/local_db/master/master_reason_db.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/style_button.dart';
@@ -49,6 +51,9 @@ class _AiListItemState extends State<AiListItem> {
 
     getAdjustItem();
     getCommon();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   getAdjustItem() {
@@ -64,7 +69,6 @@ class _AiListItemState extends State<AiListItem> {
       } else {
         setState(() {
           inventoryList = value;
-          print('SHOW INVENTORY: $inventoryList');
         });
       }
     });
@@ -719,7 +723,7 @@ class _AiListItemState extends State<AiListItem> {
             setState(() {
               var typeScan = 'invId';
               getAdjustItem();
-              scanBarcodeNormal(typeScan);
+              // scanBarcodeNormal(typeScan);
             });
           });
         } else {
@@ -736,7 +740,7 @@ class _AiListItemState extends State<AiListItem> {
           setState(() {
             var typeScan = 'invId';
             getAdjustItem();
-            scanBarcodeNormal(typeScan);
+            // scanBarcodeNormal(typeScan);
           });
         });
       }

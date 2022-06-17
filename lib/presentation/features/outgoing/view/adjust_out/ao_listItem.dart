@@ -721,7 +721,7 @@ class _AoListItemState extends State<AoListItem> {
             setState(() {
               var typeScan = 'invId';
               getAdjustItem();
-              scanBarcodeNormal(typeScan);
+              // scanBarcodeNormal(typeScan);
             });
           });
         } else {
@@ -738,7 +738,7 @@ class _AoListItemState extends State<AoListItem> {
           setState(() {
             var typeScan = 'invId';
             getAdjustItem();
-            scanBarcodeNormal(typeScan);
+            // scanBarcodeNormal(typeScan);
           });
         });
       }

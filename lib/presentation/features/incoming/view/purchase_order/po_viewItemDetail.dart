@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/incoming/po/po_non_model.dart';
@@ -12,6 +14,7 @@ import 'package:stms/data/api/models/incoming/po/po_model.dart';
 import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/domain/validator.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/input_field.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
@@ -51,6 +54,9 @@ class _PoItemDetailsState extends State<PoItemDetails> {
 
     getCommon();
     getItemPo();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   getItemPo() async {
@@ -200,6 +206,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
   }
 
   Future<void> saveData() async {
+
     if (tracking == "2" && itemSNKey.currentState?.validate() != null) {
       ErrorDialog.showErrorDialog(context, 'Serial Number cannot be empty');
     } else if (tracking != "2" && itemQtyKey.currentState?.validate() != null) {
@@ -208,6 +215,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (tracking == "2") {
+
         // follow the item listed in api -> models -> po
         // any addition or subtraction occur at the models is adjusted here
         DBPoItem()
@@ -218,7 +226,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
         ))
             .then((value) {
           // SuccessDialog.showSuccessDialog(context, 'Item Save');
-          showSuccess('Item Save');
+          showCustomSuccess('Item Save');
           Navigator.popUntil(
               context, ModalRoute.withName(StmsRoutes.poItemList));
         });
@@ -234,7 +242,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
             ))
                 .then((value) {
               // SuccessDialog.showSuccessDialog(context, 'Item Save');
-              showSuccess('Item Save');
+              showCustomSuccess('Item Save');
               Navigator.popUntil(
                   context, ModalRoute.withName(StmsRoutes.poItemList));
             });
@@ -242,7 +250,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
             DBPoNonItem()
                 .update(selectedInvtry, itemQtyController.text)
                 .then((value) {
-              showSuccess('Item Save');
+              showCustomSuccess('Item Save');
               Navigator.popUntil(
                   context, ModalRoute.withName(StmsRoutes.poItemList));
             });

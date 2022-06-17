@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:stms/config/routes.dart';
@@ -13,6 +14,7 @@ import 'package:stms/data/local_db/incoming/vsr/vsr_non_scanItem.dart';
 import 'package:stms/data/local_db/incoming/vsr/vsr_scanItem.dart';
 import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/style_button.dart';
@@ -48,6 +50,9 @@ class _VsrListItemState extends State<VsrListItem> {
     getVsrItem();
     getListItem();
     getCommon();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   getVsrItem() {
@@ -718,7 +723,7 @@ class _VsrListItemState extends State<VsrListItem> {
                   var typeScan = 'invId';
                   getVsrItem();
                   selectedItem = null;
-                  scanBarcodeNormal(typeScan);
+                  // scanBarcodeNormal(typeScan);
                 });
               });
             } else {
@@ -736,7 +741,7 @@ class _VsrListItemState extends State<VsrListItem> {
                 var typeScan = 'invId';
                 getVsrItem();
                 selectedItem = null;
-                scanBarcodeNormal(typeScan);
+               // scanBarcodeNormal(typeScan);
               });
             });
           }
@@ -751,16 +756,16 @@ class _VsrListItemState extends State<VsrListItem> {
   Future<void> searchSku(String skuScan) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var itemAdjust = masterInvList.firstWhereOrNull((element) =>
-        element.sku == skuScan); // || element['upc'] == skuScan
+    var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+        element['item_name'] == skuScan); // || element['upc'] == skuScan
 
     if (itemAdjust == null) {
       ErrorDialog.showErrorDialog(context, "No SKU match!");
     } else {
-      prefs.setString('vsrTracking', itemAdjust.type);
-      prefs.setString('vsrItem', itemAdjust.sku);
+      prefs.setString('vsrTracking', itemAdjust['tracking_type']);
+      prefs.setString('vsrItem', itemAdjust['item_name']);
 
-      if (itemAdjust.type == '2') {
+      if (itemAdjust['tracking_type'] == '2') {
         scanItemSerial();
       } else {
         // prefs.setString('itemQty', itemAdjust['item_quantity']);

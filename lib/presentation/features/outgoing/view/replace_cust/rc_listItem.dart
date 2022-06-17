@@ -662,7 +662,7 @@ class _RcListItemState extends State<RcListItem> {
                               } else {
                                 SharedPreferences prefs =
                                     await SharedPreferences.getInstance();
-                                prefs.setString('rcItem', selectedItem);
+                                // prefs.setString('rcItem', selectedItem);
 
                                 findInv(selectedItem, newListItem);
                               }
@@ -689,6 +689,7 @@ class _RcListItemState extends State<RcListItem> {
         (element) => element['item_inventory_id'] == selectedItem);
 
     prefs.setString('rcTracking', itemAdjust['tracking_type']);
+    prefs.setString('rcItem', itemAdjust['item_name']);
 
     if (itemAdjust['tracking_type'] == '2') {
       var typeScan = 'invId';
@@ -771,7 +772,7 @@ class _RcListItemState extends State<RcListItem> {
                 setState(() {
                   var typeScan = 'invId';
                   getRcItem();
-                  scanBarcodeNormal(typeScan);
+                  // scanBarcodeNormal(typeScan);
                 });
               });
             } else {
@@ -788,7 +789,7 @@ class _RcListItemState extends State<RcListItem> {
               setState(() {
                 var typeScan = 'invId';
                 getRcItem();
-                scanBarcodeNormal(typeScan);
+                // scanBarcodeNormal(typeScan);
               });
             });
           }
@@ -818,7 +819,7 @@ class _RcListItemState extends State<RcListItem> {
       ErrorDialog.showErrorDialog(context, "No SKU match!");
     } else {
       prefs.setString('rcTracking', itemAdjust['tracking_type']);
-      prefs.setString('rcItem', itemAdjust['item_inventory_id']);
+      prefs.setString('rcItem', itemAdjust['item_name']);
 
       if (itemAdjust['tracking_type'] == '2') {
         print('inventory id: ${itemAdjust['item_inventory_id']}');
@@ -854,7 +855,7 @@ class _RcListItemState extends State<RcListItem> {
 
       if (itemAdjust != null) {
         prefs.setString('rcTracking', itemAdjust['tracking_type']);
-        prefs.setString('rcItem', itemAdjust['item_inventory_id']);
+        prefs.setString('rcItem', itemAdjust['item_name']);
 
         if (itemAdjust['tracking_type'] == '2') {
           print('inventory id: ${itemAdjust['item_inventory_id']}');

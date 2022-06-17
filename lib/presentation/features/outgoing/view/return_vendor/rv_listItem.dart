@@ -701,7 +701,7 @@ class _RvListItemState extends State<RvListItem> {
                 setState(() {
                   var typeScan = 'invId';
                   getRvItem();
-                  scanBarcodeNormal(typeScan);
+                  // scanBarcodeNormal(typeScan);
                 });
               });
             } else {
@@ -718,7 +718,7 @@ class _RvListItemState extends State<RvListItem> {
               setState(() {
                 var typeScan = 'invId';
                 getRvItem();
-                scanBarcodeNormal(typeScan);
+                // scanBarcodeNormal(typeScan);
               });
             });
           }
@@ -733,16 +733,16 @@ class _RvListItemState extends State<RvListItem> {
   Future<void> searchSku(String skuScan) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var itemAdjust = invMasterList
-        .firstWhereOrNull((element) => element.sku == skuScan);
+    var itemAdjust = inventoryList
+        .firstWhereOrNull((element) => element['item_name'] == skuScan);
 
     if (itemAdjust == null) {
       ErrorDialog.showErrorDialog(context, "No SKU match!");
     } else {
-      prefs.setString('rvTracking', itemAdjust.type);
-      prefs.setString('rvItem', itemAdjust.sku);
+      prefs.setString('rvTracking', itemAdjust['tracking_type']);
+      prefs.setString('rvItem', itemAdjust['item_name']);
 
-      if (itemAdjust.type == '2') {
+      if (itemAdjust['tracking_type'] == '2') {
         scanItemSerial();
       } else {
         //prefs.setString('itemQty', itemAdjust['item_quantity']);
