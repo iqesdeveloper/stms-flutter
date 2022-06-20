@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:search_choices/search_choices.dart';
 
@@ -20,6 +21,7 @@ import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/data/local_db/master/master_location_db.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
 import 'package:stms/presentation/widgets/independent/card_text.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/serial_dialog.dart';
@@ -80,6 +82,9 @@ class _SrItemListViewState extends State<SrItemListView> {
     getEnterQty();
     formatDate = DateFormat('yyyy-MM-dd').format(date);
     _future = getSaleReturnItem.getSrItem();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   Future<void> getItemSr() async {
@@ -873,7 +878,7 @@ class _SrItemListViewState extends State<SrItemListView> {
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -889,7 +894,7 @@ class _SrItemListViewState extends State<SrItemListView> {
               DBSaleReturnNonItem()
                   .update(selectedItem, newQty.toString())
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -932,7 +937,7 @@ class _SrItemListViewState extends State<SrItemListView> {
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -948,7 +953,7 @@ class _SrItemListViewState extends State<SrItemListView> {
               DBSaleReturnNonItem()
                   .update(selectedItem, newQty.toString())
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);

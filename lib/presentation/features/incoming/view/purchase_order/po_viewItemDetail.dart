@@ -38,6 +38,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
 
   List<InventoryHive> inventoryList = [];
   List poItemList = [];
+  List getAllPoNonItem = [];
   // String _scanBarcode = 'Unknown';
   var selectedInvtry, selectedVendorItem, selectedItemSequence,tracking;
   final format = DateFormat("yyyy-MM-dd");
@@ -66,7 +67,8 @@ class _PoItemDetailsState extends State<PoItemDetails> {
     selectedInvtry = prefs.getString('selectedIvID');
     selectedVendorItem = prefs.getString('vendorItemNo');
     itemSNController.text = prefs.getString('itemBarcode')!;
-    itemSelectedInventory.text = selectedVendorItem;
+    selectedItemSequence = prefs.getString('line_seq_no');
+    itemSelectedInventory.text = selectedInvtry;
     tracking = prefs.getString('poTracking');
     print("selectedInvtry : $selectedVendorItem");
   }
@@ -81,6 +83,18 @@ class _PoItemDetailsState extends State<PoItemDetails> {
           inventoryList = value;
         });
       }
+    });
+    DBPoNonItem().getAllPoNonItem().then((value){
+      setState(() {
+        if (value == null) {
+          ErrorDialog.showErrorDialog(
+              context, 'Please download inventory file at master page first');
+        } else {
+          setState(() {
+            getAllPoNonItem = value;
+          });
+        }
+      });
     });
   }
 
@@ -216,26 +230,52 @@ class _PoItemDetailsState extends State<PoItemDetails> {
     } else {
       if (tracking == "2") {
 
-        // follow the item listed in api -> models -> po
-        // any addition or subtraction occur at the models is adjusted here
-        DBPoItem()
-            .createPoItem(PoItem(
-          itemInvId: selectedInvtry,
-          vendorItemNo: selectedVendorItem,
-          itemSerialNo: itemSNController.text,
-        ))
-            .then((value) {
-          // SuccessDialog.showSuccessDialog(context, 'Item Save');
-          showCustomSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.poItemList));
-        });
+        // Compare item name from DB
+        var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+        element.sku == selectedInvtry);
+
+        if(itemAdjust != null){
+          setState(() {
+            // follow the item listed in api -> models -> po
+            // any addition or subtraction occur at the models is adjusted here
+            DBPoItem()
+                .createPoItem(PoItem(
+              itemInvId: itemAdjust.id,
+              vendorItemNo: selectedVendorItem,
+              itemSerialNo: itemSNController.text,
+            ))
+                .then((value) {
+              // SuccessDialog.showSuccessDialog(context, 'Item Save');
+              showCustomSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.poItemList));
+            });
+          });
+        }else {
+          // if no item with this item inventory id
+          DBPoItem()
+              .createPoItem(PoItem(
+            itemInvId: itemAdjust!.id,
+            vendorItemNo: selectedVendorItem,
+            itemSerialNo: itemSNController.text,
+          ))
+              .then((value) {
+            // SuccessDialog.showSuccessDialog(context, 'Item Save');
+            showCustomSuccess('Item Save');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.poItemList));
+          });
+        }
+
       } else {
-        DBPoNonItem().getPoNonItem(selectedInvtry, selectedItemSequence).then((value) {
-          if (value == null) {
+        if(getAllPoNonItem.isEmpty) {
+          var itemAdjust = getAllPoNonItem.firstWhereOrNull((element) =>
+          element['item_inventory_id'] == selectedInvtry);
+
+          if(itemAdjust == null ){
             DBPoNonItem()
                 .createPoNonItem(PoNonItem(
-              itemInvId: selectedInvtry,
+              itemInvId: itemAdjust['item_inventory_id'],
               vendorItemName: selectedVendorItem,
               itemSequence: selectedItemSequence,
               nonTracking: itemQtyController.text,
@@ -247,15 +287,53 @@ class _PoItemDetailsState extends State<PoItemDetails> {
                   context, ModalRoute.withName(StmsRoutes.poItemList));
             });
           } else {
+            DBPoNonItem().getPoNonItem(itemAdjust['item_inventory_id'], selectedItemSequence).then((value) {
+              // Compare item name from DB
+              // getAllPoNonItem = value;
+              print('PRINT VALUE: $value');
+              // itemSequence = getAllPoNonItem.firstWhereOrNull((element) =>
+              // element['item_inventory_id'] == selectedInvtry);
+              if (value == null) {
+                setState(() {
+                  DBPoNonItem()
+                      .createPoNonItem(PoNonItem(
+                    itemInvId: itemAdjust['item_inventory_id'],
+                    vendorItemName: selectedVendorItem,
+                    itemSequence: selectedItemSequence,
+                    nonTracking: itemQtyController.text,
+                  ))
+                      .then((value) {
+                    // SuccessDialog.showSuccessDialog(context, 'Item Save');
+                    showCustomSuccess('Item Save');
+                    Navigator.popUntil(
+                        context, ModalRoute.withName(StmsRoutes.poItemList));
+                  });
+                });
+              } else {
+                DBPoNonItem()
+                    .update(itemAdjust['item_inventory_id'], itemQtyController.text, selectedItemSequence)
+                    .then((value) {
+                  showCustomSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.poItemList));
+                });
+              }
+            });
+          }
+        } else {
+          var itemAdjust = getAllPoNonItem.firstWhereOrNull((element) =>
+          element['item_inventory_id'] == selectedInvtry);
+
+          if(itemAdjust != null){
             DBPoNonItem()
-                .update(selectedInvtry, itemQtyController.text)
+                .update(itemAdjust['item_inventory_id'], itemQtyController.text, selectedItemSequence)
                 .then((value) {
               showCustomSuccess('Item Save');
               Navigator.popUntil(
                   context, ModalRoute.withName(StmsRoutes.poItemList));
             });
           }
-        });
+        }
       }
     }
   }

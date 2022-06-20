@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
 import 'package:stms/config/routes.dart';
@@ -45,6 +46,9 @@ class _AiCreateItemState extends State<AiCreateItem> {
 
     getData();
     getCommon();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   getData() async {
@@ -312,7 +316,7 @@ class _AiCreateItemState extends State<AiCreateItem> {
                     ),
                   )
                       .then((value) {
-                    showSuccess('Item Save');
+                    showCustomSuccess('Item Save');
                     Navigator.popUntil(
                         context, ModalRoute.withName(StmsRoutes.aiItemList));
                   });
@@ -331,7 +335,7 @@ class _AiCreateItemState extends State<AiCreateItem> {
                 ),
               )
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 Navigator.popUntil(
                     context, ModalRoute.withName(StmsRoutes.aiItemList));
               });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
 import 'package:stms/config/routes.dart';
@@ -13,6 +14,7 @@ import 'package:stms/data/local_db/outgoing/rric/rric_non_scanItem.dart';
 import 'package:stms/data/local_db/outgoing/rric/rric_scanItem.dart';
 import 'package:stms/domain/validator.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/input_field.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
@@ -46,6 +48,9 @@ class _RcCreateItemState extends State<RcCreateItem> {
 
     getData();
     getCommon();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   getData() async {
@@ -256,7 +261,7 @@ class _RcCreateItemState extends State<RcCreateItem> {
                     ),
                   )
                       .then((value) {
-                    showSuccess('Item Save');
+                    showCustomSuccess('Item Save');
                     Navigator.popUntil(
                         context, ModalRoute.withName(StmsRoutes.rcItemList));
                   });
@@ -275,7 +280,7 @@ class _RcCreateItemState extends State<RcCreateItem> {
                 ),
               )
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 Navigator.popUntil(
                     context, ModalRoute.withName(StmsRoutes.rcItemList));
               });
@@ -320,7 +325,7 @@ class _RcCreateItemState extends State<RcCreateItem> {
                     ),
                   )
                       .then((value) {
-                    showSuccess('Item Save');
+                    showCustomSuccess('Item Save');
                     Navigator.popUntil(
                         context, ModalRoute.withName(StmsRoutes.rcItemList));
                   });
@@ -339,7 +344,7 @@ class _RcCreateItemState extends State<RcCreateItem> {
                 ),
               )
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 Navigator.popUntil(
                     context, ModalRoute.withName(StmsRoutes.rcItemList));
               });

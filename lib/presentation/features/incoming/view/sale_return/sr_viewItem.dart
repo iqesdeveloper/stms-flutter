@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/incoming/sr/sr_model.dart';
@@ -12,6 +13,7 @@ import 'package:stms/data/local_db/incoming/sr/sr_scanItem_db.dart';
 import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/domain/validator.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/input_field.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
@@ -53,6 +55,9 @@ class _SrItemDetailsState extends State<SrItemDetails> {
 
     getCommon();
     getItemSr();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   getItemSr() async {
@@ -223,7 +228,7 @@ class _SrItemDetailsState extends State<SrItemDetails> {
         ))
             .then((value) {
           // SuccessDialog.showSuccessDialog(context, 'Item Save');
-          showSuccess('Item Save');
+          showCustomSuccess('Item Save');
           Navigator.popUntil(
               context, ModalRoute.withName(StmsRoutes.srItemList));
         });
@@ -237,7 +242,7 @@ class _SrItemDetailsState extends State<SrItemDetails> {
             ))
                 .then((value) {
               // SuccessDialog.showSuccessDialog(context, 'Item Save');
-              showSuccess('Item Save');
+              showCustomSuccess('Item Save');
               Navigator.popUntil(
                   context, ModalRoute.withName(StmsRoutes.srItemList));
             });
@@ -245,7 +250,7 @@ class _SrItemDetailsState extends State<SrItemDetails> {
             DBSaleReturnNonItem()
                 .update(selectedInvtry, itemQtyController.text)
                 .then((value) {
-              showSuccess('Item Save');
+              showCustomSuccess('Item Save');
               Navigator.popUntil(
                   context, ModalRoute.withName(StmsRoutes.srItemList));
             });

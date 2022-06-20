@@ -26,7 +26,7 @@ class ViewDialog extends StatelessWidget {
     return Container(
       color: Colors.white,
       alignment: Alignment.center,
-      height: height * 0.6, // * 0.25,
+      height: height * 0.01, // * 0.25,
       child: Column(
         // mainAxisSize: MainAxisSize.min,
         children: <Widget>[

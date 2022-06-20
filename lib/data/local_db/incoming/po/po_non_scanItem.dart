@@ -96,11 +96,11 @@ class DBPoNonItem {
     return null;
   }
 
-  Future<dynamic> update(String id, String qty) async {
+  Future<dynamic> update(String id, String qty, String lineSeqNo) async {
     final db = await database;
     var results = await db.rawQuery(
-        'UPDATE poNonItem SET non_tracking_qty = ? WHERE item_inventory_id = ?',
-        [qty, id]);
+        'UPDATE poNonItem SET non_tracking_qty = ? WHERE item_inventory_id = ?  AND line_seq_no = ?',
+        [qty, id, lineSeqNo]);
     return results;
   }
 }

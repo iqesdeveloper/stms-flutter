@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:search_choices/search_choices.dart';
 
 import 'package:stms/config/routes.dart';
@@ -19,6 +20,7 @@ import 'package:stms/data/local_db/outgoing/pr/pr_non_scanItem.dart';
 import 'package:stms/data/local_db/outgoing/pr/pr_scanItem.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
 import 'package:stms/presentation/widgets/independent/card_text.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/serial_dialog.dart';
@@ -76,6 +78,9 @@ class _PrItemListViewState extends State<PrItemListView> {
     // call the enterQty whenever at start of this page
     getEnterQty();
     _future = getPurchaseReturnItem.getPrItem();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   Future<void> getItemPr() async {
@@ -864,7 +869,7 @@ class _PrItemListViewState extends State<PrItemListView> {
                 nonTracking: '1',
               ))
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -881,7 +886,7 @@ class _PrItemListViewState extends State<PrItemListView> {
               DBPurchaseReturnNonItem()
                   .update(selectedItem, newQty.toString())
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -923,7 +928,7 @@ class _PrItemListViewState extends State<PrItemListView> {
                 nonTracking: '1',
               ))
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -940,7 +945,7 @@ class _PrItemListViewState extends State<PrItemListView> {
               DBPurchaseReturnNonItem()
                   .update(selectedItem, newQty.toString())
                   .then((value) {
-                showSuccess('Item Save');
+                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);

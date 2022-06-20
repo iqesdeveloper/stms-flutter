@@ -425,9 +425,10 @@ class _AiListItemState extends State<AiListItem> {
     if (type == 'serial') {
       DBAdjustInItem().deleteAiItem(itemInvId, itemSerialNo).then((value) {
         if (value == 1) {
+          if (!mounted) return;
           setState(() {
             getAdjustItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -436,9 +437,10 @@ class _AiListItemState extends State<AiListItem> {
     } else {
       DBAdjustInNonItem().deleteAiNonItem(itemInvId).then((value) {
         if (value == 1) {
+          if (!mounted) return;
           setState(() {
             getAdjustItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');

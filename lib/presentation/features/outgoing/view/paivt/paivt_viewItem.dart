@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
@@ -12,6 +13,7 @@ import 'package:stms/data/local_db/outgoing/paivt/paivt_non_scanItem.dart';
 import 'package:stms/data/local_db/outgoing/paivt/paivt_scanItem.dart';
 import 'package:stms/domain/validator.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/input_field.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
@@ -53,6 +55,9 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
 
     getCommon();
     getItemPaivt();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   getItemPaivt() async {
@@ -202,7 +207,7 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
           itemSerialNo: itemSNController.text,
         ))
             .then((value) {
-          showSuccess('Item Save');
+          showCustomSuccess('Item Save');
           Navigator.popUntil(
               context, ModalRoute.withName(StmsRoutes.paivtItemList));
         });
@@ -215,7 +220,7 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
               nonTracking: itemQtyController.text,
             ))
                 .then((value) {
-              showSuccess('Item Save');
+              showCustomSuccess('Item Save');
               Navigator.popUntil(
                   context, ModalRoute.withName(StmsRoutes.paivtItemList));
             });
@@ -223,7 +228,7 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
             DBPaivtNonItem()
                 .update(selectedInvtry, itemQtyController.text)
                 .then((value) {
-              showSuccess('Item Save');
+              showCustomSuccess('Item Save');
               Navigator.popUntil(
                   context, ModalRoute.withName(StmsRoutes.paivtItemList));
             });
