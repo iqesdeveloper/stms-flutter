@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/incoming/paiv/paiv_model.dart';
@@ -37,6 +38,8 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
 
   List<InventoryHive> inventoryList = [];
   List paivItemList = [];
+  List getAllPaivNonItems = [];
+  List getAllPaivItems = [];
   // String _scanBarcode = 'Unknown';
   var selectedInvtry, tracking;
   final format = DateFormat("yyyy-MM-dd");
@@ -44,10 +47,12 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
   final TextEditingController itemQtyController = TextEditingController();
   final TextEditingController itemUomController = TextEditingController();
   final TextEditingController itemUomQtyController = TextEditingController();
+  final TextEditingController itemSelectedInventory = TextEditingController();
   final GlobalKey<StmsInputFieldState> itemSNKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemQtyKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemUomKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemUomQtyKey = GlobalKey();
+  final GlobalKey<StmsInputFieldState> itemSelectedInvKey = GlobalKey();
 
   @override
   void initState() {
@@ -66,6 +71,7 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
     // await Future.delayed(const Duration(seconds: 1));
     selectedInvtry = prefs.getString('selectedPaIvID');
     itemSNController.text = prefs.getString('itemBarcode')!;
+    itemSelectedInventory.text = selectedInvtry;
     tracking = prefs.getString('paivTracking');
   }
 
@@ -82,16 +88,6 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
         });
       }
     });
-    // DBMasterInventory().getAllMasterInv().then((value) {
-    //   if (value == null) {
-    //     ErrorDialog.showErrorDialog(
-    //         context, 'Please download inventory file at master page first');
-    //   } else {
-    //     setState(() {
-    //       inventoryList = value;
-    //     });
-    //   }
-    // });
   }
 
   @override
@@ -124,91 +120,58 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
           // }
           return StmsScaffold(
             title: '',
-            body: SingleChildScrollView(
-              child: Container(
-                height: height * 0.9,
-                color: Colors.white,
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    FormField<String>(
-                      builder: (FormFieldState<String> state) {
-                        return InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: 'Item Inventory ID',
-                            errorText: state.hasError ? state.errorText : null,
-                          ),
-                          isEmpty: false,
-                          child: new DropdownButtonHideUnderline(
-                            child: ButtonTheme(
-                              child: DropdownButton<String>(
-                                isDense: true,
-                                iconSize: 28,
-                                iconEnabledColor: Colors.amber,
-                                items: inventoryList.map((item) {
-                                  return new DropdownMenuItem(
-                                    child: Container(
-                                      width: width * 0.8,
-                                      child: Text(
-                                        item.sku,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    value: item.id.toString(),
-                                  );
-                                }).toList(),
-                                isExpanded: false,
-                                value:
-                                    selectedInvtry, // == "" ? "" : selectedTxn,
-                                onChanged: null,
-                                // (String? newValue) {
-                                //   setState(() {
-                                //     selectedLoc = newValue!;
-                                //     // print('transfer type: $transferType');
-                                //   });
-                                // },
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+            body: Container(
+              height: height * 0.9,
+              color: Colors.white,
+              padding: EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: itemSelectedInventory,
+                    key: itemSelectedInvKey,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Item Inventory ID',
                     ),
-                    tracking == "2"
-                        ? StmsInputField(
-                            key: itemSNKey,
-                            controller: itemSNController,
-                            hint: 'Item Serial No',
-                            validator: Validator.valueExists,
-                          )
-                        : StmsInputField(
-                            key: itemQtyKey,
-                            controller: itemQtyController,
-                            hint: 'Quantity',
-                            keyboard: TextInputType.number,
-                            validator: Validator.valueExists,
-                          ),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                          child: ButtonTheme(
-                            minWidth: 200,
-                            height: 50,
-                            child: StmsStyleButton(
-                              title: 'SAVE',
-                              backgroundColor: Colors.amber,
-                              textColor: Colors.black,
-                              onPressed: () {
-                                saveData();
-                              },
-                            ),
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                  tracking == "2"
+                      ? StmsInputField(
+                    key: itemSNKey,
+                    controller: itemSNController,
+                    hint: 'Item Serial No',
+                    validator: Validator.valueExists,
+                  )
+                      : StmsInputField(
+                    key: itemQtyKey,
+                    controller: itemQtyController,
+                    hint: 'Quantity',
+                    keyboard: TextInputType.number,
+                    validator: Validator.valueExists,
+                  ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                        child: ButtonTheme(
+                          minWidth: 200,
+                          height: 50,
+                          child: StmsStyleButton(
+                            title: 'SAVE',
+                            backgroundColor: Colors.amber,
+                            textColor: Colors.black,
+                            onPressed: () {
+                              saveData();
+                            },
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );
@@ -226,59 +189,52 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (tracking == "2") {
-        DBPaivItem()
-            .createPaivItem(PaivItem(
-          itemInvId: selectedInvtry,
-          itemSerialNo: itemSNController.text,
-        ))
-            .then((value) {
-          // SuccessDialog.showSuccessDialog(context, 'Item Save');
-          showCustomSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.paivItemList));
-        });
-      } else {
-        DBPaivNonItem().getPaivNonItem(selectedInvtry).then((value) {
-          print('value non $value');
-          if (value == null) {
-            DBPaivNonItem()
-                .createPaivNonItem(PaivNonItem(
-              itemInvId: selectedInvtry,
-              nonTracking: itemQtyController.text,
-            ))
-                .then((value) {
-              // SuccessDialog.showSuccessDialog(context, 'Item Save');
-              showCustomSuccess('Item Save');
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.paivItemList));
-            });
-          } else {
-            DBPaivNonItem()
-                .update(selectedInvtry, itemQtyController.text)
-                .then((value) {
-              showCustomSuccess('Item Save');
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.paivItemList));
-            });
-          }
-        });
-        // DBPaivNonItem().getAllPaivNonItem().then((value) {
-        //   if (value == null) {
-        //     DBPaivNonItem()
-        //         .createPaivNonItem(PaivNonItem(
-        //       itemInvId: selectedInvtry,
-        //       nonTracking: itemQtyController.text,
-        //     ))
-        //         .then((value) {
-        //       // SuccessDialog.showSuccessDialog(context, 'Item Save');
-        //       showSuccess('Item Save');
-        //       Navigator.popUntil(
-        //           context, ModalRoute.withName(StmsRoutes.paivItemList));
-        //     });
-        //   } else {
 
-        //   }
-        // });
+        var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+        element.sku == selectedInvtry);
+
+        if(itemAdjust == null){
+          DBPaivItem()
+              .createPaivItem(PaivItem(
+            itemInvId: itemAdjust!.id,
+            itemSerialNo: itemSNController.text,
+          ))
+              .then((value) {
+            // SuccessDialog.showSuccessDialog(context, 'Item Save');
+            showCustomSuccess('Item Save');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.paivItemList));
+          });
+        } else {
+          ErrorDialog.showErrorDialog(
+              context, 'Similar Serial Number present');
+        }
+      } else {
+        var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+        element.sku == selectedInvtry);
+
+
+        if(itemAdjust == null){
+          DBPaivNonItem()
+              .createPaivNonItem(PaivNonItem(
+            itemInvId: itemAdjust!.id,
+            nonTracking: itemQtyController.text,
+          ))
+              .then((value) {
+            // SuccessDialog.showSuccessDialog(context, 'Item Save');
+            showCustomSuccess('Item Save');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.paivItemList));
+          });
+        } else {
+          DBPaivNonItem()
+              .update(itemAdjust.id, itemQtyController.text)
+              .then((value) {
+            showCustomSuccess('Item Save');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.paivItemList));
+          });
+        }
       }
     }
   }

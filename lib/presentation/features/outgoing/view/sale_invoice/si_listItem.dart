@@ -343,7 +343,7 @@ class _SiItemListViewState extends State<SiItemListView> {
                                               )
                                                   : Text(
                                                 // This one is to check if AllPoNonItem got value
-                                                // ALLSINONITEM section
+                                                // ALLPAIVNONITEM section
                                                 // Need to check if there is a value after scan.
                                                 // Comparing both the DB and master file to check if there is a value before and after scan
                                                 allSalesInvoiceNonItem.isNotEmpty ? allSalesInvoiceNonItem.firstWhereOrNull((element) =>
@@ -388,7 +388,7 @@ class _SiItemListViewState extends State<SiItemListView> {
 
                                                         selectedItem = snapshot
                                                                 .data[index][
-                                                            'item_inventory_id'];
+                                                            'item_name'];
                                                         prefs.setString(
                                                             'selectedSiID',
                                                             selectedItem);
@@ -458,7 +458,7 @@ class _SiItemListViewState extends State<SiItemListView> {
                                                                       snapshot.data[
                                                                               index]
                                                                           [
-                                                                          'item_inventory_id'];
+                                                                          'item_name'];
                                                                   prefs.setString(
                                                                       'selectedSiID',
                                                                       selectedItem);
@@ -514,11 +514,8 @@ class _SiItemListViewState extends State<SiItemListView> {
                                                                           0.05),
                                                                 ),
                                                                 onPressed: () {
-                                                                  viewBarcode(snapshot
-                                                                              .data[
-                                                                          index]
-                                                                      [
-                                                                      'item_inventory_id']);
+                                                                  viewBarcode(
+                                                                      snapshot.data[index]['item_inventory_id']);
                                                                 },
                                                                 child: Text(
                                                                   'VIEW',
@@ -570,7 +567,7 @@ class _SiItemListViewState extends State<SiItemListView> {
                                                                   snapshot.data[
                                                                           index]
                                                                       [
-                                                                      'item_inventory_id'];
+                                                                      'item_name'];
                                                               prefs.setString(
                                                                   'selectedSiID',
                                                                   selectedItem);
@@ -862,13 +859,14 @@ class _SiItemListViewState extends State<SiItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
-          DBSaleInvoiceNonItem().getSiNonItem(selectedItem).then((value) {
+          DBSaleInvoiceNonItem().getSiNonItem(itemSku.id).then((value) {
             if (value == null) {
               DBSaleInvoiceNonItem()
                   .createSiNonItem(SaleInvoiceNon(
-                itemInvId: selectedItem,
+                itemInvId: itemSku.id,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -881,13 +879,13 @@ class _SiItemListViewState extends State<SiItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                  (element) => element['item_inventory_id'] == selectedItem);
+                  (element) => element['item_inventory_id'] == itemSku.id);
 
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
 
               DBSaleInvoiceNonItem()
-                  .update(selectedItem, newQty.toString())
+                  .update(itemSku.id, newQty.toString())
                   .then((value) {
                 showCustomSuccess('Item Save');
                 // call and update the enterQty function
@@ -921,13 +919,14 @@ class _SiItemListViewState extends State<SiItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
-          DBSaleInvoiceNonItem().getSiNonItem(selectedItem).then((value) {
+          DBSaleInvoiceNonItem().getSiNonItem(itemUpc.id).then((value) {
             if (value == null) {
               DBSaleInvoiceNonItem()
                   .createSiNonItem(SaleInvoiceNon(
-                itemInvId: selectedItem,
+                itemInvId: itemUpc.id,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -940,13 +939,13 @@ class _SiItemListViewState extends State<SiItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                  (element) => element['item_inventory_id'] == selectedItem);
+                  (element) => element['item_inventory_id'] == itemUpc.id);
 
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
 
               DBSaleInvoiceNonItem()
-                  .update(selectedItem, newQty.toString())
+                  .update(itemUpc.id, newQty.toString())
                   .then((value) {
                 showCustomSuccess('Item Save');
                 // call and update the enterQty function

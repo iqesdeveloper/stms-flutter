@@ -38,7 +38,8 @@ class _PoItemDetailsState extends State<PoItemDetails> {
 
   List<InventoryHive> inventoryList = [];
   List poItemList = [];
-  List getAllPoNonItem = [];
+  List getAllPoNonItems = [];
+  List getAllPoItems = [];
   // String _scanBarcode = 'Unknown';
   var selectedInvtry, selectedVendorItem, selectedItemSequence,tracking;
   final format = DateFormat("yyyy-MM-dd");
@@ -70,7 +71,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
     selectedItemSequence = prefs.getString('line_seq_no');
     itemSelectedInventory.text = selectedInvtry;
     tracking = prefs.getString('poTracking');
-    print("selectedInvtry : $selectedVendorItem");
+    print("selectedInvtry : $selectedItemSequence");
   }
 
   getCommon() {
@@ -86,14 +87,12 @@ class _PoItemDetailsState extends State<PoItemDetails> {
     });
     DBPoNonItem().getAllPoNonItem().then((value){
       setState(() {
-        if (value == null) {
-          ErrorDialog.showErrorDialog(
-              context, 'Please download inventory file at master page first');
-        } else {
-          setState(() {
-            getAllPoNonItem = value;
-          });
-        }
+        getAllPoNonItems = value;
+      });
+    });
+    DBPoItem().getAllPoItem().then((value){
+      setState(() {
+        getAllPoItems = value;
       });
     });
   }
@@ -229,19 +228,22 @@ class _PoItemDetailsState extends State<PoItemDetails> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (tracking == "2") {
-
-        // Compare item name from DB
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>
         element.sku == selectedInvtry);
 
-        if(itemAdjust != null){
-          setState(() {
-            // follow the item listed in api -> models -> po
-            // any addition or subtraction occur at the models is adjusted here
+        var itemSequence = getAllPoItems.firstWhereOrNull((element) =>
+        element['line_seq_no'] == selectedItemSequence);
+
+        print('ITEM ADJUST: $itemAdjust');
+        print('ITEM SEQUENCE: $itemSequence');
+
+        if(itemAdjust == null){} else {
+          if(itemSequence == null){
             DBPoItem()
                 .createPoItem(PoItem(
               itemInvId: itemAdjust.id,
               vendorItemNo: selectedVendorItem,
+              itemSequence: selectedItemSequence,
               itemSerialNo: itemSNController.text,
             ))
                 .then((value) {
@@ -250,32 +252,29 @@ class _PoItemDetailsState extends State<PoItemDetails> {
               Navigator.popUntil(
                   context, ModalRoute.withName(StmsRoutes.poItemList));
             });
-          });
-        }else {
-          // if no item with this item inventory id
-          DBPoItem()
-              .createPoItem(PoItem(
-            itemInvId: itemAdjust!.id,
-            vendorItemNo: selectedVendorItem,
-            itemSerialNo: itemSNController.text,
-          ))
-              .then((value) {
-            // SuccessDialog.showSuccessDialog(context, 'Item Save');
-            showCustomSuccess('Item Save');
-            Navigator.popUntil(
-                context, ModalRoute.withName(StmsRoutes.poItemList));
-          });
+          } else {
+            if(itemSequence['line_seq_no'] == selectedItemSequence &&
+                itemSequence['item_serial_no'] != itemSNController.text){
+              ErrorDialog.showErrorDialog(
+                  context, 'Similar Serial Number present');
+            }
+          }
         }
-
       } else {
-        if(getAllPoNonItem.isEmpty) {
-          var itemAdjust = getAllPoNonItem.firstWhereOrNull((element) =>
-          element['item_inventory_id'] == selectedInvtry);
+        var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+        element.sku == selectedInvtry);
 
-          if(itemAdjust == null ){
+        var itemSequence = getAllPoNonItems.firstWhereOrNull((element) =>
+        element['line_seq_no'] == selectedItemSequence);
+        print('NON ITEM ADJUST: $itemAdjust');
+        print('NON ITEM SEQUENCE: $itemSequence');
+
+        if(itemAdjust == null){} else {
+          if(itemSequence == null){
+            print('ITEM SEQUENCE: $itemSequence');
             DBPoNonItem()
                 .createPoNonItem(PoNonItem(
-              itemInvId: itemAdjust['item_inventory_id'],
+              itemInvId: itemAdjust.id,
               vendorItemName: selectedVendorItem,
               itemSequence: selectedItemSequence,
               nonTracking: itemQtyController.text,
@@ -287,46 +286,8 @@ class _PoItemDetailsState extends State<PoItemDetails> {
                   context, ModalRoute.withName(StmsRoutes.poItemList));
             });
           } else {
-            DBPoNonItem().getPoNonItem(itemAdjust['item_inventory_id'], selectedItemSequence).then((value) {
-              // Compare item name from DB
-              // getAllPoNonItem = value;
-              print('PRINT VALUE: $value');
-              // itemSequence = getAllPoNonItem.firstWhereOrNull((element) =>
-              // element['item_inventory_id'] == selectedInvtry);
-              if (value == null) {
-                setState(() {
-                  DBPoNonItem()
-                      .createPoNonItem(PoNonItem(
-                    itemInvId: itemAdjust['item_inventory_id'],
-                    vendorItemName: selectedVendorItem,
-                    itemSequence: selectedItemSequence,
-                    nonTracking: itemQtyController.text,
-                  ))
-                      .then((value) {
-                    // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                    showCustomSuccess('Item Save');
-                    Navigator.popUntil(
-                        context, ModalRoute.withName(StmsRoutes.poItemList));
-                  });
-                });
-              } else {
-                DBPoNonItem()
-                    .update(itemAdjust['item_inventory_id'], itemQtyController.text, selectedItemSequence)
-                    .then((value) {
-                  showCustomSuccess('Item Save');
-                  Navigator.popUntil(
-                      context, ModalRoute.withName(StmsRoutes.poItemList));
-                });
-              }
-            });
-          }
-        } else {
-          var itemAdjust = getAllPoNonItem.firstWhereOrNull((element) =>
-          element['item_inventory_id'] == selectedInvtry);
-
-          if(itemAdjust != null){
             DBPoNonItem()
-                .update(itemAdjust['item_inventory_id'], itemQtyController.text, selectedItemSequence)
+                .update(itemAdjust.id, itemQtyController.text, selectedItemSequence)
                 .then((value) {
               showCustomSuccess('Item Save');
               Navigator.popUntil(

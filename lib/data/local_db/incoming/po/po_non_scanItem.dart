@@ -64,7 +64,8 @@ class DBPoNonItem {
   Future<dynamic> getPoNonItem(String id, String lineSeqNo) async {
     final db = await database;
     final res = await db
-        .rawQuery("SELECT * FROM poNonItem WHERE item_inventory_id = ? AND line_seq_no = ?", [id, lineSeqNo] );
+        .rawQuery("SELECT * FROM poNonItem WHERE item_inventory_id = ? "
+        "AND line_seq_no = ?", [id, lineSeqNo] );
 
     if (res.length > 0) {
       return res;
@@ -99,7 +100,8 @@ class DBPoNonItem {
   Future<dynamic> update(String id, String qty, String lineSeqNo) async {
     final db = await database;
     var results = await db.rawQuery(
-        'UPDATE poNonItem SET non_tracking_qty = ? WHERE item_inventory_id = ?  AND line_seq_no = ?',
+        'UPDATE poNonItem SET non_tracking_qty = ? WHERE item_inventory_id = ?  '
+            'AND line_seq_no = ?',
         [qty, id, lineSeqNo]);
     return results;
   }

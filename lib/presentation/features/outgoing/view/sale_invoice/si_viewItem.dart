@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
@@ -37,13 +38,17 @@ class _SiItemDetailsState extends State<SiItemDetails> {
 
   List<InventoryHive> inventoryList = [];
   List siItemList = [];
+  List getAllSiNonItems = [];
+  List getAllSiItems = [];
   // String _scanBarcode = 'Unknown';
   var selectedInvtry, tracking;
   final format = DateFormat("yyyy-MM-dd");
   final TextEditingController itemSNController = TextEditingController();
   final TextEditingController itemQtyController = TextEditingController();
+  final TextEditingController itemSelectedInventory = TextEditingController();
   final GlobalKey<StmsInputFieldState> itemSNKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemQtyKey = GlobalKey();
+  final GlobalKey<StmsInputFieldState> itemSelectedInvKey = GlobalKey();
 
   @override
   void initState() {
@@ -62,6 +67,7 @@ class _SiItemDetailsState extends State<SiItemDetails> {
 
     selectedInvtry = prefs.getString('selectedSiID');
     itemSNController.text = prefs.getString('itemBarcode')!;
+    itemSelectedInventory.text = selectedInvtry;
     tracking = prefs.getString('siTracking');
   }
 
@@ -105,39 +111,16 @@ class _SiItemDetailsState extends State<SiItemDetails> {
               padding: EdgeInsets.all(10),
               child: Column(
                 children: [
-                  FormField<String>(
-                    builder: (FormFieldState<String> state) {
-                      return InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: 'Item Inventory ID',
-                          errorText: state.hasError ? state.errorText : null,
-                        ),
-                        isEmpty: false,
-                        child: new DropdownButtonHideUnderline(
-                          child: new DropdownButton<String>(
-                            isDense: true,
-                            iconSize: 28,
-                            iconEnabledColor: Colors.amber,
-                            items: inventoryList.map((item) {
-                              return new DropdownMenuItem(
-                                child: Container(
-                                    width: width * 0.8, child: Text(item.sku)),
-                                value: item.id.toString(),
-                              );
-                            }).toList(),
-                            isExpanded: false,
-                            value: selectedInvtry, // == "" ? "" : selectedTxn,
-                            onChanged: null,
-                            // (String? newValue) {
-                            //   setState(() {
-                            //     selectedLoc = newValue!;
-                            //     // print('transfer type: $transferType');
-                            //   });
-                            // },
-                          ),
-                        ),
-                      );
-                    },
+                  TextField(
+                    controller: itemSelectedInventory,
+                    key: itemSelectedInvKey,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Item Inventory ID',
+                    ),
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
                   ),
                   tracking == "2"
                       ? StmsInputField(
@@ -191,39 +174,48 @@ class _SiItemDetailsState extends State<SiItemDetails> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (tracking == "2") {
-        DBSaleInvoiceItem()
-            .createSiItem(SaleInvoice(
-          itemInvId: selectedInvtry,
-          itemSerialNo: itemSNController.text,
-        ))
-            .then((value) {
-          showCustomSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.siItemList));
-        });
+        var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+        element.sku == selectedInvtry);
+
+        if(itemAdjust == null){
+          DBSaleInvoiceItem()
+              .createSiItem(SaleInvoice(
+            itemInvId: itemAdjust!.id,
+            itemSerialNo: itemSNController.text,
+          ))
+              .then((value) {
+            showCustomSuccess('Item Save');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.siItemList));
+          });
+        } else {
+          ErrorDialog.showErrorDialog(
+              context, 'Similar Serial Number present');
+        }
       } else {
-        DBSaleInvoiceNonItem().getSiNonItem(selectedInvtry).then((value) {
-          if (value == null) {
-            DBSaleInvoiceNonItem()
-                .createSiNonItem(SaleInvoiceNon(
-              itemInvId: selectedInvtry,
-              nonTracking: itemQtyController.text,
-            ))
-                .then((value) {
-              showCustomSuccess('Item Save');
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.siItemList));
-            });
-          } else {
-            DBSaleInvoiceNonItem()
-                .update(selectedInvtry, itemQtyController.text)
-                .then((value) {
-              showCustomSuccess('Item Save');
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.siItemList));
-            });
-          }
-        });
+        var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+        element.sku == selectedInvtry);
+
+        if(itemAdjust == null){
+          DBSaleInvoiceNonItem()
+              .createSiNonItem(SaleInvoiceNon(
+            itemInvId: itemAdjust!.id,
+            nonTracking: itemQtyController.text,
+          ))
+              .then((value) {
+            showCustomSuccess('Item Save');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.siItemList));
+          });
+        } else {
+          DBSaleInvoiceNonItem()
+              .update(itemAdjust.id, itemQtyController.text)
+              .then((value) {
+            showCustomSuccess('Item Save');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.siItemList));
+          });
+        }
       }
     }
   }

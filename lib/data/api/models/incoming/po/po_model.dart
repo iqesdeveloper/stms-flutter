@@ -12,23 +12,27 @@ class PoItem {
   // Add variable to represent the data store when scan
   String itemInvId;
   String vendorItemNo;
+  String itemSequence;
   String itemSerialNo;
 
   PoItem({
     required this.itemInvId,
     required this.vendorItemNo,
+    required this.itemSequence,
     required this.itemSerialNo,
   });
 
   factory PoItem.fromJson(Map<String, dynamic> json) => PoItem(
     itemInvId: json["item_inventory_id"],
     vendorItemNo: json["vendor_item_number"],
+    itemSequence: json["line_seq_no"],
     itemSerialNo: json["item_serial_no"],
   );
 
   Map<String, dynamic> toJson() => {
     "item_inventory_id": itemInvId,
     "vendor_item_number": vendorItemNo,
+    "line_seq_no": itemSequence,
     "item_serial_no": itemSerialNo,
   };
 }

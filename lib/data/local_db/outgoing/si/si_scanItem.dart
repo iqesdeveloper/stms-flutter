@@ -59,7 +59,7 @@ class DBSaleInvoiceItem {
   }
 
   // Get list of all barcode
-  Future<dynamic> getBarcodeSiItem(String invNo) async {
+  Future<dynamic> getBarcodeSiItem(invNo) async {
     final db = await database;
     final res = await db.rawQuery(
         "SELECT * FROM siItem WHERE item_serial_no != ? AND item_inventory_id == ?",

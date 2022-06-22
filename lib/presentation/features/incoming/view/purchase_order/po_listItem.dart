@@ -365,11 +365,14 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                   // to check if allPoItem got value or not
                                                   // If got value, check in the master file snapshot and compare the item_inventory_id
                                                   // Using the 'where' will go through the check process like a looping
+
                                                   allPoItem.isNotEmpty ? allPoItem.where((element)
-                                                  => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).isNotEmpty
+                                                  => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] ==
+                                                      snapshot.data[index]['line_seq_no']).isNotEmpty
                                                   // once check, if it is containing a value or the item_id in DB is same in the master file
                                                   // Get the length of the item_id
-                                                      ? '${allPoItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).length}'
+                                                      ? '${allPoItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] ==
+                                                      snapshot.data[index]['line_seq_no']).length}'
                                                   // If there is no match, then the result is display '0'
                                                       : '0'
                                                   // If the overall result is default as nothing, the display will also show '0'
@@ -385,22 +388,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                       snapshot.data[index]['line_seq_no']) != null
                                                       ? allPoNonItem.firstWhereOrNull((element) =>
                                                       element['item_inventory_id'] == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] ==
-                                                          snapshot.data[index]['line_seq_no'])['non_tracking_qty']
-                                          : '0' : '0',
-
-                                                  // // This one is to check if AllPoNonItem got value
-                                                  // // ALLPONONITEM section
-                                                  // // Need to check if there is a value after scan.
-                                                  // // Comparing both the DB and master file to check if there is a value before and after scan
-                                                  // allPoNonItem.isNotEmpty ? allPoNonItem.firstWhereOrNull((element) =>
-                                                  // element['item_inventory_id'] == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] == snapshot.data[index]['line_seq_no']) != null
-                                                  // // If got value, then display the tracking_qty
-                                                  //     ? "${allPoNonItem.firstWhereOrNull((element) => element['item_inventory_id']
-                                                  //     == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] == snapshot.data[index]['line_seq_no'])['non_tracking_qty']}"
-                                                  // // If no value after scan, which means it is not the same as in DB, then display '0'
-                                                  //     : "0"
-                                                  // // This is generally display '0' if no value is found
-                                                  //     : "0",
+                                                          snapshot.data[index]['line_seq_no'])['non_tracking_qty'] : '0' : '0',
                                                   style: TextStyle(
                                                       fontSize: 16.0
                                                   ),
@@ -550,7 +538,9 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                               selectedVendorItem = snapshot.data[index]['vendor_item_number'];
                                                               prefs.setString('VendorItemNo', selectedVendorItem);
 
-
+                                                              // Save selected item sequence no
+                                                              selectedItemSequence = snapshot.data[index]['line_seq_no'];
+                                                              prefs.setString('line_seq_no', selectedItemSequence);
 
                                                               prefs.setString(
                                                                   'poTracking',
@@ -593,9 +583,8 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                             onPressed:
                                                                 () {
                                                               viewBarcode(
-                                                                  snapshot.data[index]
-                                                                  [
-                                                                  'item_inventory_id']);
+                                                                  snapshot.data[index]['item_inventory_id'],
+                                                                  snapshot.data[index]['line_seq_no']);
                                                             },
                                                             child: Text(
                                                               'VIEW',
@@ -649,6 +638,11 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           // Save selected vendor item no
                                                           selectedVendorItem = snapshot.data[index]['vendor_item_number'];
                                                           prefs.setString('vendorItemNo', selectedVendorItem);
+
+                                                          // Save selected item sequence no
+                                                          selectedItemSequence = snapshot.data[index]['line_seq_no'];
+                                                          prefs.setString('line_seq_no', selectedItemSequence);
+
                                                           prefs.setString(
                                                               'poTracking',
                                                               snapshot.data[index]
@@ -1014,7 +1008,6 @@ class _PoItemListViewState extends State<PoItemListView> {
               var getItem = nonItem.firstWhereOrNull(
                       (element) => element['item_inventory_id'] == itemSku.id
                           && element['line_seq_no'] == selectedItemSequence);
-              print('HEEEEEEE: $selectedItemSequence');
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty'])+1;
               DBPoNonItem()
@@ -1052,15 +1045,17 @@ class _PoItemListViewState extends State<PoItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
+
         print("selecteditem :$selectedItem");
         if (nonTrackingType == 'scan') {
           // Any update on the DB, need to call the value here as it will go and search through the model and db
           // Removing and addition will need to change here
-          DBPoNonItem().getPoNonItem(selectedItem, selectedItemSequence).then((value) {
+          DBPoNonItem().getPoNonItem(itemUpc.id, selectedItemSequence).then((value) {
             if (value == null) {
               DBPoNonItem()
                   .createPoNonItem(PoNonItem(
-                itemInvId: selectedItem,
+                itemInvId: itemUpc.id,
                 itemSequence: selectedItemSequence,
                 vendorItemName: selectedVendorItem,
                 nonTracking: '1',
@@ -1076,12 +1071,13 @@ class _PoItemListViewState extends State<PoItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                      (element) => element['item_inventory_id'] == selectedItem);
+                      (element) => element['item_inventory_id'] == itemUpc.id
+                          && element['line_seq_no'] == selectedItemSequence);
 
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
               DBPoNonItem()
-                  .update(selectedItem, newQty.toString(), selectedItemSequence)
+                  .update(itemUpc.id, newQty.toString(), selectedItemSequence)
                   .then((value) {
                 getEnterQty();
                 showSuccess('Item Save');
@@ -1139,7 +1135,8 @@ class _PoItemListViewState extends State<PoItemListView> {
         poItemListing = value;
 
         var itemPO = poItemListing.firstWhereOrNull(
-                (element) => element['item_serial_no'] == barcodeScanRes);
+                (element) => element['item_serial_no'] == barcodeScanRes
+                    && element['line_seq_no'] == selectedItemSequence);
         if (null == itemPO) {
           prefs.setString("itemBarcode", barcodeScanRes);
 
@@ -1168,12 +1165,12 @@ class _PoItemListViewState extends State<PoItemListView> {
     });
   }
 
-  viewBarcode(String invNo) async {
-    DBPoItem().getBarcodePoItem(invNo).then((value) {
+  viewBarcode(String invNo, String lineSqeNo) async {
+    DBPoItem().getBarcodePoItem(invNo, lineSqeNo).then((value) {
       if (value == null) {
         ErrorDialog.showErrorDialog(context, 'No Serial No have been scan');
       } else {
-        var getList = DBPoItem().getBarcodePoItem(invNo);
+        var getList = DBPoItem().getBarcodePoItem(invNo, lineSqeNo);
         var getDb = 'DBPoItem';
         ViewDialog.showViewDialog(context, getList, getDb);
       }

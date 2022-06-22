@@ -23,6 +23,7 @@ class DBPoItem {
         await db.execute('CREATE TABLE poItem('
             'item_inventory_id TEXT,'
             'vendor_item_number TEXT,'
+            'line_seq_no TEXT,'
             'item_serial_no TEXT'
             ')');
       },
@@ -60,11 +61,12 @@ class DBPoItem {
   }
 
   // Get list of all barcode
-  Future<dynamic> getBarcodePoItem(invNo) async {
+  Future<dynamic> getBarcodePoItem(invNo, lineSeqNo) async {
     final db = await database;
     final res = await db.rawQuery(
-        "SELECT * FROM poItem WHERE item_serial_no != ? AND item_inventory_id == ?",
-        ["-", invNo]);
+        "SELECT * FROM poItem WHERE item_serial_no != ? AND item_inventory_id == ?  "
+            "AND line_seq_no = ?",
+        ["-", invNo, lineSeqNo]);
     if (res.length > 0) {
       return res;
     }

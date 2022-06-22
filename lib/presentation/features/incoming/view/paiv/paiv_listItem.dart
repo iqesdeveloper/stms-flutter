@@ -390,32 +390,16 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                             await SharedPreferences
                                                                 .getInstance();
 
-                                                        selectedItem = snapshot
-                                                                .data[index][
-                                                            'item_inventory_id'];
-                                                        prefs.setString(
-                                                            'selectedPaIvID',
-                                                            selectedItem);
+                                                        selectedItem = snapshot.data[index]['item_name'];
+                                                        prefs.setString('selectedPaIvID', selectedItem);
 
-                                                        prefs.setString(
-                                                            'paivTracking',
-                                                            snapshot.data[index]
-                                                                [
-                                                                'tracking_type']);
-                                                        var tracking = snapshot
-                                                                .data[index]
-                                                            ['tracking_type'];
+                                                        prefs.setString('paivTracking', snapshot.data[index]['tracking_type']);
+                                                        var tracking = snapshot.data[index]['tracking_type'];
                                                         var typeScan = 'scan';
-                                                        itemName =
-                                                            snapshot.data[index]
-                                                                ['item_name'];
-                                                        snapshot.data[index][
-                                                                    'tracking_type'] ==
-                                                                "2"
+                                                        itemName = snapshot.data[index]['item_name'];
+                                                        snapshot.data[index]['tracking_type'] == "2"
                                                             ? serialList =
-                                                                snapshot.data[
-                                                                        index][
-                                                                    'serial_list']
+                                                                snapshot.data[index]['serial_list']
                                                             : serialList = [];
 
                                                         snapshot.data[index][
@@ -458,43 +442,17 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                                     () async {
                                                                   SharedPreferences
                                                                       prefs =
-                                                                      await SharedPreferences
-                                                                          .getInstance();
+                                                                      await SharedPreferences.getInstance();
 
-                                                                  prefs.setString(
-                                                                      'paiv_serialList',
-                                                                      json.encode(
-                                                                          snapshot.data[index]
-                                                                              [
-                                                                              'serial_list']));
+                                                                  prefs.setString('paiv_serialList', json.encode(snapshot.data[index]['serial_list']));
 
-                                                                  selectedItem =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'item_inventory_id'];
-                                                                  prefs.setString(
-                                                                      'selectedPaIvID',
-                                                                      selectedItem);
+                                                                  selectedItem = snapshot.data[index]['item_name'];
+                                                                  prefs.setString('selectedPaIvID', selectedItem);
 
-                                                                  prefs.setString(
-                                                                      'paivTracking',
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'tracking_type']);
-                                                                  var tracking =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'tracking_type'];
-                                                                  var typeScan =
-                                                                      'manual';
-                                                                  itemName = snapshot
-                                                                              .data[
-                                                                          index]
-                                                                      [
-                                                                      'item_name'];
+                                                                  prefs.setString('paivTracking', snapshot.data[index]['tracking_type']);
+                                                                  var tracking = snapshot.data[index]['tracking_type'];
+                                                                  var typeScan = 'manual';
+                                                                  itemName = snapshot.data[index]['item_name'];
 
                                                                   checkLocation(
                                                                     tracking,
@@ -528,11 +486,8 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                                           0.05),
                                                                 ),
                                                                 onPressed: () {
-                                                                  viewBarcode(snapshot
-                                                                              .data[
-                                                                          index]
-                                                                      [
-                                                                      'item_inventory_id']);
+                                                                  viewBarcode(
+                                                                      snapshot.data[index]['item_inventory_id']);
                                                                 },
                                                                 child: Text(
                                                                   'VIEW',
@@ -565,39 +520,15 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                                 () async {
                                                               SharedPreferences
                                                                   prefs =
-                                                                  await SharedPreferences
-                                                                      .getInstance();
+                                                                  await SharedPreferences.getInstance();
 
-                                                              selectedItem =
-                                                                  snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'item_inventory_id'];
-                                                              prefs.setString(
-                                                                  'selectedPaIvID',
-                                                                  selectedItem);
+                                                              selectedItem = snapshot.data[index]['item_name'];
+                                                              prefs.setString('selectedPaIvID', selectedItem);
 
-                                                              prefs.setString(
-                                                                  'paivTracking',
-                                                                  snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'tracking_type']);
-                                                              var tracking =
-                                                                  snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'tracking_type'];
-                                                              var typeScan =
-                                                                  'manual';
-                                                              itemName = snapshot
-                                                                          .data[
-                                                                      index]
-                                                                  ['item_name'];
-                                                              snapshot.data[index]
-                                                                          [
-                                                                          'tracking_type'] ==
-                                                                      "2"
+                                                              prefs.setString('paivTracking', snapshot.data[index]['tracking_type']);
+                                                              var tracking = snapshot.data[index]['tracking_type'];
+                                                              var typeScan = 'manual';itemName = snapshot.data[index]['item_name'];
+                                                              snapshot.data[index]['tracking_type'] == "2"
                                                                   ? serialList =
                                                                       snapshot.data[
                                                                               index]
@@ -880,14 +811,15 @@ class _PaivItemListViewState extends State<PaivItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
-          DBPaivNonItem().getPaivNonItem(selectedItem).then((value) {
+          DBPaivNonItem().getPaivNonItem(itemSku.id).then((value) {
             print('value non $value');
             if (value == null) {
               DBPaivNonItem()
                   .createPaivNonItem(PaivNonItem(
-                itemInvId: selectedItem,
+                itemInvId: itemSku.id,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -901,13 +833,13 @@ class _PaivItemListViewState extends State<PaivItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                  (element) => element['item_inventory_id'] == selectedItem);
+                  (element) => element['item_inventory_id'] == itemSku.id);
 
               print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
               print('newQty: $newQty');
               DBPaivNonItem()
-                  .update(selectedItem, newQty.toString())
+                  .update(itemSku.id, newQty.toString())
                   .then((value) {
                 showCustomSuccess('Item Save');
                 // call and update the enterQty function
@@ -942,14 +874,15 @@ class _PaivItemListViewState extends State<PaivItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
-          DBPaivNonItem().getPaivNonItem(selectedItem).then((value) {
+          DBPaivNonItem().getPaivNonItem(itemSku.id).then((value) {
             print('value non $value');
             if (value == null) {
               DBPaivNonItem()
                   .createPaivNonItem(PaivNonItem(
-                itemInvId: selectedItem,
+                itemInvId: itemSku.id,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -963,13 +896,13 @@ class _PaivItemListViewState extends State<PaivItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                  (element) => element['item_inventory_id'] == selectedItem);
+                  (element) => element['item_inventory_id'] == itemSku.id);
 
               print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
               print('newQty: $newQty');
               DBPaivNonItem()
-                  .update(selectedItem, newQty.toString())
+                  .update(itemSku.id, newQty.toString())
                   .then((value) {
                 showCustomSuccess('Item Save');
                 // call and update the enterQty function

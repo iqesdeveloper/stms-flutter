@@ -111,145 +111,143 @@ class _AiCreateItemState extends State<AiCreateItem> {
             body: Container(
               color: Colors.white,
               padding: EdgeInsets.all(10),
-              child: SingleChildScrollView(
-                child: Container(
-                  height: height * 0.85,
-                  child: Column(
-                    children: [
-                      // FormField<String>(
-                      //   builder: (FormFieldState<String> state) {
-                      //     return InputDecorator(
-                      //       decoration: InputDecoration(
-                      //         labelText: 'Item Inventory ID',
-                      //         errorText:
-                      //             state.hasError ? state.errorText : null,
-                      //       ),
-                      //       isEmpty: false,
-                      //       child: new DropdownButtonHideUnderline(
-                      //         child: ButtonTheme(
-                      //           child: DropdownButton<String>(
-                      //             isDense: true,
-                      //             iconSize: 28,
-                      //             iconEnabledColor: Colors.amber,
-                      //             items: inventoryList.map((item) {
-                      //               return new DropdownMenuItem(
-                      //                 child: Container(
-                      //                   width: width * 0.8,
-                      //                   child: Text(
-                      //                     item.sku,
-                      //                     overflow: TextOverflow.ellipsis,
-                      //                   ),
-                      //                 ),
-                      //                 value: item.id.toString(),
-                      //               );
-                      //             }).toList(),
-                      //             isExpanded: false,
-                      //             value:
-                      //                 selectedInvtry, // == "" ? "" : selectedTxn,
-                      //             onChanged: null,
-                      //             // (String? newValue) {
-                      //             //   setState(() {
-                      //             //     selectedInvtry = newValue!;
-                      //             //     // print('transfer type: $transferType');
-                      //             //   });
-                      //             // },
-                      //           ),
-                      //         ),
-                      //       ),
-                      //     );
-                      //   },
-                      // ),
+              child: Container(
+                height: height * 0.85,
+                child: Column(
+                  children: [
+                    // FormField<String>(
+                    //   builder: (FormFieldState<String> state) {
+                    //     return InputDecorator(
+                    //       decoration: InputDecoration(
+                    //         labelText: 'Item Inventory ID',
+                    //         errorText:
+                    //             state.hasError ? state.errorText : null,
+                    //       ),
+                    //       isEmpty: false,
+                    //       child: new DropdownButtonHideUnderline(
+                    //         child: ButtonTheme(
+                    //           child: DropdownButton<String>(
+                    //             isDense: true,
+                    //             iconSize: 28,
+                    //             iconEnabledColor: Colors.amber,
+                    //             items: inventoryList.map((item) {
+                    //               return new DropdownMenuItem(
+                    //                 child: Container(
+                    //                   width: width * 0.8,
+                    //                   child: Text(
+                    //                     item.sku,
+                    //                     overflow: TextOverflow.ellipsis,
+                    //                   ),
+                    //                 ),
+                    //                 value: item.id.toString(),
+                    //               );
+                    //             }).toList(),
+                    //             isExpanded: false,
+                    //             value:
+                    //                 selectedInvtry, // == "" ? "" : selectedTxn,
+                    //             onChanged: null,
+                    //             // (String? newValue) {
+                    //             //   setState(() {
+                    //             //     selectedInvtry = newValue!;
+                    //             //     // print('transfer type: $transferType');
+                    //             //   });
+                    //             // },
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     );
+                    //   },
+                    // ),
 
-                      // Text field for Item Inventory ID
-                      TextField(
-                        controller: itemSelectedInventory,
-                        key: itemSelectedInvKey,
-                        readOnly: true,
-                        decoration: InputDecoration(
+                    // Text field for Item Inventory ID
+                    TextField(
+                      controller: itemSelectedInventory,
+                      key: itemSelectedInvKey,
+                      readOnly: true,
+                      decoration: InputDecoration(
                           labelText: 'Item Inventory ID',
                           labelStyle: TextStyle(
                             color: Colors.blue,
                           )
-                        ),
-                        style: TextStyle(
-                          color: Colors.grey,
-                        ),
                       ),
-                      // TextField for Quantity or Serial Number
-                      adjustInTrack == 'Serial Number'
-                          ? StmsInputField(
-                              controller: itemSnController,
-                              hint: 'Serial No',
-                              key: itemSnKey,
-                              validator: Validator.valueExists,
-                            )
-                          : StmsInputField(
-                              controller: itemNonQtyController,
-                              hint: 'Quantity',
-                              key: itemNonQtyKey,
-                              keyboard: TextInputType.number,
-                              validator: Validator.valueExists,
-                            ),
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    // TextField for Quantity or Serial Number
+                    adjustInTrack == 'Serial Number'
+                        ? StmsInputField(
+                      controller: itemSnController,
+                      hint: 'Serial No',
+                      key: itemSnKey,
+                      validator: Validator.valueExists,
+                    )
+                        : StmsInputField(
+                      controller: itemNonQtyController,
+                      hint: 'Quantity',
+                      key: itemNonQtyKey,
+                      keyboard: TextInputType.number,
+                      validator: Validator.valueExists,
+                    ),
 
-                      // Text field for reason code
-                      FormField<String>(
-                        builder: (FormFieldState<String> state) {
-                          return InputDecorator(
-                            decoration: InputDecoration(
-                              labelText: 'Reason Code',
-                              errorText:
-                                  state.hasError ? state.errorText : null,
-                            ),
-                            isEmpty: false,
-                            child: new DropdownButtonHideUnderline(
-                              child: ButtonTheme(
-                                child: DropdownButton<String>(
-                                  isDense: true,
-                                  iconSize: 28,
-                                  iconEnabledColor: Colors.amber,
-                                  items: reasonList.map((item) {
-                                    return new DropdownMenuItem(
-                                      child: new Text(
-                                        item['code'],
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      value: item['id'].toString(),
-                                    );
-                                  }).toList(),
-                                  isExpanded: false,
-                                  value:
-                                      selectedReason, // == "" ? "" : selectedTxn,
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      selectedReason = newValue!;
-                                      // print('transfer type: $transferType');
-                                    });
-                                  },
-                                ),
+                    // Text field for reason code
+                    FormField<String>(
+                      builder: (FormFieldState<String> state) {
+                        return InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'Reason Code',
+                            errorText:
+                            state.hasError ? state.errorText : null,
+                          ),
+                          isEmpty: false,
+                          child: new DropdownButtonHideUnderline(
+                            child: ButtonTheme(
+                              child: DropdownButton<String>(
+                                isDense: true,
+                                iconSize: 28,
+                                iconEnabledColor: Colors.amber,
+                                items: reasonList.map((item) {
+                                  return new DropdownMenuItem(
+                                    child: new Text(
+                                      item['code'],
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    value: item['id'].toString(),
+                                  );
+                                }).toList(),
+                                isExpanded: false,
+                                value:
+                                selectedReason, // == "" ? "" : selectedTxn,
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedReason = newValue!;
+                                    // print('transfer type: $transferType');
+                                  });
+                                },
                               ),
                             ),
-                          );
-                        },
-                      ),
-                      // Save Button
-                      Expanded(
-                        child: Container(
-                          alignment: Alignment.bottomCenter,
-                          child: StmsStyleButton(
-                            title: 'SAVE',
-                            backgroundColor: Colors.amber,
-                            textColor: Colors.black,
-                            onPressed: () {
-                              saveData();
-                              // Navigator.popUntil(context,
-                              //     ModalRoute.withName(StmsRoutes.aiItemList));
-                            },
                           ),
+                        );
+                      },
+                    ),
+                    // Save Button
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.bottomCenter,
+                        child: StmsStyleButton(
+                          title: 'SAVE',
+                          backgroundColor: Colors.amber,
+                          textColor: Colors.black,
+                          onPressed: () {
+                            saveData();
+                            // Navigator.popUntil(context,
+                            //     ModalRoute.withName(StmsRoutes.aiItemList));
+                          },
                         ),
                       ),
-                      SizedBox(height: 2),
-                    ],
-                  ),
+                    ),
+                    SizedBox(height: 2),
+                  ],
                 ),
               ),
             ),

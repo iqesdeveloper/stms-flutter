@@ -349,7 +349,7 @@ class _SrItemListViewState extends State<SrItemListView> {
                                               )
                                                   : Text(
                                                 // This one is to check if AllPoNonItem got value
-                                                // ALLSRNONITEM section
+                                                // ALLPAIVNONITEM section
                                                 // Need to check if there is a value after scan.
                                                 // Comparing both the DB and master file to check if there is a value before and after scan
                                                 allSalesReturnNonItem.isNotEmpty ? allSalesReturnNonItem.firstWhereOrNull((element) =>
@@ -392,12 +392,8 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                                     'serial_list']
                                                             : serialList = [];
 
-                                                        selectedItem = snapshot
-                                                                .data[index][
-                                                            'item_inventory_id'];
-                                                        prefs.setString(
-                                                            'selectedSrID',
-                                                            selectedItem);
+                                                        selectedItem = snapshot.data[index]['item_name'];
+                                                        prefs.setString('selectedSrID', selectedItem);
 
                                                         prefs.setString(
                                                             'srTracking',
@@ -460,14 +456,8 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                                               [
                                                                               'serial_list']));
 
-                                                                  selectedItem =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'item_inventory_id'];
-                                                                  prefs.setString(
-                                                                      'selectedSrID',
-                                                                      selectedItem);
+                                                                  selectedItem = snapshot.data[index]['item_name'];
+                                                                  prefs.setString('selectedSrID', selectedItem);
 
                                                                   prefs.setString(
                                                                       'srTracking',
@@ -519,11 +509,8 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                                           0.05),
                                                                 ),
                                                                 onPressed: () {
-                                                                  viewBarcode(snapshot
-                                                                              .data[
-                                                                          index]
-                                                                      [
-                                                                      'item_inventory_id']);
+                                                                  viewBarcode(
+                                                                      snapshot.data[index]['item_inventory_id']);
                                                                 },
                                                                 child: Text(
                                                                   'VIEW',
@@ -575,7 +562,7 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                                   snapshot.data[
                                                                           index]
                                                                       [
-                                                                      'item_inventory_id'];
+                                                                      'item_name'];
                                                               prefs.setString(
                                                                   'selectedSrID',
                                                                   selectedItem);
@@ -867,13 +854,14 @@ class _SrItemListViewState extends State<SrItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
-          DBSaleReturnNonItem().getSrNonItem(selectedItem).then((value) {
+          DBSaleReturnNonItem().getSrNonItem(itemSku.id).then((value) {
             if (value == null) {
               DBSaleReturnNonItem()
                   .createSrNonItem(SaleReturnNon(
-                itemInvId: selectedItem,
+                itemInvId: itemSku.id,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -887,12 +875,12 @@ class _SrItemListViewState extends State<SrItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                  (element) => element['item_inventory_id'] == selectedItem);
+                  (element) => element['item_inventory_id'] == itemSku.id);
 
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
               DBSaleReturnNonItem()
-                  .update(selectedItem, newQty.toString())
+                  .update(itemSku.id, newQty.toString())
                   .then((value) {
                 showCustomSuccess('Item Save');
                 // call and update the enterQty function
@@ -926,13 +914,14 @@ class _SrItemListViewState extends State<SrItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
-          DBSaleReturnNonItem().getSrNonItem(selectedItem).then((value) {
+          DBSaleReturnNonItem().getSrNonItem(itemUpc.id).then((value) {
             if (value == null) {
               DBSaleReturnNonItem()
                   .createSrNonItem(SaleReturnNon(
-                itemInvId: selectedItem,
+                itemInvId: itemUpc.id,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -946,12 +935,12 @@ class _SrItemListViewState extends State<SrItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                  (element) => element['item_inventory_id'] == selectedItem);
+                  (element) => element['item_inventory_id'] == itemUpc.id);
 
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
               DBSaleReturnNonItem()
-                  .update(selectedItem, newQty.toString())
+                  .update(itemUpc.id, newQty.toString())
                   .then((value) {
                 showCustomSuccess('Item Save');
                 // call and update the enterQty function

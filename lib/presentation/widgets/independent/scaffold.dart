@@ -84,7 +84,6 @@ class StmsScaffold extends StatelessWidget {
       ),
       body: body,
       // bottomNavigationBar: JomNGoBottomMenu(bottomMenuIndex, isDriver),
-      resizeToAvoidBottomInset: false,
     );
   }
 }

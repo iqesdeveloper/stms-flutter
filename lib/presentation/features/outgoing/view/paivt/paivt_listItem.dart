@@ -345,7 +345,7 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                               )
                                                   : Text(
                                                 // This one is to check if AllPoNonItem got value
-                                                // ALLPaivtNONITEM section
+                                                // ALLPAIVNONITEM section
                                                 // Need to check if there is a value after scan.
                                                 // Comparing both the DB and master file to check if there is a value before and after scan
                                                 allPaivtNonItem.isNotEmpty ? allPaivtNonItem.firstWhereOrNull((element) =>
@@ -390,7 +390,7 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
 
                                                         selectedItem = snapshot
                                                                 .data[index][
-                                                            'item_inventory_id'];
+                                                            'item_name'];
                                                         prefs.setString(
                                                             'selectedPaivtID',
                                                             selectedItem);
@@ -460,7 +460,7 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                                                       snapshot.data[
                                                                               index]
                                                                           [
-                                                                          'item_inventory_id'];
+                                                                          'item_name'];
                                                                   prefs.setString(
                                                                       'selectedPaivtID',
                                                                       selectedItem);
@@ -516,11 +516,9 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                                                           0.05),
                                                                 ),
                                                                 onPressed: () {
-                                                                  viewBarcode(snapshot
-                                                                              .data[
-                                                                          index]
-                                                                      [
-                                                                      'item_inventory_id']);
+                                                                  viewBarcode(
+                                                                      snapshot.data[index]['item_inventory_id']
+                                                                  );
                                                                 },
                                                                 child: Text(
                                                                   'VIEW',
@@ -572,10 +570,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                                                   snapshot.data[
                                                                           index]
                                                                       [
-                                                                      'item_inventory_id'];
-                                                              prefs.setString(
-                                                                  'selectedPaivtID',
-                                                                  selectedItem);
+                                                                      'item_name'];
+                                                              prefs.setString('selectedPaivtID', selectedItem);
 
                                                               prefs.setString(
                                                                   'paivtTracking',
@@ -864,13 +860,14 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
-          DBPaivtNonItem().getPaivtNonItem(selectedItem).then((value) {
+          DBPaivtNonItem().getPaivtNonItem(itemSku.id).then((value) {
             if (value == null) {
               DBPaivtNonItem()
                   .createPaivtNonItem(PaivtNon(
-                itemInvId: selectedItem,
+                itemInvId: itemSku.id,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -883,13 +880,13 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                  (element) => element['item_inventory_id'] == selectedItem);
+                  (element) => element['item_inventory_id'] == itemSku.id);
 
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
 
               DBPaivtNonItem()
-                  .update(selectedItem, newQty.toString())
+                  .update(itemSku.id, newQty.toString())
                   .then((value) {
                 showCustomSuccess('Item Save');
                 // call and update the enterQty function
@@ -923,13 +920,14 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
-          DBPaivtNonItem().getPaivtNonItem(selectedItem).then((value) {
+          DBPaivtNonItem().getPaivtNonItem(itemUpc.id).then((value) {
             if (value == null) {
               DBPaivtNonItem()
                   .createPaivtNonItem(PaivtNon(
-                itemInvId: selectedItem,
+                itemInvId: itemUpc.id,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -942,13 +940,13 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                  (element) => element['item_inventory_id'] == selectedItem);
+                  (element) => element['item_inventory_id'] == itemUpc.id);
 
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
 
               DBPaivtNonItem()
-                  .update(selectedItem, newQty.toString())
+                  .update(itemUpc.id, newQty.toString())
                   .then((value) {
                 showCustomSuccess('Item Save');
                 // call and update the enterQty function

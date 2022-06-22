@@ -339,7 +339,7 @@ class _PrItemListViewState extends State<PrItemListView> {
                                               )
                                                   : Text(
                                                 // This one is to check if AllPoNonItem got value
-                                                // ALLPRNONITEM section
+                                                // ALLPAIVNONITEM section
                                                 // Need to check if there is a value after scan.
                                                 // Comparing both the DB and master file to check if there is a value before and after scan
                                                 allPurchaseReturnNonItem.isNotEmpty ? allPurchaseReturnNonItem.firstWhereOrNull((element) =>
@@ -384,7 +384,7 @@ class _PrItemListViewState extends State<PrItemListView> {
 
                                                         selectedItem = snapshot
                                                                 .data[index][
-                                                            'item_inventory_id'];
+                                                            'item_name'];
                                                         prefs.setString(
                                                             'selectedPrID',
                                                             selectedItem);
@@ -454,7 +454,7 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                                       snapshot.data[
                                                                               index]
                                                                           [
-                                                                          'item_inventory_id'];
+                                                                          'item_name'];
                                                                   prefs.setString(
                                                                       'selectedPrID',
                                                                       selectedItem);
@@ -510,11 +510,9 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                                           0.05),
                                                                 ),
                                                                 onPressed: () {
-                                                                  viewBarcode(snapshot
-                                                                              .data[
-                                                                          index]
-                                                                      [
-                                                                      'item_inventory_id']);
+                                                                  viewBarcode(
+                                                                      snapshot.data[index]['item_inventory_id']
+                                                                  );
                                                                 },
                                                                 child: Text(
                                                                   'VIEW',
@@ -566,7 +564,7 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                                   snapshot.data[
                                                                           index]
                                                                       [
-                                                                      'item_inventory_id'];
+                                                                      'item_name'];
                                                               prefs.setString(
                                                                   'selectedPrID',
                                                                   selectedItem);
@@ -859,13 +857,14 @@ class _PrItemListViewState extends State<PrItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
-          DBPurchaseReturnNonItem().getPrNonItem(selectedItem).then((value) {
+          DBPurchaseReturnNonItem().getPrNonItem(itemSku.id).then((value) {
             if (value == null) {
               DBPurchaseReturnNonItem()
                   .createPrNonItem(PurchaseReturnNon(
-                itemInvId: selectedItem,
+                itemInvId: itemSku.id,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -878,13 +877,13 @@ class _PrItemListViewState extends State<PrItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                  (element) => element['item_inventory_id'] == selectedItem);
+                  (element) => element['item_inventory_id'] == itemSku.id);
 
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
 
               DBPurchaseReturnNonItem()
-                  .update(selectedItem, newQty.toString())
+                  .update(itemSku.id, newQty.toString())
                   .then((value) {
                 showCustomSuccess('Item Save');
                 // call and update the enterQty function
@@ -918,13 +917,14 @@ class _PrItemListViewState extends State<PrItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
+        prefs.setString('selectedIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
-          DBPurchaseReturnNonItem().getPrNonItem(selectedItem).then((value) {
+          DBPurchaseReturnNonItem().getPrNonItem(itemUpc.id).then((value) {
             if (value == null) {
               DBPurchaseReturnNonItem()
                   .createPrNonItem(PurchaseReturnNon(
-                itemInvId: selectedItem,
+                itemInvId: itemUpc.id,
                 nonTracking: '1',
               ))
                   .then((value) {
@@ -937,13 +937,13 @@ class _PrItemListViewState extends State<PrItemListView> {
             } else {
               List nonItem = value;
               var getItem = nonItem.firstWhereOrNull(
-                  (element) => element['item_inventory_id'] == selectedItem);
+                  (element) => element['item_inventory_id'] == itemUpc.id);
 
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
               var newQty = int.parse(getItem['non_tracking_qty']) + 1;
 
               DBPurchaseReturnNonItem()
-                  .update(selectedItem, newQty.toString())
+                  .update(itemUpc.id, newQty.toString())
                   .then((value) {
                 showCustomSuccess('Item Save');
                 // call and update the enterQty function

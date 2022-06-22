@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:stms/config/routes.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
@@ -37,6 +38,8 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
 
   List<InventoryHive> inventoryList = [];
   List paivtItemList = [];
+  List getAllPaivtNonItems = [];
+  List getAllPaivtItems = [];
   // String _scanBarcode = 'Unknown';
   var selectedInvtry, tracking;
   final format = DateFormat("yyyy-MM-dd");
@@ -44,10 +47,12 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
   final TextEditingController itemQtyController = TextEditingController();
   final TextEditingController itemUomController = TextEditingController();
   final TextEditingController itemUomQtyController = TextEditingController();
+  final TextEditingController itemSelectedInventory = TextEditingController();
   final GlobalKey<StmsInputFieldState> itemSNKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemQtyKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemUomKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemUomQtyKey = GlobalKey();
+  final GlobalKey<StmsInputFieldState> itemSelectedInvKey = GlobalKey();
 
   @override
   void initState() {
@@ -66,6 +71,7 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
 
     selectedInvtry = prefs.getString('selectedPaivtID');
     itemSNController.text = prefs.getString('itemBarcode')!;
+    itemSelectedInventory.text = selectedInvtry;
     tracking = prefs.getString('paivtTracking');
   }
 
@@ -104,86 +110,58 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
           }
           return StmsScaffold(
             title: '',
-            body: SingleChildScrollView(
-              child: Container(
-                height: height * 0.9,
-                color: Colors.white,
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    FormField<String>(
-                      builder: (FormFieldState<String> state) {
-                        return InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: 'Item Inventory ID',
-                            errorText: state.hasError ? state.errorText : null,
-                          ),
-                          isEmpty: false,
-                          child: new DropdownButtonHideUnderline(
-                            child: new DropdownButton<String>(
-                              isDense: true,
-                              iconSize: 28,
-                              iconEnabledColor: Colors.amber,
-                              items: inventoryList.map((item) {
-                                return new DropdownMenuItem(
-                                  child: Container(
-                                    width: width * 0.8,
-                                    child: Text(item.sku),
-                                  ),
-                                  value: item.id.toString(),
-                                );
-                              }).toList(),
-                              isExpanded: false,
-                              value:
-                                  selectedInvtry, // == "" ? "" : selectedTxn,
-                              onChanged: null,
-                              // (String? newValue) {
-                              //   setState(() {
-                              //     selectedLoc = newValue!;
-                              //     // print('transfer type: $transferType');
-                              //   });
-                              // },
-                            ),
-                          ),
-                        );
-                      },
+            body: Container(
+              height: height * 0.9,
+              color: Colors.white,
+              padding: EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: itemSelectedInventory,
+                    key: itemSelectedInvKey,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Item Inventory ID',
                     ),
-                    tracking == "2"
-                        ? StmsInputField(
-                            key: itemSNKey,
-                            controller: itemSNController,
-                            hint: 'Item Serial No',
-                            validator: Validator.valueExists,
-                          )
-                        : StmsInputField(
-                            key: itemQtyKey,
-                            controller: itemQtyController,
-                            hint: 'Quantity',
-                            keyboard: TextInputType.number,
-                            validator: Validator.valueExists,
-                          ),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                          child: ButtonTheme(
-                            minWidth: 200,
-                            height: 50,
-                            child: StmsStyleButton(
-                              title: 'SAVE',
-                              backgroundColor: Colors.amber,
-                              textColor: Colors.black,
-                              onPressed: () {
-                                saveData();
-                              },
-                            ),
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                  tracking == "2"
+                      ? StmsInputField(
+                    key: itemSNKey,
+                    controller: itemSNController,
+                    hint: 'Item Serial No',
+                    validator: Validator.valueExists,
+                  )
+                      : StmsInputField(
+                    key: itemQtyKey,
+                    controller: itemQtyController,
+                    hint: 'Quantity',
+                    keyboard: TextInputType.number,
+                    validator: Validator.valueExists,
+                  ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                        child: ButtonTheme(
+                          minWidth: 200,
+                          height: 50,
+                          child: StmsStyleButton(
+                            title: 'SAVE',
+                            backgroundColor: Colors.amber,
+                            textColor: Colors.black,
+                            onPressed: () {
+                              saveData();
+                            },
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );
@@ -201,39 +179,48 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (tracking == "2") {
-        DBPaivtItem()
-            .createPaivtItem(Paivt(
-          itemInvId: selectedInvtry,
-          itemSerialNo: itemSNController.text,
-        ))
-            .then((value) {
-          showCustomSuccess('Item Save');
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.paivtItemList));
-        });
+        var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+        element.sku == selectedInvtry);
+
+        if(itemAdjust == null){
+          DBPaivtItem()
+              .createPaivtItem(Paivt(
+            itemInvId: itemAdjust!.id,
+            itemSerialNo: itemSNController.text,
+          ))
+              .then((value) {
+            showCustomSuccess('Item Save');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.paivtItemList));
+          });
+        } else {
+          ErrorDialog.showErrorDialog(
+              context, 'Similar Serial Number present');
+        }
       } else {
-        DBPaivtNonItem().getPaivtNonItem(selectedInvtry).then((value) {
-          if (value == null) {
-            DBPaivtNonItem()
-                .createPaivtNonItem(PaivtNon(
-              itemInvId: selectedInvtry,
-              nonTracking: itemQtyController.text,
-            ))
-                .then((value) {
-              showCustomSuccess('Item Save');
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.paivtItemList));
-            });
-          } else {
-            DBPaivtNonItem()
-                .update(selectedInvtry, itemQtyController.text)
-                .then((value) {
-              showCustomSuccess('Item Save');
-              Navigator.popUntil(
-                  context, ModalRoute.withName(StmsRoutes.paivtItemList));
-            });
-          }
-        });
+        var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+        element.sku == selectedInvtry);
+
+        if(itemAdjust == null){
+          DBPaivtNonItem()
+              .createPaivtNonItem(PaivtNon(
+            itemInvId: itemAdjust!.id,
+            nonTracking: itemQtyController.text,
+          ))
+              .then((value) {
+            showCustomSuccess('Item Save');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.paivtItemList));
+          });
+        } else {
+          DBPaivtNonItem()
+              .update(itemAdjust.id, itemQtyController.text)
+              .then((value) {
+            showCustomSuccess('Item Save');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.paivtItemList));
+          });
+        }
       }
     }
   }
