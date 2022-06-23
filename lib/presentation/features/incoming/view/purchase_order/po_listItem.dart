@@ -1001,7 +1001,9 @@ class _PoItemListViewState extends State<PoItemListView> {
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                showSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -1017,7 +1019,9 @@ class _PoItemListViewState extends State<PoItemListView> {
               DBPoNonItem()
                   .update(itemSku.id, newQty.toString(), selectedItemSequence)
                   .then((value) {
-                showSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
@@ -1066,7 +1070,9 @@ class _PoItemListViewState extends State<PoItemListView> {
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                showSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -1084,7 +1090,9 @@ class _PoItemListViewState extends State<PoItemListView> {
                   .update(itemUpc.id, newQty.toString(), selectedItemSequence)
                   .then((value) {
                 getEnterQty();
-                showSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });

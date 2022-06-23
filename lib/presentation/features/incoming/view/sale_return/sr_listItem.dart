@@ -869,8 +869,10 @@ class _SrItemListViewState extends State<SrItemListView> {
                 nonTracking: '1',
               ))
                   .then((value) {
+                    setState(() {
+                      showCustomSuccess('Item Save');
+                    });
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                showCustomSuccess('Item Save');
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -886,7 +888,9 @@ class _SrItemListViewState extends State<SrItemListView> {
               DBSaleReturnNonItem()
                   .update(itemSku.id, newQty.toString())
                   .then((value) {
-                showCustomSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -930,7 +934,9 @@ class _SrItemListViewState extends State<SrItemListView> {
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                showCustomSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -946,7 +952,9 @@ class _SrItemListViewState extends State<SrItemListView> {
               DBSaleReturnNonItem()
                   .update(itemUpc.id, newQty.toString())
                   .then((value) {
-                showCustomSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -1000,7 +1008,7 @@ class _SrItemListViewState extends State<SrItemListView> {
         serialList.firstWhereOrNull((element) => element == barcodeScanRes);
     print('serialNo: $itemSerial');
 
-    if (null == itemSerial) {
+    if (null != itemSerial) {
       ErrorDialog.showErrorDialog(context, 'Serial No. not match');
     } else {
       DBSaleReturnItem().getAllSrItem().then((value) {

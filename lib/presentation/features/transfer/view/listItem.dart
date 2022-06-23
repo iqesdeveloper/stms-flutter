@@ -16,6 +16,7 @@ import 'package:stms/data/local_db/master/master_reason_db.dart';
 import 'package:stms/data/local_db/transfer/st_non_scanItem.dart';
 import 'package:stms/data/local_db/transfer/st_scanItem.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/style_button.dart';
@@ -417,8 +418,9 @@ class _StListItemState extends State<StListItem> {
       DBStockTransItem().deleteStItem(itemInvId, itemSerialNo).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getTransferItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -428,8 +430,9 @@ class _StListItemState extends State<StListItem> {
       DBStockTransNonItem().deleteStNonItem(itemInvId).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getTransferItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');

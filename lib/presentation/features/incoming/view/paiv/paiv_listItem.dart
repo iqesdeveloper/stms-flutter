@@ -828,7 +828,9 @@ class _PaivItemListViewState extends State<PaivItemListView> {
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                showCustomSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -845,7 +847,9 @@ class _PaivItemListViewState extends State<PaivItemListView> {
               DBPaivNonItem()
                   .update(itemSku.id, newQty.toString())
                   .then((value) {
-                showCustomSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -891,7 +895,9 @@ class _PaivItemListViewState extends State<PaivItemListView> {
               ))
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
-                showCustomSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -908,7 +914,9 @@ class _PaivItemListViewState extends State<PaivItemListView> {
               DBPaivNonItem()
                   .update(itemSku.id, newQty.toString())
                   .then((value) {
-                showCustomSuccess('Item Save');
+                setState(() {
+                  showCustomSuccess('Item Save');
+                });
                 // call and update the enterQty function
                 getEnterQty();
                 var _duration = Duration(seconds: 1);
@@ -963,7 +971,7 @@ class _PaivItemListViewState extends State<PaivItemListView> {
         serialList.firstWhereOrNull((element) => element == barcodeScanRes);
     print('serialNo: $itemSerial');
 
-    if (null == itemSerial) {
+    if (null != itemSerial) {
       ErrorDialog.showErrorDialog(context, 'Serial No. not match');
     } else {
       DBPaivItem().getAllPaivItem().then((value) {

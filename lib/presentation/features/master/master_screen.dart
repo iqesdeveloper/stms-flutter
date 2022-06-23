@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
 import 'package:stms/data/api/repositories/api_json/api_common.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/toast_dialog.dart';
 
@@ -33,6 +35,9 @@ class _MasterScreenState extends State<MasterScreen> {
   @override
   void initState() {
     super.initState();
+
+    fToast = FToast();
+    fToast.init(context);
   }
 
   @override
@@ -293,7 +298,7 @@ class _MasterScreenState extends State<MasterScreen> {
     CommonService().getCustomer().then(
       (value) async {
         await Future.delayed(const Duration(seconds: 6));
-        showSuccess('Successfully Download');
+        showCustomSuccess('Successfully Download');
 
         setState(() {
           _stateCust = 0;
@@ -319,7 +324,7 @@ class _MasterScreenState extends State<MasterScreen> {
     CommonService().getSupplier().then(
       (value) async {
         await Future.delayed(const Duration(seconds: 6));
-        showSuccess('Successfully Download');
+        showCustomSuccess('Successfully Download');
 
         setState(() {
           _stateSup = 0;
@@ -345,7 +350,7 @@ class _MasterScreenState extends State<MasterScreen> {
     CommonService().getLocation().then(
       (value) async {
         await Future.delayed(const Duration(seconds: 6));
-        showSuccess('Successfully Download');
+        showCustomSuccess('Successfully Download');
 
         if (!mounted) return;
         setState(() {
@@ -379,7 +384,7 @@ class _MasterScreenState extends State<MasterScreen> {
           //     print('downloaded');
           //   }
           // });
-          showSuccess('Successfully Download');
+          showCustomSuccess('Successfully Download');
 
           if (!mounted) return;
           setState(() {
@@ -407,7 +412,7 @@ class _MasterScreenState extends State<MasterScreen> {
     CommonService().getReason().then(
       (value) async {
         await Future.delayed(const Duration(seconds: 6));
-        showSuccess('Successfully Download');
+        showCustomSuccess('Successfully Download');
 
         setState(() {
           _stateReason = 0;
@@ -445,7 +450,7 @@ class _MasterScreenState extends State<MasterScreen> {
             CommonService().getInventory().then((value) async {
               await Future.delayed(const Duration(seconds: 13));
             }).whenComplete(() {
-              showSuccess('Successfully Download');
+              showCustomSuccess('Successfully Download');
 
               setState(() {
                 _stateAll = 0;
