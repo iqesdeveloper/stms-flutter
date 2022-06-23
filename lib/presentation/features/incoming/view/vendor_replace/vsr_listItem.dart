@@ -767,7 +767,7 @@ class _VsrListItemState extends State<VsrListItem> {
       if (itemAdjust['tracking_type'] == '2') {
         scanItemSerial();
       } else {
-        // prefs.setString('itemQty', itemAdjust['item_quantity']);
+        prefs.setString('itemQty', itemAdjust['item_quantity']);
 
         Navigator.of(context)
             .pushNamed(StmsRoutes.vsrItemCreate)

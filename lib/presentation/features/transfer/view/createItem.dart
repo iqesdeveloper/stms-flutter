@@ -35,8 +35,10 @@ class _StCreateItemState extends State<StCreateItem> {
   var transferTrack, selectedInvtry, selectedReason;
   final TextEditingController itemSnController = TextEditingController();
   final TextEditingController itemNonQtyController = TextEditingController();
+  final TextEditingController itemSelectedInventory = TextEditingController();
   final GlobalKey<StmsInputFieldState> itemSnKey = GlobalKey();
   final GlobalKey<StmsInputFieldState> itemNonQtyKey = GlobalKey();
+  final GlobalKey<StmsInputFieldState> itemSelectedInvKey = GlobalKey();
 
   @override
   void initState() {
@@ -54,6 +56,7 @@ class _StCreateItemState extends State<StCreateItem> {
     transferTrack = prefs.getString('transferTracking');
     selectedInvtry = prefs.getString('transferItem');
     itemSnController.text = prefs.getString('itemBarcode')!;
+    itemSelectedInventory.text = selectedInvtry;
   }
 
   getCommon() {
@@ -111,44 +114,16 @@ class _StCreateItemState extends State<StCreateItem> {
                   height: height * 0.85,
                   child: Column(
                     children: [
-                      FormField<String>(
-                        builder: (FormFieldState<String> state) {
-                          return InputDecorator(
-                            decoration: InputDecoration(
-                              labelText: 'Item Inventory ID',
-                              errorText:
-                                  state.hasError ? state.errorText : null,
-                            ),
-                            isEmpty: false,
-                            child: new DropdownButtonHideUnderline(
-                              child: ButtonTheme(
-                                child: DropdownButton<String>(
-                                  isDense: true,
-                                  iconSize: 28,
-                                  iconEnabledColor: Colors.amber,
-                                  items: inventoryList.map((item) {
-                                    return new DropdownMenuItem(
-                                      child: Container(
-                                          width: width * 0.8,
-                                          child: Text(item.sku)),
-                                      value: item.id.toString(),
-                                    );
-                                  }).toList(),
-                                  isExpanded: false,
-                                  value:
-                                      selectedInvtry, // == "" ? "" : selectedTxn,
-                                  onChanged: null,
-                                  // (String? newValue) {
-                                  //   setState(() {
-                                  //     selectedInvtry = newValue!;
-                                  //     // print('transfer type: $transferType');
-                                  //   });
-                                  // },
-                                ),
-                              ),
-                            ),
-                          );
-                        },
+                      TextField(
+                        controller: itemSelectedInventory,
+                        key: itemSelectedInvKey,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Item Inventory ID',
+                        ),
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
                       ),
                       transferTrack == 'Serial Number' || transferTrack == '2'
                           ? StmsInputField(
@@ -238,60 +213,87 @@ class _StCreateItemState extends State<StCreateItem> {
       ErrorDialog.showErrorDialog(context, 'Please select Reason Code');
     } else {
       if (transferTrack == "Serial Number" || transferTrack == "2") {
-        DBStockTransItem()
-            .createStItem(
-          StockTransItem(
-            itemIvId: selectedInvtry,
-            itemSn: itemSnController.text,
-            itemReason: selectedReason,
-          ),
-        )
-            .then((value) {
-          showCustomSuccess('Item Save');
-          prefs.remove('itemBarcode');
+
+        var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+        element.sku == selectedInvtry);
+
+        if(itemAdjust == null){
+          DBStockTransItem()
+              .createStItem(
+            StockTransItem(
+              itemIvId: selectedInvtry,
+              itemSn: itemSnController.text,
+              itemReason: selectedReason,
+            ),
+          )
+              .then((value) {
+            showCustomSuccess('Item Save');
+            prefs.remove('itemBarcode');
+            Navigator.popUntil(
+                context, ModalRoute.withName(StmsRoutes.stItemList));
+          });
+        } else {
           Navigator.popUntil(
               context, ModalRoute.withName(StmsRoutes.stItemList));
-        });
+
+          ErrorDialog.showErrorDialog(
+              context, 'This SKU already exists.');
+        }
       } else {
         if (int.parse(itemNonQtyController.text) <= 0) {
           ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
         } else {
           if (Storage().transfer == '1') {
             DBStockTransNonItem().getAllStNonItem().then((value) {
+
+              var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+              element.sku == selectedInvtry);
+
               if (value != null) {
-                List listingSt = value;
+                setState(() {
+                  List listingSt = value;
 
-                var itemSt = listingSt.firstWhereOrNull((element) =>
+                  if(itemAdjust != null){
+                    var itemSt = listingSt.firstWhereOrNull((element) =>
                     element['item_inventory_id'] == selectedInvtry);
-                if (null == itemSt) {
-                  String? getQty = prefs.getString('itemQty');
-                  var currentQty = int.parse(getQty!);
 
-                  if (int.parse(itemNonQtyController.text) <= currentQty) {
-                    DBStockTransNonItem()
-                        .createStNonItem(
-                      StockTransNonItem(
-                        itemIvId: selectedInvtry,
-                        itemNonQty: itemNonQtyController.text,
-                        itemReason: selectedReason,
-                      ),
-                    )
-                        .then((value) {
-                      showCustomSuccess('Item Save');
+                    if (null == itemSt) {
+                      String? getQty = prefs.getString('itemQty');
+                      var currentQty = int.parse(getQty!);
+
+                      if (int.parse(itemNonQtyController.text) <= currentQty) {
+                        DBStockTransNonItem()
+                            .createStNonItem(
+                          StockTransNonItem(
+                            itemIvId: selectedInvtry,
+                            itemNonQty: itemNonQtyController.text,
+                            itemReason: selectedReason,
+                          ),
+                        )
+                            .then((value) {
+                          showCustomSuccess('Item Save');
+                          Navigator.popUntil(
+                              context, ModalRoute.withName(StmsRoutes.stItemList));
+                        });
+                      } else {
+                        ErrorDialog.showErrorDialog(
+                            context, 'Quantity cannot more than current quantity.');
+                      }
+                    } else {
                       Navigator.popUntil(
                           context, ModalRoute.withName(StmsRoutes.stItemList));
-                    });
-                  } else {
-                    ErrorDialog.showErrorDialog(
-                        context, 'Quantity cannot more than current quantity.');
-                  }
-                } else {
-                  Navigator.popUntil(
-                      context, ModalRoute.withName(StmsRoutes.stItemList));
 
-                  ErrorDialog.showErrorDialog(
-                      context, 'This SKU already exists.');
-                }
+                      ErrorDialog.showErrorDialog(
+                          context, 'This SKU already exists.');
+                    }
+                  } else {
+                    Navigator.popUntil(
+                        context, ModalRoute.withName(StmsRoutes.stItemList));
+
+                    ErrorDialog.showErrorDialog(
+                        context, 'This SKU already exists.');
+                  }
+                });
               } else {
                 String? getQty = prefs.getString('itemQty');
                 var currentQty = int.parse(getQty!);
@@ -300,7 +302,7 @@ class _StCreateItemState extends State<StCreateItem> {
                   DBStockTransNonItem()
                       .createStNonItem(
                     StockTransNonItem(
-                      itemIvId: selectedInvtry,
+                      itemIvId: itemAdjust!.sku,
                       itemNonQty: itemNonQtyController.text,
                       itemReason: selectedReason,
                     ),
@@ -318,37 +320,52 @@ class _StCreateItemState extends State<StCreateItem> {
             });
           } else {
             DBStockTransNonItem().getAllStNonItem().then((value) {
-              if (value != null) {
-                List listingSt = value;
+              var itemAdjust = inventoryList.firstWhereOrNull((element) =>
+              element.sku == selectedInvtry);
 
-                var itemSt = listingSt.firstWhereOrNull((element) =>
+              if (value != null) {
+                setState(() {
+                  List listingSt = value;
+
+                  if(itemAdjust != null){
+                    var itemSt = listingSt.firstWhereOrNull((element) =>
                     element['item_inventory_id'] == selectedInvtry);
-                if (null == itemSt) {
-                  DBStockTransNonItem()
-                      .createStNonItem(
-                    StockTransNonItem(
-                      itemIvId: selectedInvtry,
-                      itemNonQty: itemNonQtyController.text,
-                      itemReason: selectedReason,
-                    ),
-                  )
-                      .then((value) {
-                    showCustomSuccess('Item Save');
+
+                    if (null == itemSt) {
+                      DBStockTransNonItem()
+                          .createStNonItem(
+                        StockTransNonItem(
+                          itemIvId: selectedInvtry,
+                          itemNonQty: itemNonQtyController.text,
+                          itemReason: selectedReason,
+                        ),
+                      )
+                          .then((value) {
+                        showCustomSuccess('Item Save');
+                        Navigator.popUntil(
+                            context, ModalRoute.withName(StmsRoutes.stItemList));
+                      });
+                    } else {
+                      Navigator.popUntil(
+                          context, ModalRoute.withName(StmsRoutes.stItemList));
+
+                      ErrorDialog.showErrorDialog(
+                          context, 'This SKU already exists.');
+                    }
+                  } else {
                     Navigator.popUntil(
                         context, ModalRoute.withName(StmsRoutes.stItemList));
-                  });
-                } else {
-                  Navigator.popUntil(
-                      context, ModalRoute.withName(StmsRoutes.stItemList));
 
-                  ErrorDialog.showErrorDialog(
-                      context, 'This SKU already exists.');
-                }
+                    ErrorDialog.showErrorDialog(
+                        context, 'This SKU already exists.');
+                  }
+                });
+
               } else {
                 DBStockTransNonItem()
                     .createStNonItem(
                   StockTransNonItem(
-                    itemIvId: selectedInvtry,
+                    itemIvId: itemAdjust!.sku,
                     itemNonQty: itemNonQtyController.text,
                     itemReason: selectedReason,
                   ),

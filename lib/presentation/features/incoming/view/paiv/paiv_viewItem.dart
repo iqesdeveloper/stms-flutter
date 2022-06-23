@@ -37,9 +37,6 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
   var getCommonData = CommonService();
 
   List<InventoryHive> inventoryList = [];
-  List paivItemList = [];
-  List getAllPaivNonItems = [];
-  List getAllPaivItems = [];
   // String _scanBarcode = 'Unknown';
   var selectedInvtry, tracking;
   final format = DateFormat("yyyy-MM-dd");
