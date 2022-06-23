@@ -221,7 +221,7 @@ class _StCreateItemState extends State<StCreateItem> {
           DBStockTransItem()
               .createStItem(
             StockTransItem(
-              itemIvId: selectedInvtry,
+              itemIvId: itemAdjust!.sku,
               itemSn: itemSnController.text,
               itemReason: selectedReason,
             ),
@@ -255,7 +255,7 @@ class _StCreateItemState extends State<StCreateItem> {
 
                   if(itemAdjust != null){
                     var itemSt = listingSt.firstWhereOrNull((element) =>
-                    element['item_inventory_id'] == selectedInvtry);
+                    element['item_inventory_id'] == itemAdjust.sku);
 
                     if (null == itemSt) {
                       String? getQty = prefs.getString('itemQty');
@@ -265,7 +265,7 @@ class _StCreateItemState extends State<StCreateItem> {
                         DBStockTransNonItem()
                             .createStNonItem(
                           StockTransNonItem(
-                            itemIvId: selectedInvtry,
+                            itemIvId: itemSt['item_name'],
                             itemNonQty: itemNonQtyController.text,
                             itemReason: selectedReason,
                           ),
@@ -329,13 +329,13 @@ class _StCreateItemState extends State<StCreateItem> {
 
                   if(itemAdjust != null){
                     var itemSt = listingSt.firstWhereOrNull((element) =>
-                    element['item_inventory_id'] == selectedInvtry);
+                    element['item_inventory_id'] == itemAdjust.sku);
 
                     if (null == itemSt) {
                       DBStockTransNonItem()
                           .createStNonItem(
                         StockTransNonItem(
-                          itemIvId: selectedInvtry,
+                          itemIvId: itemSt['tem_name'],
                           itemNonQty: itemNonQtyController.text,
                           itemReason: selectedReason,
                         ),
