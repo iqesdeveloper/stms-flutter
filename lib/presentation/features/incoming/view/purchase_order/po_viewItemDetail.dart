@@ -257,6 +257,20 @@ class _PoItemDetailsState extends State<PoItemDetails> {
                 itemSequence['item_serial_no'] != itemSNController.text){
               ErrorDialog.showErrorDialog(
                   context, 'Similar Serial Number present');
+            } else {
+              DBPoItem()
+                  .createPoItem(PoItem(
+                itemInvId: itemAdjust.id,
+                vendorItemNo: selectedVendorItem,
+                itemSequence: selectedItemSequence,
+                itemSerialNo: itemSNController.text,
+              ))
+                  .then((value) {
+                // SuccessDialog.showSuccessDialog(context, 'Item Save');
+                showCustomSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.poItemList));
+              });
             }
           }
         }

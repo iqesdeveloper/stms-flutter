@@ -898,7 +898,9 @@ class _PoItemListViewState extends State<PoItemListView> {
                             } else if (tracking == "2" &&
                                 typeScan == 'manual') {
                               Navigator.of(context)
-                                  .pushNamed(StmsRoutes.poItemManual);
+                                  .pushNamed(StmsRoutes.poItemManual).then((value){
+                                getEnterQty();
+                              });
                             } else {
                               prefs.setString('nontypeScan', typeScan);
                               scanSKU();
@@ -920,7 +922,9 @@ class _PoItemListViewState extends State<PoItemListView> {
       if (tracking == "2" && typeScan == 'scan') {
         scanBarcodeNormal();
       } else if (tracking == "2" && typeScan == 'manual') {
-        Navigator.of(context).pushNamed(StmsRoutes.poItemManual);
+        Navigator.of(context).pushNamed(StmsRoutes.poItemManual).then((value){
+          getEnterQty();
+        });
       } else {
         prefs.setString('nontypeScan', typeScan);
         scanSKU();

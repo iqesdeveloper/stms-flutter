@@ -368,39 +368,18 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                           Colors.blueAccent,
                                                       textColor: Colors.white,
                                                       onPressed: () async {
-                                                        SharedPreferences
-                                                            prefs =
-                                                            await SharedPreferences
-                                                                .getInstance();
+                                                        SharedPreferences prefs = await SharedPreferences.getInstance();
 
-                                                        snapshot.data[index][
-                                                                    'tracking_type'] ==
-                                                                "2"
-                                                            ? serialList =
-                                                                snapshot.data[
-                                                                        index][
-                                                                    'serial_list']
-                                                            : serialList = [];
+                                                        snapshot.data[index]['tracking_type'] == "2"
+                                                            ? serialList = snapshot.data[index]['serial_list'] : serialList = [];
 
-                                                        selectedItem = snapshot
-                                                                .data[index][
-                                                            'item_name'];
-                                                        prefs.setString(
-                                                            'selectedPrID',
-                                                            selectedItem);
+                                                        selectedItem = snapshot.data[index]['item_name'];
+                                                        prefs.setString('selectedPrID', selectedItem);
 
-                                                        prefs.setString(
-                                                            'prTracking',
-                                                            snapshot.data[index]
-                                                                [
-                                                                'tracking_type']);
-                                                        var tracking = snapshot
-                                                                .data[index]
-                                                            ['tracking_type'];
+                                                        prefs.setString('prTracking', snapshot.data[index]['tracking_type']);
+                                                        var tracking = snapshot.data[index]['tracking_type'];
                                                         var typeScan = 'scan';
-                                                        itemName =
-                                                            snapshot.data[index]
-                                                                ['item_name'];
+                                                        itemName = snapshot.data[index]['item_name'];
 
                                                         tracking == "2"
                                                             ? checkLocation(
@@ -438,50 +417,21 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                                 ),
                                                                 onPressed:
                                                                     () async {
-                                                                  SharedPreferences
-                                                                      prefs =
-                                                                      await SharedPreferences
-                                                                          .getInstance();
+                                                                  SharedPreferences prefs = await SharedPreferences.getInstance();
 
-                                                                  prefs.setString(
-                                                                      'pr_serialList',
-                                                                      json.encode(
-                                                                          snapshot.data[index]
-                                                                              [
-                                                                              'serial_list']));
+                                                                  prefs.setString('pr_serialList',
+                                                                      json.encode(snapshot.data[index]['serial_list']));
 
-                                                                  selectedItem =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'item_name'];
-                                                                  prefs.setString(
-                                                                      'selectedPrID',
-                                                                      selectedItem);
+                                                                  selectedItem = snapshot.data[index]['item_name'];
+                                                                  prefs.setString('selectedPrID', selectedItem);
 
-                                                                  prefs.setString(
-                                                                      'prTracking',
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'tracking_type']);
-                                                                  var tracking =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'tracking_type'];
+                                                                  prefs.setString('prTracking', snapshot.data[index]['tracking_type']);
+                                                                  var tracking = snapshot.data[index]['tracking_type'];
 
-                                                                  var typeScan =
-                                                                      'manual';
-                                                                  itemName = snapshot
-                                                                              .data[
-                                                                          index]
-                                                                      [
-                                                                      'item_name'];
+                                                                  var typeScan = 'manual';
+                                                                  itemName = snapshot.data[index]['item_name'];
 
-                                                                  checkLocation(
-                                                                      tracking,
-                                                                      typeScan);
+                                                                  checkLocation(tracking, typeScan);
                                                                 },
                                                                 child: Text(
                                                                   'MANUAL',
@@ -543,49 +493,18 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                             ),
                                                             onPressed:
                                                                 () async {
-                                                              SharedPreferences
-                                                                  prefs =
-                                                                  await SharedPreferences
-                                                                      .getInstance();
+                                                              SharedPreferences prefs = await SharedPreferences.getInstance();
 
-                                                              snapshot.data[index]
-                                                                          [
-                                                                          'tracking_type'] ==
-                                                                      "2"
-                                                                  ? serialList =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'serial_list']
-                                                                  : serialList =
-                                                                      [];
+                                                              snapshot.data[index]['tracking_type'] == "2"
+                                                                  ? serialList = snapshot.data[index]['serial_list'] : serialList = [];
 
-                                                              selectedItem =
-                                                                  snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'item_name'];
-                                                              prefs.setString(
-                                                                  'selectedPrID',
-                                                                  selectedItem);
+                                                              selectedItem = snapshot.data[index]['item_name'];
+                                                              prefs.setString('selectedPrID', selectedItem);
 
-                                                              prefs.setString(
-                                                                  'prTracking',
-                                                                  snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'tracking_type']);
-                                                              var tracking =
-                                                                  snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'tracking_type'];
-                                                              var typeScan =
-                                                                  'manual';
-                                                              itemName = snapshot
-                                                                          .data[
-                                                                      index]
-                                                                  ['item_name'];
+                                                              prefs.setString('prTracking', snapshot.data[index]['tracking_type']);
+                                                              var tracking = snapshot.data[index]['tracking_type'];
+                                                              var typeScan = 'manual';
+                                                              itemName = snapshot.data[index]['item_name'];
 
                                                               SkuUpcDialog
                                                                       .showSkuUpcDialog(
@@ -781,7 +700,9 @@ class _PrItemListViewState extends State<PrItemListView> {
                                 } else if (tracking == "2" &&
                                     typeScan == 'manual') {
                                   Navigator.of(context)
-                                      .pushNamed(StmsRoutes.prItemManual);
+                                      .pushNamed(StmsRoutes.prItemManual).then((value){
+                                    getEnterQty();
+                                  });
                                 } else {
                                   prefs.setString('nontypeScan', typeScan);
                                   scanSKU();
@@ -803,7 +724,9 @@ class _PrItemListViewState extends State<PrItemListView> {
       if (tracking == "2" && typeScan == 'scan') {
         scanBarcodeNormal();
       } else if (tracking == "2" && typeScan == 'manual') {
-        Navigator.of(context).pushNamed(StmsRoutes.prItemManual);
+        Navigator.of(context).pushNamed(StmsRoutes.prItemManual).then((value){
+          getEnterQty();
+        });
       } else {
         prefs.setString('nontypeScan', typeScan);
         scanSKU();

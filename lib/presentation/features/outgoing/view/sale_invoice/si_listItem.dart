@@ -784,7 +784,9 @@ class _SiItemListViewState extends State<SiItemListView> {
                                 } else if (tracking == "2" &&
                                     typeScan == 'manual') {
                                   Navigator.of(context)
-                                      .pushNamed(StmsRoutes.siItemManual);
+                                      .pushNamed(StmsRoutes.siItemManual).then((value){
+                                    getEnterQty();
+                                  });
                                 } else {
                                   prefs.setString('nontypeScan', typeScan);
                                   scanSKU();
@@ -806,7 +808,9 @@ class _SiItemListViewState extends State<SiItemListView> {
       if (tracking == "2" && typeScan == 'scan') {
         scanBarcodeNormal();
       } else if (tracking == "2" && typeScan == 'manual') {
-        Navigator.of(context).pushNamed(StmsRoutes.siItemManual);
+        Navigator.of(context).pushNamed(StmsRoutes.siItemManual).then((value){
+          getEnterQty();
+        });
       } else {
         prefs.setString('nontypeScan', typeScan);
         scanSKU();

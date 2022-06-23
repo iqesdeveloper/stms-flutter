@@ -779,7 +779,9 @@ class _SrItemListViewState extends State<SrItemListView> {
                                 } else if (tracking == "2" &&
                                     typeScan == 'manual') {
                                   Navigator.of(context)
-                                      .pushNamed(StmsRoutes.srItemManual);
+                                      .pushNamed(StmsRoutes.srItemManual).then((value){
+                                    getEnterQty();
+                                  });
                                 } else {
                                   prefs.setString('nontypeScan', typeScan);
                                   scanSKU();
@@ -801,7 +803,9 @@ class _SrItemListViewState extends State<SrItemListView> {
       if (tracking == "2" && typeScan == 'scan') {
         scanBarcodeNormal();
       } else if (tracking == "2" && typeScan == 'manual') {
-        Navigator.of(context).pushNamed(StmsRoutes.srItemManual);
+        Navigator.of(context).pushNamed(StmsRoutes.srItemManual).then((value){
+          getEnterQty();
+        });
       } else {
         prefs.setString('nontypeScan', typeScan);
         scanSKU();

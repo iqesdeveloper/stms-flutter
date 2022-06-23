@@ -49,23 +49,26 @@ class SerialDialog extends StatelessWidget {
           ),
           Divider(thickness: 2),
           Expanded(
-            child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: serial.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    child: ListTile(
-                      leading: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          height: 1.1,
+            child: Container(
+              width: double.maxFinite,
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: serial.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      child: ListTile(
+                        leading: Text(
+                          '${index + 1}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            height: 1.1,
+                          ),
                         ),
+                        title: Text('${serial[index]}'),
                       ),
-                      title: Text('${serial[index]}'),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+            )
           ),
           // Expanded(
           //     child: Container(

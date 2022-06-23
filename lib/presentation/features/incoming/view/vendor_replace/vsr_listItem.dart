@@ -50,9 +50,6 @@ class _VsrListItemState extends State<VsrListItem> {
     getVsrItem();
     getListItem();
     getCommon();
-
-    fToast = FToast();
-    fToast.init(context);
   }
 
   getVsrItem() {
@@ -403,8 +400,9 @@ class _VsrListItemState extends State<VsrListItem> {
           .then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getVsrItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -414,8 +412,9 @@ class _VsrListItemState extends State<VsrListItem> {
       DBVendorReplaceNonItem().deleteVsrNonItem(itemInvId).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getVsrItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');

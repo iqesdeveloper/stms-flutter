@@ -732,7 +732,9 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                   } else if (tracking == "2" &&
                                       typeScan == 'manual') {
                                     Navigator.of(context)
-                                        .pushNamed(StmsRoutes.paivItemManual);
+                                        .pushNamed(StmsRoutes.paivItemManual).then((value){
+                                      getEnterQty();
+                                    });
                                   } else {
                                     prefs.setString('nontypeScan', typeScan);
                                     scanSKU();
@@ -757,7 +759,9 @@ class _PaivItemListViewState extends State<PaivItemListView> {
       if (tracking == "2" && typeScan == 'scan') {
         scanBarcodeNormal();
       } else if (tracking == "2" && typeScan == 'manual') {
-        Navigator.of(context).pushNamed(StmsRoutes.paivItemManual);
+        Navigator.of(context).pushNamed(StmsRoutes.paivItemManual).then((value){
+          getEnterQty();
+        });
       } else {
         prefs.setString('nontypeScan', typeScan);
         scanSKU();

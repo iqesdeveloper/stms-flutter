@@ -22,6 +22,6 @@ void showCustomSuccess(String msg) {
 
   fToast.showToast(
     child: toast,
-    toastDuration: Duration(seconds: 3),
+    toastDuration: Duration(seconds: 2),
   );
 }

@@ -14,6 +14,7 @@ import 'package:stms/data/local_db/master/master_reason_db.dart';
 import 'package:stms/data/local_db/outgoing/adjust_out/ao_non_scanItem.dart';
 import 'package:stms/data/local_db/outgoing/adjust_out/ao_scanItem.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/style_button.dart';
@@ -422,8 +423,9 @@ class _AoListItemState extends State<AoListItem> {
       DBAdjustOutItem().deleteAoItem(itemInvId, itemSerialNo).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getAdjustItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -433,8 +435,9 @@ class _AoListItemState extends State<AoListItem> {
       DBAdjustOutNonItem().deleteAoNonItem(itemInvId).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getAdjustItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');

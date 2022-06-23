@@ -26,7 +26,7 @@ class ViewDialog extends StatelessWidget {
     return Container(
       color: Colors.white,
       alignment: Alignment.center,
-      height: height * 0.01, // * 0.25,
+      height: height * 0.6, // * 0.25,
       child: Column(
         // mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -59,119 +59,123 @@ class ViewDialog extends StatelessWidget {
           ),
           Divider(thickness: 2),
           Expanded(
-              child: ListView(
-            shrinkWrap: true,
-            children: [
-              Container(
-                // padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                child: Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: TableBorder.all(color: Colors.black, width: 1),
-                  columnWidths: const <int, TableColumnWidth>{
-                    1: FixedColumnWidth(70.0),
-                  },
+            child: Container(
+              width: double.maxFinite,
+                child: ListView(
+                  shrinkWrap: true,
                   children: [
-                    TableRow(
-                      children: [
-                        Container(
-                          height: 35,
-                          alignment: Alignment.center,
-                          child: Text(
-                            'Serial No',
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              // height: 1.8,
-                            ),
-                            textAlign: TextAlign.center,
+                    Container(
+                      // padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                      child: Table(
+                        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                        border: TableBorder.all(color: Colors.black, width: 1),
+                        columnWidths: const <int, TableColumnWidth>{
+                          1: FixedColumnWidth(70.0),
+                        },
+                        children: [
+                          TableRow(
+                            children: [
+                              Container(
+                                height: 35,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  'Serial No',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    // height: 1.8,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              Text(
+                                ' ',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  // height: 1.8,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
-                        ),
-                        Text(
-                          ' ',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            // height: 1.8,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                    Container(
+                      child: FutureBuilder(
+                        future: urlList,
+                        builder: (BuildContext context, AsyncSnapshot snapshot) {
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else {
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: snapshot.data.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Material(
+                                  // color: index % 2 == 0 ? Colors.white : Colors.grey[400],
+                                  child: Table(
+                                    border: TableBorder.all(
+                                      color: Colors.black,
+                                      width: 0.2,
+                                    ),
+                                    defaultVerticalAlignment:
+                                    TableCellVerticalAlignment.middle,
+                                    columnWidths: const <int, TableColumnWidth>{
+                                      1: FixedColumnWidth(70.0),
+                                    },
+                                    children: [
+                                      TableRow(
+                                        children: [
+                                          Container(
+                                            height: 50,
+                                            alignment: Alignment.center,
+                                            padding: EdgeInsets.fromLTRB(2, 0, 0, 0),
+                                            child: Text(
+                                              "${snapshot.data[index]['item_serial_no']}",
+                                              style: TextStyle(
+                                                fontSize: 16.0,
+                                                // height: 2.5,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                          Container(
+                                            height: 50,
+                                            alignment: Alignment.center,
+                                            padding: EdgeInsets.fromLTRB(2, 0, 0, 0),
+                                            child: IconButton(
+                                              padding: EdgeInsets.all(0),
+                                              onPressed: () {
+                                                // print('pressed');
+                                                getDB(
+                                                    context,
+                                                    snapshot.data[index]
+                                                    ['item_serial_no']);
+                                              },
+                                              icon: Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ],
-                ),
-              ),
-              Container(
-                child: FutureBuilder(
-                  future: urlList,
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (!snapshot.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else {
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: snapshot.data.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Material(
-                            // color: index % 2 == 0 ? Colors.white : Colors.grey[400],
-                            child: Table(
-                              border: TableBorder.all(
-                                color: Colors.black,
-                                width: 0.2,
-                              ),
-                              defaultVerticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              columnWidths: const <int, TableColumnWidth>{
-                                1: FixedColumnWidth(70.0),
-                              },
-                              children: [
-                                TableRow(
-                                  children: [
-                                    Container(
-                                      height: 50,
-                                      alignment: Alignment.center,
-                                      padding: EdgeInsets.fromLTRB(2, 0, 0, 0),
-                                      child: Text(
-                                        "${snapshot.data[index]['item_serial_no']}",
-                                        style: TextStyle(
-                                          fontSize: 16.0,
-                                          // height: 2.5,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 50,
-                                      alignment: Alignment.center,
-                                      padding: EdgeInsets.fromLTRB(2, 0, 0, 0),
-                                      child: IconButton(
-                                        padding: EdgeInsets.all(0),
-                                        onPressed: () {
-                                          // print('pressed');
-                                          getDB(
-                                              context,
-                                              snapshot.data[index]
-                                                  ['item_serial_no']);
-                                        },
-                                        icon: Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    }
-                  },
-                ),
-              ),
-            ],
-          )),
+                )
+            ),
+          ),
         ],
       ),
     );

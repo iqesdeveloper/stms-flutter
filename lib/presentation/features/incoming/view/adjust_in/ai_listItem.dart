@@ -51,9 +51,6 @@ class _AiListItemState extends State<AiListItem> {
 
     getAdjustItem();
     getCommon();
-
-    fToast = FToast();
-    fToast.init(context);
   }
 
   getAdjustItem() {
@@ -251,11 +248,9 @@ class _AiListItemState extends State<AiListItem> {
                                                   onPressed: () {
                                                     var type = 'serial';
                                                     getDB(
-                                                        snapshot.data[index][
-                                                            'item_inventory_id'],
+                                                        snapshot.data[index]['item_inventory_id'],
                                                         type,
-                                                        snapshot.data[index]
-                                                            ['item_serial_no']);
+                                                        snapshot.data[index]['item_serial_no']);
                                                   },
                                                   icon: Icon(
                                                     Icons.delete,
@@ -427,6 +422,8 @@ class _AiListItemState extends State<AiListItem> {
         if (value == 1) {
           if (!mounted) return;
           setState(() {
+            fToast.init(context);
+
             getAdjustItem();
             showCustomSuccess('Delete Successful');
           });
@@ -439,6 +436,8 @@ class _AiListItemState extends State<AiListItem> {
         if (value == 1) {
           if (!mounted) return;
           setState(() {
+            fToast.init(context);
+
             getAdjustItem();
             showCustomSuccess('Delete Successful');
           });

@@ -38,8 +38,6 @@ class _PrItemDetailsState extends State<PrItemDetails> {
 
   List<InventoryHive> inventoryList = [];
   List prItemList = [];
-  List getAllPrNonItems = [];
-  List getAllPrItems = [];
   // String _scanBarcode = 'Unknown';
   var selectedInvtry, tracking;
   final format = DateFormat("yyyy-MM-dd");
@@ -178,10 +176,10 @@ class _PrItemDetailsState extends State<PrItemDetails> {
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>
         element.sku == selectedInvtry);
 
-        if(itemAdjust == null){
+        if(itemAdjust != null){
           DBPurchaseReturnItem()
               .createPrItem(PurchaseReturn(
-            itemInvId: itemAdjust!.id,
+            itemInvId: itemAdjust.id,
             itemSerialNo: itemSNController.text,
           ))
               .then((value) {
@@ -198,10 +196,10 @@ class _PrItemDetailsState extends State<PrItemDetails> {
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>
         element.sku == selectedInvtry);
 
-        if(itemAdjust == null){
+        if(itemAdjust != null){
           DBPurchaseReturnNonItem()
               .createPrNonItem(PurchaseReturnNon(
-            itemInvId: itemAdjust!.id,
+            itemInvId: itemAdjust.id,
             nonTracking: itemQtyController.text,
           ))
               .then((value) {
@@ -212,7 +210,7 @@ class _PrItemDetailsState extends State<PrItemDetails> {
           });
         } else {
           DBPurchaseReturnNonItem()
-              .update(itemAdjust.id, itemQtyController.text)
+              .update(itemAdjust!.id, itemQtyController.text)
               .then((value) {
             showCustomSuccess('Item Save');
             Navigator.popUntil(

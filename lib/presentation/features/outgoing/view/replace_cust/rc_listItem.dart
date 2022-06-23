@@ -18,6 +18,7 @@ import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/data/local_db/outgoing/rric/rric_non_scanItem.dart';
 import 'package:stms/data/local_db/outgoing/rric/rric_scanItem.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/style_button.dart';
@@ -479,8 +480,9 @@ class _RcListItemState extends State<RcListItem> {
       DBReplaceCustItem().deleteRricItem(itemInvId, itemSerialNo).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getRcItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -490,8 +492,9 @@ class _RcListItemState extends State<RcListItem> {
       DBReplaceCustNonItem().deleteRricNonItem(itemInvId).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getRcItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');

@@ -47,9 +47,6 @@ class _CrListItemState extends State<CrListItem> {
 
     getCrItem();
     getCommon();
-
-    fToast = FToast();
-    fToast.init(context);
   }
 
   getCrItem() {
@@ -388,6 +385,7 @@ class _CrListItemState extends State<CrListItem> {
       DBCustReturnItem().deleteCrItem(itemInvId, itemSerialNo).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getCrItem();
             showSuccess('Delete Successful');
           });
@@ -399,6 +397,7 @@ class _CrListItemState extends State<CrListItem> {
       DBCustReturnNonItem().deleteCrNonItem(itemInvId).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getCrItem();
             showSuccess('Delete Successful');
           });

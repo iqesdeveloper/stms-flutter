@@ -14,6 +14,7 @@ import 'package:stms/data/local_db/incoming/im/im_scanItem.dart';
 import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/data/local_db/master/master_reason_db.dart';
 import 'package:stms/presentation/features/profile/profile.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/style_button.dart';
@@ -424,8 +425,9 @@ class _ImListItemState extends State<ImListItem> {
       DBItemModifyItem().deleteImItem(itemInvId, itemSerialNo).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getModifyItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -435,8 +437,9 @@ class _ImListItemState extends State<ImListItem> {
       DBItemModifyNonItem().deleteImNonItem(itemInvId).then((value) {
         if (value == 1) {
           setState(() {
+            fToast.init(context);
             getModifyItem();
-            showSuccess('Delete Successful');
+            showCustomSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
