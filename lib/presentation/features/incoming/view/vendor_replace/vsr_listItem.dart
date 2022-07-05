@@ -34,6 +34,8 @@ class _VsrListItemState extends State<VsrListItem> {
   List inventoryList = [];
   List<InventoryHive> masterInvList = [];
   List vsrItemListing = [];
+  List allVsrItem = [];
+  List allVsrNonItem = [];
   // InventoryHive? invName;
   var invName,
       adjustInItem,
@@ -50,6 +52,7 @@ class _VsrListItemState extends State<VsrListItem> {
     getVsrItem();
     getListItem();
     getCommon();
+    getEnterQty();
   }
 
   getVsrItem() {
@@ -75,6 +78,23 @@ class _VsrListItemState extends State<VsrListItem> {
       setState(() {
         inventoryList = value;
         print('item RV list: $inventoryList');
+      });
+    });
+  }
+
+  // Check and get all Item and Non Item in DB
+  getEnterQty() {
+    DBVendorReplaceItem().getAllVsrItem().then((value) {
+      setState(() {
+        allVsrItem = value;
+        // print('after save: $allPoNonItem');
+      });
+    });
+
+    DBVendorReplaceNonItem().getAllVsrNonItem().then((value) {
+      setState(() {
+        allVsrNonItem = value;
+        // print('after save: $allPoItem');
       });
     });
   }
@@ -317,12 +337,48 @@ class _VsrListItemState extends State<VsrListItem> {
                                                     TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
+                                              // Enter Quantity
+                                              snapshot.data[index]['tracking_type'] == '2' ?
                                               Text(
-                                                "${snapshot.data[index]['non_tracking_qty']}",
-                                                style:
-                                                TextStyle(fontSize: 16.0),
+                                                // CHECK ALL ITEM GOT VALUE OR NOT
+                                                allVsrItem.isNotEmpty ?
+                                                allVsrItem.where((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']).isNotEmpty ?
+                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                '${allVsrItem.where((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']).length}'
+                                                // ELSE, DISPLAY 0
+                                                    : '0'
+                                                // IF NO VALUE DISPLAY 0
+                                                    : '0',
                                                 textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
+                                              ) :
+                                              Text(
+                                                // CHECK ALL ITEM GOT VALUE OR NOT
+                                                allVsrNonItem.isNotEmpty ?
+                                                allVsrNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']) != null ?
+                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                "${allVsrNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
+                                                // ELSE, DISPLAY 0
+                                                    : '0'
+                                                // IF NO VALUE DISPLAY 0
+                                                    : '0',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
                                               ),
+                                              // Text(
+                                              //   "${snapshot.data[index]['non_tracking_qty']}",
+                                              //   style:
+                                              //   TextStyle(fontSize: 16.0),
+                                              //   textAlign: TextAlign.center,
+                                              // ),
                                               Container(
                                                 alignment: Alignment.center,
                                                 child: IconButton(
@@ -630,6 +686,7 @@ class _VsrListItemState extends State<VsrListItem> {
           .pushNamed(StmsRoutes.vsrItemCreate)
           .whenComplete(() {
         setState(() {
+          getEnterQty();
           getVsrItem();
           selectedItem = null;
         });
@@ -720,6 +777,7 @@ class _VsrListItemState extends State<VsrListItem> {
                   .whenComplete(() {
                 setState(() {
                   var typeScan = 'invId';
+                  getEnterQty();
                   getVsrItem();
                   selectedItem = null;
                   // scanBarcodeNormal(typeScan);
@@ -738,6 +796,7 @@ class _VsrListItemState extends State<VsrListItem> {
                 .whenComplete(() {
               setState(() {
                 var typeScan = 'invId';
+                getEnterQty();
                 getVsrItem();
                 selectedItem = null;
                // scanBarcodeNormal(typeScan);
@@ -773,6 +832,7 @@ class _VsrListItemState extends State<VsrListItem> {
             .pushNamed(StmsRoutes.vsrItemCreate)
             .whenComplete(() {
           setState(() {
+            getEnterQty();
             getVsrItem();
             selectedItem = null;
           });
@@ -801,6 +861,7 @@ class _VsrListItemState extends State<VsrListItem> {
             .pushNamed(StmsRoutes.vsrItemCreate)
             .whenComplete(() {
           setState(() {
+            getEnterQty();
             getVsrItem();
             selectedItem = null;
           });

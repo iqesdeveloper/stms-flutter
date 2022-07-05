@@ -33,6 +33,8 @@ class _CrListItemState extends State<CrListItem> {
   String _scanBarcode = 'Unknown';
   List<InventoryHive> inventoryList = [];
   List crItemListing = [];
+  List allCrItem = [];
+  List allCrNonItem = [];
   InventoryHive? invName;
   var custRetItem,
       selectedItem,
@@ -47,6 +49,7 @@ class _CrListItemState extends State<CrListItem> {
 
     getCrItem();
     getCommon();
+    getEnterQty();
   }
 
   getCrItem() {
@@ -64,6 +67,23 @@ class _CrListItemState extends State<CrListItem> {
           inventoryList = value;
         });
       }
+    });
+  }
+
+  // Check and get all Item and Non Item in DB
+  getEnterQty() {
+    DBCustReturnItem().getAllCrItem().then((value) {
+      setState(() {
+        allCrItem = value;
+        // print('after save: $allPoNonItem');
+      });
+    });
+
+    DBCustReturnNonItem().getAllCrNonItem().then((value) {
+      setState(() {
+        allCrNonItem = value;
+        // print('after save: $allPoItem');
+      });
     });
   }
 
@@ -305,12 +325,48 @@ class _CrListItemState extends State<CrListItem> {
                                                     TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
+                                              // Enter Quantity
+                                              snapshot.data[index]['tracking_type'] == '2' ?
                                               Text(
-                                                "${snapshot.data[index]['non_tracking_qty']}",
-                                                style:
-                                                TextStyle(fontSize: 16.0),
+                                                // CHECK ALL ITEM GOT VALUE OR NOT
+                                                allCrItem.isNotEmpty ?
+                                                allCrItem.where((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']).isNotEmpty ?
+                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                '${allCrItem.where((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']).length}'
+                                                // ELSE, DISPLAY 0
+                                                    : '0'
+                                                // IF NO VALUE DISPLAY 0
+                                                    : '0',
                                                 textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
+                                              ) :
+                                              Text(
+                                                // CHECK ALL ITEM GOT VALUE OR NOT
+                                                allCrNonItem.isNotEmpty ?
+                                                allCrNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']) != null ?
+                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                "${allCrNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
+                                                // ELSE, DISPLAY 0
+                                                    : '0'
+                                                // IF NO VALUE DISPLAY 0
+                                                    : '0',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
                                               ),
+                                              // Text(
+                                              //   "${snapshot.data[index]['non_tracking_qty']}",
+                                              //   style:
+                                              //   TextStyle(fontSize: 16.0),
+                                              //   textAlign: TextAlign.center,
+                                              // ),
                                               Container(
                                                 alignment: Alignment.center,
                                                 child: IconButton(
@@ -625,6 +681,7 @@ class _CrListItemState extends State<CrListItem> {
     } else {
       Navigator.of(context).pushNamed(StmsRoutes.crItemCreate).whenComplete(() {
         setState(() {
+          getEnterQty();
           getCrItem();
         });
       });
@@ -680,6 +737,7 @@ class _CrListItemState extends State<CrListItem> {
               .whenComplete(() {
             setState(() {
               var typeScan = 'invId';
+              getEnterQty();
               getCrItem();
               // scanBarcodeNormal(typeScan);
             });
@@ -697,6 +755,7 @@ class _CrListItemState extends State<CrListItem> {
             .whenComplete(() {
           setState(() {
             var typeScan = 'invId';
+            getEnterQty();
             getCrItem();
             // scanBarcodeNormal(typeScan);
           });
@@ -725,6 +784,7 @@ class _CrListItemState extends State<CrListItem> {
             .pushNamed(StmsRoutes.crItemCreate)
             .whenComplete(() {
           setState(() {
+            getEnterQty();
             getCrItem();
           });
         });

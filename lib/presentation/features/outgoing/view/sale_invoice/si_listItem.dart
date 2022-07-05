@@ -875,6 +875,7 @@ class _SiItemListViewState extends State<SiItemListView> {
               ))
                   .then((value) {
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 // call and update the enterQty function
@@ -894,6 +895,7 @@ class _SiItemListViewState extends State<SiItemListView> {
                   .update(itemSku.id, newQty.toString())
                   .then((value) {
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 // call and update the enterQty function
@@ -939,6 +941,7 @@ class _SiItemListViewState extends State<SiItemListView> {
               ))
                   .then((value) {
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 // call and update the enterQty function
@@ -958,6 +961,7 @@ class _SiItemListViewState extends State<SiItemListView> {
                   .update(itemUpc.id, newQty.toString())
                   .then((value) {
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 // call and update the enterQty function
@@ -1011,9 +1015,8 @@ class _SiItemListViewState extends State<SiItemListView> {
     // siSerialNo = getInfoSi['items'];
     var itemSerial =
         serialList.firstWhereOrNull((element) => element == barcodeScanRes);
-    print('serialNo: $itemSerial');
 
-    if (null != itemSerial) {
+    if (itemSerial == null) {
       ErrorDialog.showErrorDialog(context, 'Serial No. not match');
     } else {
       DBSaleInvoiceItem().getAllSiItem().then((value) {

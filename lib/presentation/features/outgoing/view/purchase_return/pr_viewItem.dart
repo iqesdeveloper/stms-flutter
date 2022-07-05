@@ -65,7 +65,13 @@ class _PrItemDetailsState extends State<PrItemDetails> {
 
     selectedInvtry = prefs.getString('selectedPrID');
     print('selected inv id pr: $selectedInvtry');
-    itemSNController.text = prefs.getString('itemBarcode')!;
+
+    if (tracking == "2") {
+      itemSNController.text = prefs.getString('itemBarcode')!;
+    } else {
+      itemSNController.text = prefs.getString('itemBarcode')!;
+    }
+
     itemSelectedInventory.text = selectedInvtry;
     tracking = prefs.getString('prTracking');
   }
@@ -176,10 +182,10 @@ class _PrItemDetailsState extends State<PrItemDetails> {
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>
         element.sku == selectedInvtry);
 
-        if(itemAdjust != null){
+        if(itemAdjust == null){
           DBPurchaseReturnItem()
               .createPrItem(PurchaseReturn(
-            itemInvId: itemAdjust.id,
+            itemInvId: itemAdjust!.id,
             itemSerialNo: itemSNController.text,
           ))
               .then((value) {
@@ -189,8 +195,22 @@ class _PrItemDetailsState extends State<PrItemDetails> {
                 context, ModalRoute.withName(StmsRoutes.prItemList));
           });
         } else {
-          ErrorDialog.showErrorDialog(
-              context, 'Similar Serial Number present');
+          if(itemAdjust.sku == itemSNController.text){
+            ErrorDialog.showErrorDialog(
+                context, 'Similar Serial Number present');
+          } else {
+            DBPurchaseReturnItem()
+                .createPrItem(PurchaseReturn(
+              itemInvId: itemAdjust.id,
+              itemSerialNo: itemSNController.text,
+            ))
+                .then((value) {
+              // SuccessDialog.showSuccessDialog(context, 'Item Save');
+              showCustomSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.prItemList));
+            });
+          }
         }
       } else {
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>

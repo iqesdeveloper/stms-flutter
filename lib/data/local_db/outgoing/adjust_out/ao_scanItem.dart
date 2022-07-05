@@ -48,11 +48,11 @@ class DBAdjustOutItem {
   }
 
   // Delete certain serial no
-  Future<int> deleteAoItem(String itemInvID, String itemSerialNo) async {
+  Future<int> deleteAoItem(String itemInvID, String itemSerialNo, String itemReasonCode) async {
     final db = await database;
     final res = await db.rawDelete(
-        'DELETE FROM aoItem WHERE item_inventory_id == ? AND item_serial_no == ?',
-        [itemInvID, itemSerialNo]);
+        'DELETE FROM aoItem WHERE item_inventory_id == ? AND item_serial_no == ? AND item_reason_code == ?',
+        [itemInvID, itemSerialNo, itemReasonCode]);
 
     return res;
   }

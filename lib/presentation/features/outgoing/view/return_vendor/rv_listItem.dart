@@ -32,6 +32,8 @@ class _RvListItemState extends State<RvListItem> {
   String _scanBarcode = 'Unknown';
   List inventoryList = [];
   List rvItemListing = [];
+  List allRvItem = [];
+  List allRvNonItem = [];
   List reasonList = [];
   List<InventoryHive> invMasterList = [];
   // var _future;
@@ -50,6 +52,7 @@ class _RvListItemState extends State<RvListItem> {
     getRvItem();
     getListItem();
     getCommon();
+    getEnterQty();
   }
 
   getRvItem() {
@@ -87,6 +90,23 @@ class _RvListItemState extends State<RvListItem> {
     CustReturnService().getCrItem().then((value) {
       setState(() {
         inventoryList = value;
+      });
+    });
+  }
+
+  // Check and get all Item and Non Item in DB
+  getEnterQty() {
+    DBReturnVendorItem().getAllRvItem().then((value) {
+      setState(() {
+        allRvItem = value;
+        // print('after save: $allPoNonItem');
+      });
+    });
+
+    DBReturnVendorNonItem().getAllRvNonItem().then((value) {
+      setState(() {
+        allRvNonItem = value;
+        // print('after save: $allPoItem');
       });
     });
   }
@@ -226,13 +246,13 @@ class _RvListItemState extends State<RvListItem> {
                                                 ),
                                               ),
                                               Text(
-                                                "1",
+                                                "${snapshot.data[index]['item_serial_no']}",
                                                 style:
-                                                    TextStyle(fontSize: 16.0),
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Text(
-                                                "${snapshot.data[index]['item_serial_no']}",
+                                                "1",
                                                 style:
                                                     TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
@@ -324,17 +344,53 @@ class _RvListItemState extends State<RvListItem> {
                                                 ),
                                               ),
                                               Text(
-                                                "${snapshot.data[index]['non_tracking_qty']}",
-                                                style:
-                                                    TextStyle(fontSize: 16.0),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              Text(
                                                 "-",
                                                 style:
                                                     TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
+                                              // Enter Quantity
+                                              snapshot.data[index]['tracking_type'] == '2' ?
+                                              Text(
+                                                // CHECK ALL ITEM GOT VALUE OR NOT
+                                                allRvItem.isNotEmpty ?
+                                                allRvItem.where((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']).isNotEmpty ?
+                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                '${allRvItem.where((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']).length}'
+                                                // ELSE, DISPLAY 0
+                                                    : '0'
+                                                // IF NO VALUE DISPLAY 0
+                                                    : '0',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
+                                              ) :
+                                              Text(
+                                                // CHECK ALL ITEM GOT VALUE OR NOT
+                                                allRvNonItem.isNotEmpty ?
+                                                allRvNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']) != null ?
+                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                "${allRvNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
+                                                // ELSE, DISPLAY 0
+                                                    : '0'
+                                                // IF NO VALUE DISPLAY 0
+                                                    : '0',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
+                                              ),
+                                              // Text(
+                                              //   "${snapshot.data[index]['non_tracking_qty']}",
+                                              //   style:
+                                              //   TextStyle(fontSize: 16.0),
+                                              //   textAlign: TextAlign.center,
+                                              // ),
                                               Container(
                                                 alignment: Alignment.center,
                                                 child: IconButton(
@@ -627,13 +683,14 @@ class _RvListItemState extends State<RvListItem> {
     prefs.setString('rvTracking', itemAdjust!.type);
     prefs.setString('rvItem', itemAdjust.sku);
 
-    if (itemAdjust.type == '2') {
+    if (itemAdjust.type == 'Serial Number') {
       var typeScan = 'invId';
       scanBarcodeNormal(typeScan);
     } else {
       // prefs.setString('itemQty', itemAdjust['item_quantity']);
       Navigator.of(context).pushNamed(StmsRoutes.rvItemCreate).whenComplete(() {
         setState(() {
+          getEnterQty();
           getRvItem();
         });
       });
@@ -681,20 +738,27 @@ class _RvListItemState extends State<RvListItem> {
     var itemAdjust = inventoryList.firstWhereOrNull(
         (element) => element['item_inventory_id'] == selectedId);
 
+
+    print('TEST1: $itemAdjust');
+
     if (itemAdjust != null) {
       List currentSerial = itemAdjust['serial_list'];
       var serialList =
           currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
+
+      print('TEST2: $serialList');
 
       if (serialList != null) {
         DBReturnVendorItem().getAllRvItem().then((value) {
           // ignore: unnecessary_null_comparison
           if (value != null) {
             rvItemListing = value;
-            // print('item Serial list: $value');
+            print('item Serial list: $value');
 
             var itemRv = rvItemListing.firstWhereOrNull(
                 (element) => element['item_serial_no'] == barcodeScanRes);
+            print('TEST3: $itemRv');
+
             if (null == itemRv) {
               prefs.setString("itemBarcode", barcodeScanRes);
 
@@ -703,8 +767,9 @@ class _RvListItemState extends State<RvListItem> {
                   .whenComplete(() {
                 setState(() {
                   var typeScan = 'invId';
+                  getEnterQty();
                   getRvItem();
-                  // scanBarcodeNormal(typeScan);
+                  scanBarcodeNormal(typeScan);
                 });
               });
             } else {
@@ -720,8 +785,9 @@ class _RvListItemState extends State<RvListItem> {
                 .whenComplete(() {
               setState(() {
                 var typeScan = 'invId';
+                getEnterQty();
                 getRvItem();
-                // scanBarcodeNormal(typeScan);
+                scanBarcodeNormal(typeScan);
               });
             });
           }
@@ -745,7 +811,7 @@ class _RvListItemState extends State<RvListItem> {
       prefs.setString('rvTracking', itemAdjust['tracking_type']);
       prefs.setString('rvItem', itemAdjust['item_name']);
 
-      if (itemAdjust['tracking_type'] == '2') {
+      if (itemAdjust['tracking_type'] == 'Serial Number') {
         scanItemSerial();
       } else {
         //prefs.setString('itemQty', itemAdjust['item_quantity']);
@@ -753,6 +819,7 @@ class _RvListItemState extends State<RvListItem> {
             .pushNamed(StmsRoutes.rvItemCreate)
             .whenComplete(() {
           setState(() {
+            getEnterQty();
             getRvItem();
           });
         });
@@ -773,7 +840,7 @@ class _RvListItemState extends State<RvListItem> {
       prefs.setString('rvTracking', itemAdjustUpc.type);
       prefs.setString('rvItem', itemAdjustUpc.sku);
 
-      if (itemAdjustUpc.type == '2') {
+      if (itemAdjustUpc.type == 'Serial Number') {
         scanItemSerial();
       } else {
        //  prefs.setString('itemQty', itemAdjust['item_quantity']);
@@ -781,6 +848,7 @@ class _RvListItemState extends State<RvListItem> {
             .pushNamed(StmsRoutes.rvItemCreate)
             .whenComplete(() {
           setState(() {
+            getEnterQty();
             getRvItem();
           });
         });

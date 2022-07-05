@@ -55,8 +55,13 @@ class _StCreateItemState extends State<StCreateItem> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     transferTrack = prefs.getString('transferTracking');
     selectedInvtry = prefs.getString('transferItem');
-    itemSnController.text = prefs.getString('itemBarcode')!;
+
+    if (transferTrack == "Serial Number" || transferTrack == "2") {
+      itemSnController.text = prefs.getString('itemBarcode')!;
+    }
+
     itemSelectedInventory.text = selectedInvtry;
+    print('TEST: ${itemSelectedInventory.text}');
   }
 
   getCommon() {
@@ -119,7 +124,10 @@ class _StCreateItemState extends State<StCreateItem> {
                         key: itemSelectedInvKey,
                         readOnly: true,
                         decoration: InputDecoration(
-                          labelText: 'Item Inventory ID',
+                            labelText: 'Item Inventory ID',
+                            labelStyle: TextStyle(
+                              color: Colors.blue,
+                            )
                         ),
                         style: TextStyle(
                           color: Colors.grey,
@@ -217,11 +225,14 @@ class _StCreateItemState extends State<StCreateItem> {
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>
         element.sku == selectedInvtry);
 
-        if(itemAdjust == null){
+        print('TESTING: ${itemAdjust!.id}');
+
+        // ignore: unnecessary_null_comparison
+        if(itemAdjust == null){} else {
           DBStockTransItem()
               .createStItem(
             StockTransItem(
-              itemIvId: itemAdjust!.sku,
+              itemIvId: itemAdjust.id,
               itemSn: itemSnController.text,
               itemReason: selectedReason,
             ),
@@ -232,20 +243,14 @@ class _StCreateItemState extends State<StCreateItem> {
             Navigator.popUntil(
                 context, ModalRoute.withName(StmsRoutes.stItemList));
           });
-        } else {
-          Navigator.popUntil(
-              context, ModalRoute.withName(StmsRoutes.stItemList));
-
-          ErrorDialog.showErrorDialog(
-              context, 'This SKU already exists.');
         }
+
       } else {
         if (int.parse(itemNonQtyController.text) <= 0) {
           ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
         } else {
           if (Storage().transfer == '1') {
             DBStockTransNonItem().getAllStNonItem().then((value) {
-
               var itemAdjust = inventoryList.firstWhereOrNull((element) =>
               element.sku == selectedInvtry);
 
@@ -255,8 +260,7 @@ class _StCreateItemState extends State<StCreateItem> {
 
                   if(itemAdjust != null){
                     var itemSt = listingSt.firstWhereOrNull((element) =>
-                    element['item_inventory_id'] == itemAdjust.sku);
-
+                    element['item_inventory_id'] == itemAdjust.id);
                     if (null == itemSt) {
                       String? getQty = prefs.getString('itemQty');
                       var currentQty = int.parse(getQty!);
@@ -265,7 +269,7 @@ class _StCreateItemState extends State<StCreateItem> {
                         DBStockTransNonItem()
                             .createStNonItem(
                           StockTransNonItem(
-                            itemIvId: itemSt['item_name'],
+                            itemIvId: itemAdjust.id,
                             itemNonQty: itemNonQtyController.text,
                             itemReason: selectedReason,
                           ),
@@ -287,34 +291,46 @@ class _StCreateItemState extends State<StCreateItem> {
                           context, 'This SKU already exists.');
                     }
                   } else {
-                    Navigator.popUntil(
-                        context, ModalRoute.withName(StmsRoutes.stItemList));
-
-                    ErrorDialog.showErrorDialog(
-                        context, 'This SKU already exists.');
+                    if(itemAdjust != null){
+                      DBStockTransNonItem()
+                          .createStNonItem(
+                        StockTransNonItem(
+                          itemIvId: itemAdjust.id,
+                          itemNonQty: itemNonQtyController.text,
+                          itemReason: selectedReason,
+                        ),
+                      )
+                          .then((value) {
+                        showCustomSuccess('Item Save');
+                        Navigator.popUntil(
+                            context, ModalRoute.withName(StmsRoutes.stItemList));
+                      });
+                    }
                   }
                 });
               } else {
                 String? getQty = prefs.getString('itemQty');
                 var currentQty = int.parse(getQty!);
 
-                if (int.parse(itemNonQtyController.text) <= currentQty) {
-                  DBStockTransNonItem()
-                      .createStNonItem(
-                    StockTransNonItem(
-                      itemIvId: itemAdjust!.sku,
-                      itemNonQty: itemNonQtyController.text,
-                      itemReason: selectedReason,
-                    ),
-                  )
-                      .then((value) {
-                    showCustomSuccess('Item Save');
-                    Navigator.popUntil(
-                        context, ModalRoute.withName(StmsRoutes.stItemList));
-                  });
-                } else {
-                  ErrorDialog.showErrorDialog(
-                      context, 'Quantity cannot more than current quantity.');
+                if(itemAdjust != null){
+                  if (int.parse(itemNonQtyController.text) <= currentQty) {
+                    DBStockTransNonItem()
+                        .createStNonItem(
+                      StockTransNonItem(
+                        itemIvId: itemAdjust.id,
+                        itemNonQty: itemNonQtyController.text,
+                        itemReason: selectedReason,
+                      ),
+                    )
+                        .then((value) {
+                      showCustomSuccess('Item Save');
+                      Navigator.popUntil(
+                          context, ModalRoute.withName(StmsRoutes.stItemList));
+                    });
+                  } else {
+                    ErrorDialog.showErrorDialog(
+                        context, 'Quantity cannot more than current quantity.');
+                  }
                 }
               }
             });
@@ -326,16 +342,14 @@ class _StCreateItemState extends State<StCreateItem> {
               if (value != null) {
                 setState(() {
                   List listingSt = value;
-
                   if(itemAdjust != null){
                     var itemSt = listingSt.firstWhereOrNull((element) =>
-                    element['item_inventory_id'] == itemAdjust.sku);
-
+                    element['item_inventory_id'] == itemAdjust.id);
                     if (null == itemSt) {
                       DBStockTransNonItem()
                           .createStNonItem(
                         StockTransNonItem(
-                          itemIvId: itemSt['tem_name'],
+                          itemIvId: itemAdjust.id,
                           itemNonQty: itemNonQtyController.text,
                           itemReason: selectedReason,
                         ),
@@ -353,28 +367,39 @@ class _StCreateItemState extends State<StCreateItem> {
                           context, 'This SKU already exists.');
                     }
                   } else {
-                    Navigator.popUntil(
-                        context, ModalRoute.withName(StmsRoutes.stItemList));
-
-                    ErrorDialog.showErrorDialog(
-                        context, 'This SKU already exists.');
+                    if(itemAdjust != null){
+                      DBStockTransNonItem()
+                          .createStNonItem(
+                        StockTransNonItem(
+                          itemIvId: itemAdjust.id,
+                          itemNonQty: itemNonQtyController.text,
+                          itemReason: selectedReason,
+                        ),
+                      )
+                          .then((value) {
+                        showCustomSuccess('Item Save');
+                        Navigator.popUntil(
+                            context, ModalRoute.withName(StmsRoutes.stItemList));
+                      });
+                    }
                   }
                 });
-
               } else {
-                DBStockTransNonItem()
-                    .createStNonItem(
-                  StockTransNonItem(
-                    itemIvId: itemAdjust!.sku,
-                    itemNonQty: itemNonQtyController.text,
-                    itemReason: selectedReason,
-                  ),
-                )
-                    .then((value) {
-                  showCustomSuccess('Item Save');
-                  Navigator.popUntil(
-                      context, ModalRoute.withName(StmsRoutes.stItemList));
-                });
+                if(itemAdjust != null){
+                  DBStockTransNonItem()
+                      .createStNonItem(
+                    StockTransNonItem(
+                      itemIvId: itemAdjust.id,
+                      itemNonQty: itemNonQtyController.text,
+                      itemReason: selectedReason,
+                    ),
+                  )
+                      .then((value) {
+                    showCustomSuccess('Item Save');
+                    Navigator.popUntil(
+                        context, ModalRoute.withName(StmsRoutes.stItemList));
+                  });
+                }
               }
             });
           }

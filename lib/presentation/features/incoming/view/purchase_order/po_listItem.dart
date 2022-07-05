@@ -166,7 +166,6 @@ class _PoItemListViewState extends State<PoItemListView> {
         // Display and get all the PoNonItem after scanDB collected.
         // It is the save info
         allPoNonItem = value;
-        print('SHOW ALL PO: $allPoNonItem');
 
 
       });
@@ -367,12 +366,12 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                   // Using the 'where' will go through the check process like a looping
 
                                                   allPoItem.isNotEmpty ? allPoItem.where((element)
-                                                  => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] ==
-                                                      snapshot.data[index]['line_seq_no']).isNotEmpty
+                                                  => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                      && element['line_seq_no'] == snapshot.data[index]['line_seq_no']).isNotEmpty
                                                   // once check, if it is containing a value or the item_id in DB is same in the master file
                                                   // Get the length of the item_id
-                                                      ? '${allPoItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] ==
-                                                      snapshot.data[index]['line_seq_no']).length}'
+                                                      ? '${allPoItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                      && element['line_seq_no'] == snapshot.data[index]['line_seq_no']).length}'
                                                   // If there is no match, then the result is display '0'
                                                       : '0'
                                                   // If the overall result is default as nothing, the display will also show '0'
@@ -384,11 +383,12 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                 )
                                                     : Text(
                                                   allPoNonItem.isNotEmpty ? allPoNonItem.firstWhereOrNull((element) =>
-                                                  element['item_inventory_id'] == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] ==
-                                                      snapshot.data[index]['line_seq_no']) != null
-                                                      ? allPoNonItem.firstWhereOrNull((element) =>
-                                                      element['item_inventory_id'] == snapshot.data[index]['item_inventory_id'] && element['line_seq_no'] ==
-                                                          snapshot.data[index]['line_seq_no'])['non_tracking_qty'] : '0' : '0',
+                                                  element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                      && element['line_seq_no'] == snapshot.data[index]['line_seq_no']) != null
+                                                      ? "${allPoNonItem.firstWhereOrNull((element) =>
+                                                  element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                      && element['line_seq_no'] == snapshot.data[index]['line_seq_no'])['non_tracking_qty']}"
+                                                      : '0' : '0',
                                                   style: TextStyle(
                                                       fontSize: 16.0
                                                   ),
@@ -1002,6 +1002,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 // call and update the enterQty function
@@ -1015,11 +1016,12 @@ class _PoItemListViewState extends State<PoItemListView> {
                       (element) => element['item_inventory_id'] == itemSku.id
                           && element['line_seq_no'] == selectedItemSequence);
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
-              var newQty = int.parse(getItem['non_tracking_qty'])+1;
+              var newQty = int.parse(getItem['non_tracking_qty']);
               DBPoNonItem()
                   .update(itemSku.id, newQty.toString(), selectedItemSequence)
                   .then((value) {
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 getEnterQty();
@@ -1071,6 +1073,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                   .then((value) {
                 // SuccessDialog.showSuccessDialog(context, 'Item Save');
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 // call and update the enterQty function
@@ -1085,17 +1088,24 @@ class _PoItemListViewState extends State<PoItemListView> {
                           && element['line_seq_no'] == selectedItemSequence);
 
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
-              var newQty = int.parse(getItem['non_tracking_qty']) + 1;
-              DBPoNonItem()
-                  .update(itemUpc.id, newQty.toString(), selectedItemSequence)
-                  .then((value) {
-                getEnterQty();
-                setState(() {
-                  showCustomSuccess('Item Save');
+              if(getItem['non_tracking_qty'] == 0){
+                var newQty = int.parse(getItem['non_tracking_qty'])+1;
+                print('QTY: $newQty');
+                DBPoNonItem()
+                    .update(itemUpc.id, newQty.toString(), selectedItemSequence)
+                    .then((value) {
+                  getEnterQty();
+                  setState(() {
+                    fToast.init(context);
+                    showCustomSuccess('Item Save');
+                  });
+                  var _duration = Duration(seconds: 1);
+                  return Timer(_duration, scanSKU);
                 });
-                var _duration = Duration(seconds: 1);
-                return Timer(_duration, scanSKU);
-              });
+              } else {
+                // Want to make sure if to set it to zero.
+                // Cause it need to reset once scan and not add up from manual scan
+              }
             }
           });
         } else {
@@ -1211,6 +1221,9 @@ class _PoItemListViewState extends State<PoItemListView> {
       } else {
         combineUpdated = poSerial;
       }
+      print('CHECK: $poSerial');
+      print('CHECK2: $poNonTrack');
+      print('CHECK3: $combineUpdated');
 
       IncomingService().sendToServer(combineUpdated).then((value) {
         if (value['status'] == true) {

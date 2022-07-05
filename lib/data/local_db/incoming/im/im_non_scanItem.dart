@@ -48,10 +48,11 @@ class DBItemModifyNonItem {
   }
 
   // Delete certain serial no
-  Future<int> deleteImNonItem(String itemInvID) async {
+  Future<int> deleteImNonItem(String itemInvID, String itemReasonCode) async {
     final db = await database;
     final res = await db.rawDelete(
-        'DELETE FROM imNonItem WHERE item_inventory_id == ?', [itemInvID]);
+        'DELETE FROM imNonItem WHERE item_inventory_id == ? AND item_reason_code == ?',
+        [itemInvID, itemReasonCode]);
 
     return res;
   }

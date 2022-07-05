@@ -26,7 +26,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
   List vendorList = [];
   List poList = [];
   var testList;
-  var selectedVendor, selectedPo;
+  var selectedVendor, selectedPo, poTotalItem;
 
   // upon start this page, it will run the vendorList function
   // vendorList function calls the item contain vendor in API
@@ -167,6 +167,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                                       (element) =>
                                           element['name'] == selectedVendor);
                                   selectedPo = null;
+                                  poTotalItem = null;
                                   getPoList(vendorId['id']);
                                 });
                               },
@@ -298,8 +299,13 @@ class _PoDownloadViewState extends State<PoDownloadView> {
     if (selectedPo == null) {
       ErrorDialog.showErrorDialog(context, 'Please select Purchase Order');
     } else {
+      // poTotalItem = poList.firstWhereOrNull((element) => element['po_id']
+      // == selectedPo);
+
+      // print('TEST: ${poTotalItem['total_item']}');
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('poID', selectedPo);
+   //   prefs.setString('poTotalItem', poTotalItem['total_item']);
       removeListItem();
 
       IncomingService().getPurchaseOrderItem().then((value) {

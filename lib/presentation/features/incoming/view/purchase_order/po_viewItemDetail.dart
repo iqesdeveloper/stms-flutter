@@ -67,11 +67,16 @@ class _PoItemDetailsState extends State<PoItemDetails> {
 
     selectedInvtry = prefs.getString('selectedIvID');
     selectedVendorItem = prefs.getString('vendorItemNo');
-    itemSNController.text = prefs.getString('itemBarcode')!;
+
+    if (tracking == "2") {
+      itemSNController.text = prefs.getString('itemBarcode')!;
+    } else {
+      itemSNController.text = prefs.getString('itemBarcode')!;
+    }
+
     selectedItemSequence = prefs.getString('line_seq_no');
     itemSelectedInventory.text = selectedInvtry;
     tracking = prefs.getString('poTracking');
-    print("selectedInvtry : $selectedItemSequence");
   }
 
   getCommon() {
@@ -85,14 +90,14 @@ class _PoItemDetailsState extends State<PoItemDetails> {
         });
       }
     });
-    DBPoNonItem().getAllPoNonItem().then((value){
-      setState(() {
-        getAllPoNonItems = value;
-      });
-    });
     DBPoItem().getAllPoItem().then((value){
       setState(() {
         getAllPoItems = value;
+      });
+    });
+    DBPoNonItem().getAllPoNonItem().then((value){
+      setState(() {
+        getAllPoNonItems = value;
       });
     });
   }
@@ -254,7 +259,8 @@ class _PoItemDetailsState extends State<PoItemDetails> {
             });
           } else {
             if(itemSequence['line_seq_no'] == selectedItemSequence &&
-                itemSequence['item_serial_no'] != itemSNController.text){
+                itemSequence['item_serial_no'] == itemSNController.text &&
+                itemSequence['vendor_item_number'] == itemSNController.text){
               ErrorDialog.showErrorDialog(
                   context, 'Similar Serial Number present');
             } else {

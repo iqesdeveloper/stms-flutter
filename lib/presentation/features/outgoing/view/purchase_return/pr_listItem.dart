@@ -792,6 +792,7 @@ class _PrItemListViewState extends State<PrItemListView> {
               ))
                   .then((value) {
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 // call and update the enterQty function
@@ -811,6 +812,7 @@ class _PrItemListViewState extends State<PrItemListView> {
                   .update(itemSku.id, newQty.toString())
                   .then((value) {
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 // call and update the enterQty function
@@ -856,6 +858,7 @@ class _PrItemListViewState extends State<PrItemListView> {
               ))
                   .then((value) {
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 // call and update the enterQty function
@@ -875,6 +878,7 @@ class _PrItemListViewState extends State<PrItemListView> {
                   .update(itemUpc.id, newQty.toString())
                   .then((value) {
                 setState(() {
+                  fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
                 // call and update the enterQty function
@@ -930,7 +934,7 @@ class _PrItemListViewState extends State<PrItemListView> {
         serialList.firstWhereOrNull((element) => element == barcodeScanRes);
     print('serialNo: $itemSerial');
 
-    if (null != itemSerial) {
+    if (itemSerial == null) {
       ErrorDialog.showErrorDialog(context, 'Serial No. not match');
     } else {
       DBPurchaseReturnItem().getAllPrItem().then((value) {

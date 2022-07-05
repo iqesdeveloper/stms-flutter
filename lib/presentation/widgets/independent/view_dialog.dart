@@ -5,6 +5,7 @@ import 'package:stms/data/local_db/incoming/sr/sr_scanItem_db.dart';
 import 'package:stms/data/local_db/outgoing/paivt/paivt_scanItem.dart';
 import 'package:stms/data/local_db/outgoing/pr/pr_scanItem.dart';
 import 'package:stms/data/local_db/outgoing/si/si_scanItem.dart';
+import 'package:stms/presentation/widgets/independent/custom_toast.dart';
 import 'package:stms/presentation/widgets/independent/error_dialog.dart';
 import 'package:stms/presentation/widgets/independent/toast_dialog.dart';
 
@@ -17,6 +18,7 @@ class ViewDialog extends StatelessWidget {
     required this.urlList,
     required this.db,
   }) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -186,7 +188,8 @@ class ViewDialog extends StatelessWidget {
     if (db == 'DBPoItem') {
       DBPoItem().deletePoItem(serialNo).then((value) {
         if (value == 1) {
-          showSuccess('Delete Successful');
+          fToast.init(context);
+          showCustomSuccess('Delete Successful');
           Navigator.pop(context);
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -195,8 +198,10 @@ class ViewDialog extends StatelessWidget {
     } else if (db == 'DBPaivItem') {
       DBPaivItem().deletePaivItem(serialNo).then((value) {
         if (value == 1) {
-          showSuccess('Delete Successful');
+          fToast.init(context);
+          showCustomSuccess('Delete Successful');
           Navigator.pop(context);
+
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
         }
@@ -204,7 +209,8 @@ class ViewDialog extends StatelessWidget {
     } else if (db == 'DBSaleReturnItem') {
       DBSaleReturnItem().deleteSrItem(serialNo).then((value) {
         if (value == 1) {
-          showSuccess('Delete Successful');
+          fToast.init(context);
+          showCustomSuccess('Delete Successful');
           Navigator.pop(context);
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -213,7 +219,8 @@ class ViewDialog extends StatelessWidget {
     } else if (db == 'DBSaleInvoiceItem') {
       DBSaleInvoiceItem().deleteSiItem(serialNo).then((value) {
         if (value == 1) {
-          showSuccess('Delete Successful');
+          fToast.init(context);
+          showCustomSuccess('Delete Successful');
           Navigator.pop(context);
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -222,7 +229,8 @@ class ViewDialog extends StatelessWidget {
     } else if (db == 'DBPaivtItem') {
       DBPaivtItem().deletePaivtItem(serialNo).then((value) {
         if (value == 1) {
-          showSuccess('Delete Successful');
+          fToast.init(context);
+          showCustomSuccess('Delete Successful');
           Navigator.pop(context);
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -231,7 +239,8 @@ class ViewDialog extends StatelessWidget {
     } else if (db == 'DBPurchaseReturnItem') {
       DBPurchaseReturnItem().deletePrItem(serialNo).then((value) {
         if (value == 1) {
-          showSuccess('Delete Successful');
+          fToast.init(context);
+          showCustomSuccess('Delete Successful');
           Navigator.pop(context);
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');

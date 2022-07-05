@@ -71,7 +71,13 @@ class _SrItemDetailsState extends State<SrItemDetails> {
 
     selectedInvtry = prefs.getString('selectedSrID');
     // print('selected sr inventory id: $selectedInvtry');
-    itemSNController.text = prefs.getString('itemBarcode')!;
+
+    if (tracking == "2") {
+      itemSNController.text = prefs.getString('itemBarcode')!;
+    } else {
+      itemSNController.text = prefs.getString('itemBarcode')!;
+    }
+
     itemSelectedInventory.text = selectedInvtry;
     tracking = prefs.getString('srTracking');
   }
@@ -210,8 +216,22 @@ class _SrItemDetailsState extends State<SrItemDetails> {
                 context, ModalRoute.withName(StmsRoutes.srItemList));
           });
         } else {
-          ErrorDialog.showErrorDialog(
-              context, 'Similar Serial Number present');
+          if(itemAdjust.sku == itemSNController.text){
+            ErrorDialog.showErrorDialog(
+                context, 'Similar Serial Number present');
+          } else {
+            DBSaleReturnItem()
+                .createSrItem(SaleReturn(
+              itemInvId: itemAdjust.id,
+              itemSerialNo: itemSNController.text,
+            ))
+                .then((value) {
+              // SuccessDialog.showSuccessDialog(context, 'Item Save');
+              showCustomSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.srItemList));
+            });
+          }
         }
 
       } else {

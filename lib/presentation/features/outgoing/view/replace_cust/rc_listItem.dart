@@ -42,6 +42,8 @@ class _RcListItemState extends State<RcListItem> {
   List rcItemListing = [];
   List reasonList = [];
   List repairList = [];
+  List allRcItem = [];
+  List allRcNonItem = [];
   late InventoryHive invName;
   var invSerial,
       reasonName,
@@ -61,6 +63,7 @@ class _RcListItemState extends State<RcListItem> {
     getCrListItem();
     transactionType();
     getCommon();
+    getEnterQty();
   }
 
   getRcItem() {
@@ -134,6 +137,23 @@ class _RcListItemState extends State<RcListItem> {
           masterInventoryList = value;
         });
       }
+    });
+  }
+
+  // Check and get all Item and Non Item in DB
+  getEnterQty() {
+    DBReplaceCustItem().getAllRricItem().then((value) {
+      setState(() {
+        allRcItem = value;
+        // print('after save: $allPoNonItem');
+      });
+    });
+
+    DBReplaceCustNonItem().getAllRricNonItem().then((value) {
+      setState(() {
+        allRcNonItem = value;
+        // print('after save: $allPoItem');
+      });
     });
   }
 
@@ -288,7 +308,7 @@ class _RcListItemState extends State<RcListItem> {
                                               Text(
                                                 "${snapshot.data[index]['item_serial_no']}",
                                                 style:
-                                                    TextStyle(fontSize: 16.0),
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
                                               Text(
@@ -396,12 +416,48 @@ class _RcListItemState extends State<RcListItem> {
                                                     TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
                                               ),
+                                              // Enter Quantity
+                                              snapshot.data[index]['tracking_type'] == '2' ?
                                               Text(
-                                                "${snapshot.data[index]['non_tracking_qty']}",
-                                                style:
-                                                TextStyle(fontSize: 16.0),
+                                                // CHECK ALL ITEM GOT VALUE OR NOT
+                                                allRcItem.isNotEmpty ?
+                                                allRcItem.where((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']).isNotEmpty ?
+                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                '${allRcItem.where((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']).length}'
+                                                // ELSE, DISPLAY 0
+                                                    : '0'
+                                                // IF NO VALUE DISPLAY 0
+                                                    : '0',
                                                 textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
+                                              ) :
+                                              Text(
+                                                // CHECK ALL ITEM GOT VALUE OR NOT
+                                                allRcNonItem.isNotEmpty ?
+                                                allRcNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']) != null ?
+                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                "${allRcNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
+                                                // ELSE, DISPLAY 0
+                                                    : '0'
+                                                // IF NO VALUE DISPLAY 0
+                                                    : '0',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
                                               ),
+                                              // Text(
+                                              //   "${snapshot.data[index]['non_tracking_qty']}",
+                                              //   style:
+                                              //   TextStyle(fontSize: 16.0),
+                                              //   textAlign: TextAlign.center,
+                                              // ),
                                               Container(
                                                 alignment: Alignment.center,
                                                 child: IconButton(
@@ -702,6 +758,7 @@ class _RcListItemState extends State<RcListItem> {
 
       Navigator.of(context).pushNamed(StmsRoutes.rcItemCreate).whenComplete(() {
         setState(() {
+          getEnterQty();
           getRcItem();
         });
       });
@@ -774,6 +831,7 @@ class _RcListItemState extends State<RcListItem> {
                   .whenComplete(() {
                 setState(() {
                   var typeScan = 'invId';
+                  getEnterQty();
                   getRcItem();
                   // scanBarcodeNormal(typeScan);
                 });
@@ -791,6 +849,7 @@ class _RcListItemState extends State<RcListItem> {
                 .whenComplete(() {
               setState(() {
                 var typeScan = 'invId';
+                getEnterQty();
                 getRcItem();
                 // scanBarcodeNormal(typeScan);
               });
@@ -833,6 +892,7 @@ class _RcListItemState extends State<RcListItem> {
             .pushNamed(StmsRoutes.rcItemCreate)
             .whenComplete(() {
           setState(() {
+            getEnterQty();
             getRcItem();
           });
         });
@@ -869,6 +929,7 @@ class _RcListItemState extends State<RcListItem> {
               .pushNamed(StmsRoutes.rcItemCreate)
               .whenComplete(() {
             setState(() {
+              getEnterQty();
               getRcItem();
             });
           });

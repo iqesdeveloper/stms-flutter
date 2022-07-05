@@ -34,6 +34,8 @@ class _AoListItemState extends State<AoListItem> {
   List<InventoryHive> inventoryList = [];
   List aoItemListing = [];
   List reasonList = [];
+  List allAoItem = [];
+  List allAoNonItem = [];
   InventoryHive? invName;
   var reasonName,
       adjustOutItem,
@@ -49,6 +51,7 @@ class _AoListItemState extends State<AoListItem> {
 
     getAdjustItem();
     getCommon();
+    getEnterQty();
   }
 
   getAdjustItem() {
@@ -78,6 +81,23 @@ class _AoListItemState extends State<AoListItem> {
           reasonList = value;
         });
       }
+    });
+  }
+
+  // Check and get all Item and Non Item in DB
+  getEnterQty() {
+    DBAdjustOutItem().getAllAoItem().then((value) {
+      setState(() {
+        allAoItem = value;
+        // print('after save: $allPoNonItem');
+      });
+    });
+
+    DBAdjustOutNonItem().getAllAoNonItem().then((value) {
+      setState(() {
+        allAoNonItem = value;
+        // print('after save: $allPoItem');
+      });
     });
   }
 
@@ -236,7 +256,7 @@ class _AoListItemState extends State<AoListItem> {
                                               ),
                                               // Enter Quantity
                                               Text(
-                                                "${snapshot.data[index]['non_tracking_qty']}",
+                                                "1",
                                                 style:
                                                 TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
@@ -248,11 +268,9 @@ class _AoListItemState extends State<AoListItem> {
                                                   onPressed: () {
                                                     var type = 'serial';
                                                     getDB(
-                                                        snapshot.data[index][
-                                                            'item_inventory_id'],
-                                                        type,
-                                                        snapshot.data[index]
-                                                            ['item_serial_no']);
+                                                        snapshot.data[index]['item_inventory_id'],
+                                                        type, snapshot.data[index]['item_serial_no'],
+                                                    snapshot.data[index]['item_reason_code']);
                                                   },
                                                   icon: Icon(
                                                     Icons.delete,
@@ -343,12 +361,52 @@ class _AoListItemState extends State<AoListItem> {
                                                 textAlign: TextAlign.center,
                                               ),
                                               // Enter Quantity
+                                              snapshot.data[index]['tracking_type'] == '2' ?
                                               Text(
-                                                "${snapshot.data[index]['non_tracking_qty']}",
-                                                style:
-                                                TextStyle(fontSize: 16.0),
+                                                // CHECK ALL ITEM GOT VALUE OR NOT
+                                                allAoItem.isNotEmpty ?
+                                                allAoItem.where((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id'] &&
+                                                    element['item_reason_code'] == snapshot.data[index]['item_reason_code']).isNotEmpty ?
+                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                '${allAoItem.where((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']
+                                                    && element['item_reason_code'] == snapshot.data[index]['item_reason_code']).length}'
+                                                // ELSE, DISPLAY 0
+                                                    : '0'
+                                                // IF NO VALUE DISPLAY 0
+                                                    : '0',
                                                 textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
+                                              ) :
+                                              Text(
+                                                // CHECK ALL ITEM GOT VALUE OR NOT
+                                                allAoNonItem.isNotEmpty ?
+                                                allAoNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id'] &&
+                                                    element['item_reason_code'] == snapshot.data[index]['item_reason_code']) != null ?
+                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                "${allAoNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                    snapshot.data[index]['item_inventory_id']
+                                                    && element['item_reason_code'] == snapshot.data[index]['item_reason_code'])['non_tracking_qty']}"
+                                                // ELSE, DISPLAY 0
+                                                    : '0'
+                                                // IF NO VALUE DISPLAY 0
+                                                    : '0',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 16.0
+                                                ),
                                               ),
+                                              // Enter Quantity
+                                              // Text(
+                                              //   "${snapshot.data[index]['non_tracking_qty']}",
+                                              //   style:
+                                              //   TextStyle(fontSize: 16.0),
+                                              //   textAlign: TextAlign.center,
+                                              // ),
                                               Container(
                                                 alignment: Alignment.center,
                                                 child: IconButton(
@@ -359,7 +417,7 @@ class _AoListItemState extends State<AoListItem> {
                                                         snapshot.data[index][
                                                             'item_inventory_id'],
                                                         type,
-                                                        '-');
+                                                        '-', snapshot.data[index]['item_reason_code']);
                                                   },
                                                   icon: Icon(
                                                     Icons.delete,
@@ -418,9 +476,9 @@ class _AoListItemState extends State<AoListItem> {
     );
   }
 
-  getDB(String itemInvId, String type, String itemSerialNo) {
+  getDB(String itemInvId, String type, String itemSerialNo, String itemReasonCode) {
     if (type == 'serial') {
-      DBAdjustOutItem().deleteAoItem(itemInvId, itemSerialNo).then((value) {
+      DBAdjustOutItem().deleteAoItem(itemInvId, itemSerialNo, itemReasonCode).then((value) {
         if (value == 1) {
           setState(() {
             fToast.init(context);
@@ -432,7 +490,7 @@ class _AoListItemState extends State<AoListItem> {
         }
       });
     } else {
-      DBAdjustOutNonItem().deleteAoNonItem(itemInvId).then((value) {
+      DBAdjustOutNonItem().deleteAoNonItem(itemInvId, itemReasonCode).then((value) {
         if (value == 1) {
           setState(() {
             fToast.init(context);
@@ -665,6 +723,7 @@ class _AoListItemState extends State<AoListItem> {
     } else {
       Navigator.of(context).pushNamed(StmsRoutes.aoItemCreate).whenComplete(() {
         setState(() {
+          getEnterQty();
           getAdjustItem();
         });
       });
@@ -723,8 +782,9 @@ class _AoListItemState extends State<AoListItem> {
               .whenComplete(() {
             setState(() {
               var typeScan = 'invId';
+              getEnterQty();
               getAdjustItem();
-              // scanBarcodeNormal(typeScan);
+              scanBarcodeNormal(typeScan);
             });
           });
         } else {
@@ -740,8 +800,9 @@ class _AoListItemState extends State<AoListItem> {
             .whenComplete(() {
           setState(() {
             var typeScan = 'invId';
+            getEnterQty();
             getAdjustItem();
-            // scanBarcodeNormal(typeScan);
+            scanBarcodeNormal(typeScan);
           });
         });
       }
@@ -767,6 +828,7 @@ class _AoListItemState extends State<AoListItem> {
             .pushNamed(StmsRoutes.aoItemCreate)
             .whenComplete(() {
           setState(() {
+            getEnterQty();
             getAdjustItem();
           });
         });
@@ -793,6 +855,7 @@ class _AoListItemState extends State<AoListItem> {
             .pushNamed(StmsRoutes.aoItemCreate)
             .whenComplete(() {
           setState(() {
+            getEnterQty();
             getAdjustItem();
           });
         });

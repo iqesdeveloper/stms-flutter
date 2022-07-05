@@ -32,6 +32,8 @@ class _ImListItemState extends State<ImListItem> {
   // ignore: unused_field
   String _scanBarcode = 'Unknown';
   List<InventoryHive> inventoryList = [];
+  List allIMItem = [];
+  List allIMNonItem = [];
   List imItemListing = [];
   List reasonList = [];
   InventoryHive? invName;
@@ -50,6 +52,7 @@ class _ImListItemState extends State<ImListItem> {
 
     getModifyItem();
     getCommon();
+    getEnterQty();
   }
 
   getModifyItem() {
@@ -79,6 +82,23 @@ class _ImListItemState extends State<ImListItem> {
           reasonList = value;
         });
       }
+    });
+  }
+
+  // Check and get all Item and Non Item in DB
+  getEnterQty() {
+    DBItemModifyItem().getAllImItem().then((value) {
+      setState(() {
+        allIMItem = value;
+        // print('after save: $allPoNonItem');
+      });
+    });
+
+    DBItemModifyNonItem().getAllImNonItem().then((value) {
+      setState(() {
+        allIMNonItem = value;
+        // print('after save: $allPoItem');
+      });
     });
   }
 
@@ -237,7 +257,7 @@ class _ImListItemState extends State<ImListItem> {
                                               ),
                                               // Enter Quantity
                                               Text(
-                                                "${snapshot.data[index]['non_tracking_qty']}",
+                                                "1",
                                                 style:
                                                 TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
@@ -249,11 +269,9 @@ class _ImListItemState extends State<ImListItem> {
                                                   onPressed: () {
                                                     var type = 'serial';
                                                     getDB(
-                                                        snapshot.data[index][
-                                                            'item_inventory_id'],
-                                                        type,
-                                                        snapshot.data[index]
-                                                            ['item_serial_no']);
+                                                        snapshot.data[index]['item_inventory_id'],
+                                                        type, snapshot.data[index]['item_serial_no'],
+                                                    snapshot.data[index]['item_reason_code']);
                                                   },
                                                   icon: Icon(
                                                     Icons.delete,
@@ -344,12 +362,51 @@ class _ImListItemState extends State<ImListItem> {
                                                 textAlign: TextAlign.center,
                                               ),
                                               // Enter Quantity
-                                              Text(
-                                                "${snapshot.data[index]['non_tracking_qty']}",
-                                                style:
-                                                TextStyle(fontSize: 16.0),
-                                                textAlign: TextAlign.center,
-                                              ),
+                                              snapshot.data[index]['tracking_type'] == '2' ?
+                                                  Text(
+                                                    // CHECK ALL ITEM GOT VALUE OR NOT
+                                                    allIMItem.isNotEmpty ?
+                                                        allIMItem.where((element) =>
+                                                        element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                        && element['item_reason_code'] == snapshot.data[index]['item_reason_code']).isNotEmpty ?
+                                                        // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                            '${allIMItem.where((element) =>
+                                                            element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                                && element['item_reason_code'] == snapshot.data[index]['item_reason_code']).length}'
+                                                        // ELSE, DISPLAY 0
+                                                            : '0'
+                                                    // IF NO VALUE DISPLAY 0
+                                                        : '0',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        fontSize: 16.0
+                                                    ),
+                                                  ) :
+                                                  Text(
+                                                    // CHECK ALL ITEM GOT VALUE OR NOT
+                                                    allIMNonItem.isNotEmpty ?
+                                                        allIMNonItem.firstWhereOrNull((element) =>
+                                                        element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                            && element['item_reason_code'] == snapshot.data[index]['item_reason_code']) != null ?
+                                                        // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                                            "${allIMNonItem.firstWhereOrNull((element) =>
+                                                            element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                                && element['item_reason_code'] == snapshot.data[index]['item_reason_code'])['non_tracking_qty']}"
+                                                        // ELSE, DISPLAY 0
+                                                            : '0'
+                                                    // IF NO VALUE DISPLAY 0
+                                                        : '0',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        fontSize: 16.0
+                                                    ),
+                                                  ),
+                                              // Text(
+                                              //   "${snapshot.data[index]['non_tracking_qty']}",
+                                              //   style:
+                                              //   TextStyle(fontSize: 16.0),
+                                              //   textAlign: TextAlign.center,
+                                              // ),
                                               Container(
                                                 alignment: Alignment.center,
                                                 child: IconButton(
@@ -357,10 +414,8 @@ class _ImListItemState extends State<ImListItem> {
                                                   onPressed: () {
                                                     var type = 'nonTracking';
                                                     getDB(
-                                                        snapshot.data[index][
-                                                            'item_inventory_id'],
-                                                        type,
-                                                        '-');
+                                                        snapshot.data[index]['item_inventory_id'],
+                                                        type, '-', snapshot.data[index]['item_reason_code']);
                                                   },
                                                   icon: Icon(
                                                     Icons.delete,
@@ -419,10 +474,10 @@ class _ImListItemState extends State<ImListItem> {
     );
   }
 
-  getDB(String itemInvId, String type, String itemSerialNo) {
+  getDB(String itemInvId, String type, String itemSerialNo, String itemReasonCode) {
     print('inv id: $itemInvId');
     if (type == 'serial') {
-      DBItemModifyItem().deleteImItem(itemInvId, itemSerialNo).then((value) {
+      DBItemModifyItem().deleteImItem(itemInvId, itemSerialNo, itemReasonCode).then((value) {
         if (value == 1) {
           setState(() {
             fToast.init(context);
@@ -434,9 +489,12 @@ class _ImListItemState extends State<ImListItem> {
         }
       });
     } else {
-      DBItemModifyNonItem().deleteImNonItem(itemInvId).then((value) {
+      print('PRINT1: $itemInvId');
+      print('PRINT2: $itemReasonCode');
+      DBItemModifyNonItem().deleteImNonItem(itemInvId, itemReasonCode).then((value) {
         if (value == 1) {
           setState(() {
+            print('PRINT3: $value');
             fToast.init(context);
             getModifyItem();
             showCustomSuccess('Delete Successful');
@@ -667,6 +725,7 @@ class _ImListItemState extends State<ImListItem> {
     } else {
       Navigator.of(context).pushNamed(StmsRoutes.imItemCreate).whenComplete(() {
         setState(() {
+          getEnterQty();
           getModifyItem();
         });
       });
@@ -712,7 +771,7 @@ class _ImListItemState extends State<ImListItem> {
       if (value != null) {
         imItemListing = value;
         // print('item Serial list: $value');
-
+// MAKE SURE TO KNOW WHETHER NEED OR NOT SIMILAR SKU FOR SN
         var itemIm = imItemListing.firstWhereOrNull(
             (element) => element['item_serial_no'] == barcodeScanRes);
         if (null == itemIm) {
@@ -723,8 +782,9 @@ class _ImListItemState extends State<ImListItem> {
               .whenComplete(() {
             setState(() {
               var typeScan = 'invId';
+              getEnterQty();
               getModifyItem();
-             // scanBarcodeNormal(typeScan);
+             scanBarcodeNormal(typeScan);
             });
           });
         } else {
@@ -740,8 +800,9 @@ class _ImListItemState extends State<ImListItem> {
             .whenComplete(() {
           setState(() {
             var typeScan = 'invId';
+            getEnterQty();
             getModifyItem();
-           //  scanBarcodeNormal(typeScan);
+            scanBarcodeNormal(typeScan);
           });
         });
       }
@@ -768,6 +829,7 @@ class _ImListItemState extends State<ImListItem> {
             .pushNamed(StmsRoutes.imItemCreate)
             .whenComplete(() {
           setState(() {
+            getEnterQty();
             getModifyItem();
           });
         });
@@ -795,6 +857,7 @@ class _ImListItemState extends State<ImListItem> {
             .pushNamed(StmsRoutes.imItemCreate)
             .whenComplete(() {
           setState(() {
+            getEnterQty();
             getModifyItem();
           });
         });

@@ -286,15 +286,16 @@ class _AiCreateItemState extends State<AiCreateItem> {
             setState(() {
               // set the value to list
               // variable allModifyItem is the list
-              allAdjustInItem = value;
+              adjustInTrack = value;
 
               // Check if SKU name present
               if(itemAdjust != null){
                 // Compare item in DB with the sku name selected
                 // search in DB if got the same item inventory id or not
                 // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
-                var currentItemInBD = adjustInTrack.firstWhereOrNull((element) =>
-                element['item_inventory_id'] == itemAdjust.id);
+                var currentItemInBD = allAdjustInItem.firstWhereOrNull((element) =>
+                element['item_inventory_id'] == itemAdjust.id
+                    && element['item_reason_code'] == selectedReason);
 
                 // if already got item with the same item inventory id
                 if (currentItemInBD != null) {
@@ -302,7 +303,7 @@ class _AiCreateItemState extends State<AiCreateItem> {
                   Navigator.popUntil(
                       context, ModalRoute.withName(StmsRoutes.aiItemList));
                   ErrorDialog.showErrorDialog(
-                      context, 'Item SKU already exists.');
+                      context, 'Item Similar Reason Code already exists.');
                 } else {
                   // if no item with this item inventory id
                   DBAdjustInItem()
@@ -358,13 +359,14 @@ class _AiCreateItemState extends State<AiCreateItem> {
               if(itemAdjust != null) {
                 // Compare item in DB with the sku name selected
                 var currentItemInBD = allAdjustInNonItem.firstWhereOrNull((element) =>
-                element['item_inventory_id'] == itemAdjust.id);
+                element['item_inventory_id'] == itemAdjust.id
+                    && element['item_reason_code'] == selectedReason);
 
                 // if already got item with the same item inventory id
                 if(currentItemInBD != null){
                   // display popup error and show popup error of the item already exist
                   Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.aiItemList));
-                  ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+                  ErrorDialog.showErrorDialog(context, 'Item Similar Reason Code already exists.');
                 } else {
                     // if no item with this item inventory id
                     DBAdjustInNonItem()

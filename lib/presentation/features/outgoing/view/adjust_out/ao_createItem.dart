@@ -232,13 +232,15 @@ class _AoCreateItemState extends State<AoCreateItem> {
               // set the value to list
               // variable allModifyItem is the list
               adjustOutTrack = value;
+              print('PRINT: $adjustOutTrack');
 
               // Check if SKU name present
               if(itemAdjust != null){
                 // search in DB if got the same item inventory id or not
                 // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
                 var currentItemInBD = allAdjustOutItem.firstWhereOrNull((
-                    element) => element['item_inventory_id'] == itemAdjust.id);
+                    element) => element['item_inventory_id'] == itemAdjust.id
+                    && element['item_reason_code'] == selectedReason);
 
                 // if already got item with the same item inventory id
                 if (currentItemInBD != null) {
@@ -246,7 +248,7 @@ class _AoCreateItemState extends State<AoCreateItem> {
                   Navigator.popUntil(
                       context, ModalRoute.withName(StmsRoutes.aoItemList));
                   ErrorDialog.showErrorDialog(
-                      context, 'Item SKU already exists.');
+                      context, 'Item Similar Reason Code already exists.');
                 } else {
                   // if no item with this item inventory id
                   DBAdjustOutItem()
@@ -302,13 +304,15 @@ class _AoCreateItemState extends State<AoCreateItem> {
               if(itemAdjust != null) {
                 // search in DB if got the same item inventory id or not
                 // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
-                var currentItemInBD = allAdjustOutNonItem.firstWhereOrNull((element) => element['item_inventory_id'] == itemAdjust.id);
+                var currentItemInBD = allAdjustOutNonItem.firstWhereOrNull((element) =>
+                element['item_inventory_id'] == itemAdjust.id
+                    && element['item_reason_code'] == selectedReason);
 
                 // if already got item with the same item inventory id
                 if(currentItemInBD != null){
                   // display popup error and show popup error of the item already exist
                   Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.aoItemList));
-                  ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+                  ErrorDialog.showErrorDialog(context, 'Item Similar Reason Code already exists.');
                 } else {
                   // if no item with this item inventory id
                   DBAdjustOutNonItem()

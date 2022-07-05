@@ -241,14 +241,15 @@ class _ImCreateItemState extends State<ImCreateItem> {
             setState(() {
               // set the value to list
               // variable allModifyItem is the list
-              allModifyItem = value;
+              itemModifyTrack = value;
 
               // Check if SKU name present
               if(itemAdjust != null){
                 // search in DB if got the same item inventory id or not
                 // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
                 var currentItemInBD = allModifyItem.firstWhereOrNull((
-                    element) => element['item_inventory_id'] == itemAdjust.id);
+                    element) => element['item_inventory_id'] == itemAdjust.id
+                    && element['item_reason_code'] == selectedReason);
 
                 // if already got item with the same item inventory id
                 if (currentItemInBD != null) {
@@ -256,7 +257,7 @@ class _ImCreateItemState extends State<ImCreateItem> {
                   Navigator.popUntil(
                       context, ModalRoute.withName(StmsRoutes.imItemList));
                   ErrorDialog.showErrorDialog(
-                      context, 'Item SKU already exists.');
+                      context, 'Item Similar Reason Code already exists.');
                 } else {
                   // if no item with this item inventory id
                   DBItemModifyItem()
@@ -269,6 +270,7 @@ class _ImCreateItemState extends State<ImCreateItem> {
                     showCustomSuccess('Item Save');
                     Navigator.popUntil(
                         context, ModalRoute.withName(StmsRoutes.imItemList));
+
                   });
                 }
               }
@@ -310,13 +312,15 @@ class _ImCreateItemState extends State<ImCreateItem> {
                 // search in DB if got the same item inventory id or not
                 // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
                 var currentItemInBD = allModifyNonItem.firstWhereOrNull((element) =>
-                element['item_inventory_id'] == itemAdjust.id);
+                element['item_inventory_id'] == itemAdjust.id
+                    && element['item_reason_code'] == selectedReason);
+
 
                 // if already got item with the same item inventory id
                 if(currentItemInBD != null){
                   // display popup error and show popup error of the item already exist
                   Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.imItemList));
-                  ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
+                  ErrorDialog.showErrorDialog(context, 'Item Similar Reason Code already exists.');
                 } else {
                   // if no item with this item inventory id
                   DBItemModifyNonItem()
@@ -332,6 +336,7 @@ class _ImCreateItemState extends State<ImCreateItem> {
                     Navigator.popUntil(
                         context, ModalRoute.withName(StmsRoutes.imItemList));
                   });
+                  print('TEST2.1: ${itemAdjust.id}, TEST 2.2: ${itemNonQtyController.text}, TEST 2.3:  $selectedReason}');
                 }
               }
             });
@@ -351,8 +356,31 @@ class _ImCreateItemState extends State<ImCreateItem> {
                 Navigator.popUntil(
                     context, ModalRoute.withName(StmsRoutes.imItemList));
               });
+              print('TEST3.1: ${itemAdjust.id}, TEST 3.2: ${itemNonQtyController.text}, '
+                  'TEST 3.3:  $selectedReason}');
             }
           }
+          //
+          // if(selectedReason != null && selectedReason == currentItemInBD['item_reason_code']){
+          //   // display popup error and show popup error of the item already exist
+          //   Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.imItemList));
+          //   ErrorDialog.showErrorDialog(context, 'Item Similar Reason Code already exists.');
+          // } else {
+          //   // if no item with this item inventory id
+          //   DBItemModifyNonItem()
+          //       .createImNonItem(
+          //     ItemModifyNonItem(
+          //       itemIvId: itemAdjust.id,
+          //       itemNonQty: itemNonQtyController.text,
+          //       itemReason: selectedReason,
+          //     ),
+          //   )
+          //       .then((value) {
+          //     showCustomSuccess('Item Save');
+          //     Navigator.popUntil(
+          //         context, ModalRoute.withName(StmsRoutes.imItemList));
+          //   });
+          // }
         });
       }
     }

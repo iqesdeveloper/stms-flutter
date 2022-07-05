@@ -53,6 +53,7 @@ class _StListItemState extends State<StListItem> {
     getCommon();
     getTransferItem();
     getListItem();
+
   }
 
   getCommon() {
@@ -600,7 +601,7 @@ class _StListItemState extends State<StListItem> {
                                         SharedPreferences prefs =
                                             await SharedPreferences
                                                 .getInstance();
-                                        //prefs.setString('transferItem', selectedItem);
+                                        prefs.setString('transferItem', selectedItem);
 
                                         findInv(selectedItem);
                                       }
@@ -726,7 +727,8 @@ class _StListItemState extends State<StListItem> {
                                         SharedPreferences prefs =
                                             await SharedPreferences
                                                 .getInstance();
-                                        // prefs.setString('transferItem', inventoryId);
+                                        prefs.setString(
+                                            'transferItem', inventoryId);
 
                                         findInv(inventoryId);
                                       }
@@ -748,35 +750,38 @@ class _StListItemState extends State<StListItem> {
 
   /// Find a person in the list using firstWhere method.
   Future<void> findInv(String selectedItem) async {
+    var itemTransfer, trackingType, transferId;
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var itemLocal = inventoryInList.firstWhereOrNull(
-            (element) => element['item_inventory_id'] == selectedItem);
-    var itemTransfer = inventoryList
-        .firstWhereOrNull((element) => element.id == selectedItem);
-
     if (Storage().transfer == '1') {
-      prefs.setString('transferTracking', itemLocal['tracking_type']);
-      prefs.setString('transferItem', itemLocal['item_name']);
-      // trackingType = itemTransfer['tracking_type'];
-      // transferId = itemTransfer['item_name'];
-    } else {
-      prefs.setString('transferTracking', itemTransfer!.type);
-      prefs.setString('transferItem', itemTransfer.sku);
-      // trackingType = itemTransfer['type'];
-      // transferId = itemTransfer['id'];
-    }
-    //
-    // prefs.setString('transferTracking', trackingType);
-    // prefs.setString('transferItem', transferId);
+      itemTransfer = inventoryInList.firstWhereOrNull(
+          (element) => element['item_inventory_id'] == selectedItem);
+      trackingType = itemTransfer['tracking_type'];
+      transferId = itemTransfer['item_name'];
 
-    if (itemTransfer!.type == 'Serial Number' || itemLocal['trackingType'] == '2') {
+      prefs.setString('transferTracking', trackingType);
+      prefs.setString('transferItem', transferId);
+
+    } else {
+      var itemTransfers = inventoryList
+          .firstWhereOrNull((element) => element.id == selectedItem);
+      trackingType = itemTransfers!.type;
+      transferId = itemTransfers.sku;
+
+      prefs.setString('transferTracking', trackingType);
+      prefs.setString('transferItem', transferId);
+    }
+
+    prefs.setString('transferTracking', trackingType);
+    prefs.setString('transferItem', transferId);
+
+    if (trackingType == 'Serial Number' || trackingType == '2') {
       var typeScan = 'invId';
       scanBarcodeNormal(typeScan);
     } else {
       if (Storage().transfer == '1') {
-        print('itm Qty: ${itemLocal['item_quantity']}');
-        prefs.setString('itemQty', itemLocal['item_quantity']);
+        print('itm Qty: ${itemTransfer['item_quantity']}');
+        prefs.setString('itemQty', itemTransfer['item_quantity']);
         Navigator.of(context)
             .pushNamed(StmsRoutes.stItemCreate)
             .whenComplete(() {
@@ -834,7 +839,9 @@ class _StListItemState extends State<StListItem> {
 
     if (Storage().transfer == '1') {
       var itemTransfer = inventoryInList.firstWhereOrNull(
-          (element) => element['item_inventory_id'] == selectedId);
+          (element) => element['item_inventory_id'] == selectedItem);
+
+      print('TEST: $itemTransfer');
 
       if (itemTransfer != null) {
         List currentSerial = itemTransfer['serial_list'];
@@ -933,23 +940,24 @@ class _StListItemState extends State<StListItem> {
   }
 
   Future<void> searchSku(String skuScan) async {
+    var itemTransfer;
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (Storage().transfer == '1') {
-      var itemLocal = inventoryInList
+      itemTransfer = inventoryInList
           .firstWhereOrNull((element) => element['item_name'] == skuScan);
-      print('itemadjust: $itemLocal');
+      print('itemadjust: $itemTransfer');
 
-      if (itemLocal == null) {
+      if (itemTransfer == null) {
         ErrorDialog.showErrorDialog(context, 'No SKU match!');
       } else {
-        prefs.setString('transferTracking', itemLocal['tracking_type']);
-        prefs.setString('transferItem', itemLocal['item_name']);
+        prefs.setString('transferTracking', itemTransfer['tracking_type']);
+        prefs.setString('transferItem', itemTransfer['item_name']);
 
-        if (itemLocal['tracking_type'] == '2') {
+        if (itemTransfer['tracking_type'] == '2') {
           scanItemSerial();
         } else {
-          prefs.setString('itemQty', itemLocal['item_quantity']);
+          prefs.setString('itemQty', itemTransfer['item_quantity']);
           Navigator.of(context)
               .pushNamed(StmsRoutes.stItemCreate)
               .whenComplete(() {
@@ -961,18 +969,18 @@ class _StListItemState extends State<StListItem> {
       }
     } else {
       print('transfer type: out');
-      var itemTransfer = inventoryList
+      itemTransfer = inventoryList
           .firstWhereOrNull((element) => element.sku == skuScan);
       print('item transfer: $itemTransfer');
 
       if (itemTransfer == null) {
         ErrorDialog.showErrorDialog(context, 'SKU not match with document.');
       } else {
-        prefs.setString('transferTracking', itemTransfer.type);
-        prefs.setString('transferItem', itemTransfer.sku);
+        prefs.setString('transferTracking', itemTransfer['type']);
+        prefs.setString('transferItem', itemTransfer['id']);
 
         // print('tracking_type: ${itemTransfer['tracking_type']}');
-        if (itemTransfer.type == 'Serial Number') {
+        if (itemTransfer['type'] == 'Serial Number') {
           scanItemSerial();
         } else {
           Navigator.of(context)

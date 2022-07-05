@@ -1,5 +1,5 @@
 class ServerAddressesProd {
-  static const serverAddress = 'http://stmsdev.iqes.com.my';
+  static const serverAddress = 'https://stmsdev.iqes.com.my';
   // 'https://stmstmse.tms.iqes.com.my'; // tmse-stms
   // 'https://stmsent.tms.iqes.com.my'; // ent-stms
   // 'https://stmstms.tms.iqes.com.my'; // tms-stms

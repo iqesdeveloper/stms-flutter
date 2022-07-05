@@ -66,7 +66,15 @@ class _SiItemDetailsState extends State<SiItemDetails> {
     // serialNo = prefs.getString('itemBarcode')!;
 
     selectedInvtry = prefs.getString('selectedSiID');
-    itemSNController.text = prefs.getString('itemBarcode')!;
+
+    if (tracking == "2") {
+      itemSNController.text = prefs.getString('itemBarcode')!;
+      print('TEST1.0: ${itemSNController.text}');
+    } else {
+      itemSNController.text = prefs.getString('itemBarcode')!;
+      print('TEST2.0: ${itemSNController.text}');
+    }
+
     itemSelectedInventory.text = selectedInvtry;
     tracking = prefs.getString('siTracking');
   }
@@ -189,8 +197,21 @@ class _SiItemDetailsState extends State<SiItemDetails> {
                 context, ModalRoute.withName(StmsRoutes.siItemList));
           });
         } else {
-          ErrorDialog.showErrorDialog(
-              context, 'Similar Serial Number present');
+          if(itemAdjust.sku == itemSNController.text){
+            ErrorDialog.showErrorDialog(
+                context, 'Similar Serial Number present');
+          } else {
+            DBSaleInvoiceItem()
+                .createSiItem(SaleInvoice(
+              itemInvId: itemAdjust.id,
+              itemSerialNo: itemSNController.text,
+            ))
+                .then((value) {
+              showCustomSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.siItemList));
+            });
+          }
         }
       } else {
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>

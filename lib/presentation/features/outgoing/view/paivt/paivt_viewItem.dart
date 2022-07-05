@@ -70,7 +70,13 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
     // serialNo = prefs.getString('itemBarcode')!;
 
     selectedInvtry = prefs.getString('selectedPaivtID');
-    itemSNController.text = prefs.getString('itemBarcode')!;
+
+    if (tracking == "2") {
+      itemSNController.text = prefs.getString('itemBarcode')!;
+    } else {
+      itemSNController.text = prefs.getString('itemBarcode')!;
+    }
+
     itemSelectedInventory.text = selectedInvtry;
     tracking = prefs.getString('paivtTracking');
   }
@@ -194,8 +200,21 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
                 context, ModalRoute.withName(StmsRoutes.paivtItemList));
           });
         } else {
-          ErrorDialog.showErrorDialog(
-              context, 'Similar Serial Number present');
+          if(itemAdjust.sku == itemSNController.text){
+            ErrorDialog.showErrorDialog(
+                context, 'Similar Serial Number present');
+          } else {
+            DBPaivtItem()
+                .createPaivtItem(Paivt(
+              itemInvId: itemAdjust.id,
+              itemSerialNo: itemSNController.text,
+            ))
+                .then((value) {
+              showCustomSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.paivtItemList));
+            });
+          }
         }
       } else {
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>
