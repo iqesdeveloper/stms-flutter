@@ -286,12 +286,9 @@ class _PoItemDetailsState extends State<PoItemDetails> {
 
         var itemSequence = getAllPoNonItems.firstWhereOrNull((element) =>
         element['line_seq_no'] == selectedItemSequence);
-        print('NON ITEM ADJUST: $itemAdjust');
-        print('NON ITEM SEQUENCE: $itemSequence');
 
         if(itemAdjust == null){} else {
           if(itemSequence == null){
-            print('ITEM SEQUENCE: $itemSequence');
             DBPoNonItem()
                 .createPoNonItem(PoNonItem(
               itemInvId: itemAdjust.id,
@@ -306,8 +303,11 @@ class _PoItemDetailsState extends State<PoItemDetails> {
                   context, ModalRoute.withName(StmsRoutes.poItemList));
             });
           } else {
+            print('ITEM SEQUENCE: $itemSequence}');
+            var newQty = int.parse(itemQtyController.text) + int.parse(itemSequence['non_tracking_qty']);
+            print('Check non tracking: $newQty');
             DBPoNonItem()
-                .update(itemAdjust.id, itemQtyController.text, selectedItemSequence)
+                .update(itemAdjust.id, newQty.toString(), selectedItemSequence)
                 .then((value) {
               showCustomSuccess('Item Save');
               Navigator.popUntil(

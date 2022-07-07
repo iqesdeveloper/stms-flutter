@@ -18,7 +18,6 @@ import 'package:stms/data/api/models/master/inventory_hive_model.dart';
 import 'package:stms/data/api/repositories/api_json/api_in_po.dart';
 import 'package:stms/data/local_db/incoming/po/po_non_scanItem.dart';
 import 'package:stms/data/local_db/incoming/po/po_scanItem_db.dart';
-// import 'package:stms/data/local_db/master/master_inventory_db.dart';
 import 'package:stms/data/local_db/master/master_inventory_hive_db.dart';
 import 'package:stms/data/local_db/master/master_location_db.dart';
 import 'package:stms/domain/validator.dart';
@@ -32,7 +31,6 @@ import 'package:stms/presentation/widgets/independent/skuUpc_dialog.dart';
 import 'package:stms/presentation/widgets/independent/style_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stms/presentation/widgets/independent/success_dialog.dart';
-import 'package:stms/presentation/widgets/independent/toast_dialog.dart';
 import 'package:stms/presentation/widgets/independent/view_dialog.dart';
 
 class PoItemListView extends StatefulWidget {
@@ -156,19 +154,22 @@ class _PoItemListViewState extends State<PoItemListView> {
     DBPoItem().getAllPoItem().then((value) {
       // make the PoItem is equal to the item store in scanDB
       // It is the save info
-      setState(() {
-        allPoItem = value;
-      });
+      if(value != null){
+        setState(() {
+          allPoItem = value;
+        });
+      }
+
     });
 
     DBPoNonItem().getAllPoNonItem().then((value) {
-      setState(() {
-        // Display and get all the PoNonItem after scanDB collected.
-        // It is the save info
-        allPoNonItem = value;
-
-
-      });
+      if(value != null){
+        setState(() {
+          // Display and get all the PoNonItem after scanDB collected.
+          // It is the save info
+          allPoNonItem = value;
+        });
+      }
     });
   }
 
@@ -356,44 +357,125 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                   textAlign: TextAlign.center,
                                                 ),
                                                 // Enter Quantity text
-                                                // Will display whether it pass in the value or not
-                                                // This s to check if Enter Quantity got value
-                                                // using the master file snapshot check
-                                                // THIS IS FOR ALLPOITEM
-                                                snapshot.data[index]['tracking_type'] == "2" ? Text(
-                                                  // to check if allPoItem got value or not
-                                                  // If got value, check in the master file snapshot and compare the item_inventory_id
-                                                  // Using the 'where' will go through the check process like a looping
+                                                Container(
+                                                  height: height*0.11,
+                                                  child: Stack(
+                                                    children: [
+                                                      // Ent Qty Text
+                                                      Center(
+                                                        child:
+                                                        // Will display whether it pass in the value or not
+                                                        // This s to check if Enter Quantity got value
+                                                        // using the master file snapshot check
+                                                        // THIS IS FOR ALLPOITEM
+                                                        snapshot.data[index]['tracking_type'] == "2" ? Text(
+                                                          // to check if allPoItem got value or not
+                                                          // If got value, check in the master file snapshot and compare the item_inventory_id
+                                                          // Using the 'where' will go through the check process like a looping
 
-                                                  allPoItem.isNotEmpty ? allPoItem.where((element)
-                                                  => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                      && element['line_seq_no'] == snapshot.data[index]['line_seq_no']).isNotEmpty
-                                                  // once check, if it is containing a value or the item_id in DB is same in the master file
-                                                  // Get the length of the item_id
-                                                      ? '${allPoItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                      && element['line_seq_no'] == snapshot.data[index]['line_seq_no']).length}'
-                                                  // If there is no match, then the result is display '0'
-                                                      : '0'
-                                                  // If the overall result is default as nothing, the display will also show '0'
-                                                      : '0',
-                                                  style: TextStyle(
-                                                      fontSize: 16.0
+                                                          allPoItem.isNotEmpty ? allPoItem.where((element)
+                                                          => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                              && element['line_seq_no'] == snapshot.data[index]['line_seq_no']).isNotEmpty
+                                                          // once check, if it is containing a value or the item_id in DB is same in the master file
+                                                          // Get the length of the item_id
+                                                              ? '${allPoItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                              && element['line_seq_no'] == snapshot.data[index]['line_seq_no']).length}'
+                                                          // If there is no match, then the result is display '0'
+                                                              : '0'
+                                                          // If the overall result is default as nothing, the display will also show '0'
+                                                              : '0',
+                                                          style: TextStyle(
+                                                              fontSize: 16.0
+                                                          ),
+                                                          textAlign: TextAlign.center,
+                                                        )
+                                                            : Text(
+                                                          allPoNonItem.isNotEmpty ? allPoNonItem.firstWhereOrNull((element) =>
+                                                          element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                              && element['line_seq_no'] == snapshot.data[index]['line_seq_no']) != null
+                                                              ? "${allPoNonItem.firstWhereOrNull((element) =>
+                                                          element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                              && element['line_seq_no'] == snapshot.data[index]['line_seq_no'])['non_tracking_qty']}"
+                                                              : '0' : '0',
+                                                          style: TextStyle(
+                                                              fontSize: 16.0
+                                                          ),
+                                                          textAlign: TextAlign.center,
+                                                        ),
+                                                      ),
+                                                      // Reset Icon
+                                                      SingleChildScrollView(
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(height: height*0.07,),
+                                                            Align(
+                                                              alignment: Alignment.bottomCenter,
+                                                              child: IconButton(
+                                                                icon: Icon(
+                                                                  Icons.lock_reset,
+                                                                  color: Colors.red,
+                                                                  size: 20,
+                                                                ),
+                                                                onPressed: (){
+                                                                  // check if SN or not
+                                                                  if(snapshot.data[index]['tracking_type'] == "2"){
+                                                                    // get the selected item to delete
+                                                                    var getSelected = allPoItem.firstWhereOrNull((element)
+                                                                    => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                                        && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+
+                                                                    print('HHHHH: $getSelected');
+
+                                                                    // If there is value in selected item
+                                                                    if(getSelected != null){
+                                                                      setState(() {
+                                                                        deletePoItem(
+                                                                          snapshot.data[index]['item_inventory_id'],
+                                                                          snapshot.data[index]['line_seq_no'],
+                                                                        );
+                                                                        fToast.init(context);
+                                                                        showCustomSuccess('Reset Successful');
+                                                                        getEnterQty();
+                                                                      });
+                                                                    } else {
+                                                                      setState(() {
+                                                                        fToast.init(context);
+                                                                        showCustomSuccess('Already reset');
+                                                                      });
+                                                                    }
+                                                                  } else {
+                                                                    // If not SN
+                                                                    var getSelected = allPoNonItem.firstWhereOrNull((element) =>
+                                                                    element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                                        && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+
+                                                                    if(getSelected != null){
+                                                                      setState(() {
+                                                                        deletePoNonItem(
+                                                                          snapshot.data[index]['item_inventory_id'],
+                                                                          snapshot.data[index]['line_seq_no'],
+                                                                        );
+                                                                        fToast.init(context);
+                                                                        showCustomSuccess('Reset Successful');
+                                                                      });
+                                                                      getEnterQty();
+                                                                    } else {
+                                                                      setState(() {
+                                                                        fToast.init(context);
+                                                                        showCustomSuccess('Already reset');
+                                                                      });
+                                                                    }
+                                                                  }
+                                                                },
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                  textAlign: TextAlign.center,
-                                                )
-                                                    : Text(
-                                                  allPoNonItem.isNotEmpty ? allPoNonItem.firstWhereOrNull((element) =>
-                                                  element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                      && element['line_seq_no'] == snapshot.data[index]['line_seq_no']) != null
-                                                      ? "${allPoNonItem.firstWhereOrNull((element) =>
-                                                  element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                      && element['line_seq_no'] == snapshot.data[index]['line_seq_no'])['non_tracking_qty']}"
-                                                      : '0' : '0',
-                                                  style: TextStyle(
-                                                      fontSize: 16.0
-                                                  ),
-                                                  textAlign: TextAlign.center,
                                                 ),
+
                                                 Text(
                                                   "$balQty",
                                                   style:
@@ -1016,7 +1098,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                       (element) => element['item_inventory_id'] == itemSku.id
                           && element['line_seq_no'] == selectedItemSequence);
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
-              var newQty = int.parse(getItem['non_tracking_qty']);
+              var newQty = int.parse(getItem['non_tracking_qty'])+1;
               DBPoNonItem()
                   .update(itemSku.id, newQty.toString(), selectedItemSequence)
                   .then((value) {
@@ -1087,25 +1169,21 @@ class _PoItemListViewState extends State<PoItemListView> {
                       (element) => element['item_inventory_id'] == itemUpc.id
                           && element['line_seq_no'] == selectedItemSequence);
 
+
               // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
-              if(getItem['non_tracking_qty'] == 0){
-                var newQty = int.parse(getItem['non_tracking_qty'])+1;
-                print('QTY: $newQty');
-                DBPoNonItem()
-                    .update(itemUpc.id, newQty.toString(), selectedItemSequence)
-                    .then((value) {
-                  getEnterQty();
-                  setState(() {
-                    fToast.init(context);
-                    showCustomSuccess('Item Save');
-                  });
-                  var _duration = Duration(seconds: 1);
-                  return Timer(_duration, scanSKU);
+              // getItem['non_tracking_qty'] == 0;
+              var newQty = int.parse(getItem['non_tracking_qty'])+1;
+              DBPoNonItem()
+                  .update(itemUpc.id, newQty.toString(), selectedItemSequence)
+                  .then((value) {
+                getEnterQty();
+                setState(() {
+                  fToast.init(context);
+                  showCustomSuccess('Item Save');
                 });
-              } else {
-                // Want to make sure if to set it to zero.
-                // Cause it need to reset once scan and not add up from manual scan
-              }
+                var _duration = Duration(seconds: 1);
+                return Timer(_duration, scanSKU);
+              });
             }
           });
         } else {
@@ -1194,7 +1272,11 @@ class _PoItemListViewState extends State<PoItemListView> {
       } else {
         var getList = DBPoItem().getBarcodePoItem(invNo, lineSqeNo);
         var getDb = 'DBPoItem';
-        ViewDialog.showViewDialog(context, getList, getDb);
+        ViewDialog.showViewDialog(context, getList, getDb).whenComplete((){
+          setState(() {
+            getEnterQty();
+          });
+        });
       }
     });
   }
@@ -1255,7 +1337,33 @@ class _PoItemListViewState extends State<PoItemListView> {
     });
   }
 
-  delete() {
-    DBPoItem().deleteAllPoItem();
+  deletePoItem(String itemInvId, String itemLineSeq) {
+    DBPoItem().deleteSelectedPoItem(itemInvId, itemLineSeq).then((value){
+      if(value == 1){
+        setState(() {
+          DBPoItem().getAllPoItem().whenComplete((){
+            setState(() {
+              getEnterQty();
+            });
+          });
+        });
+      } else {
+        ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
+      }
+    });
+  }
+
+  deletePoNonItem(String itemInvId, String itemLineSeq) {
+    DBPoNonItem().deletePoNonItem(itemInvId, itemLineSeq).then((value){
+      if(value == 1){
+        DBPoNonItem().getAllPoNonItem().whenComplete((){
+          setState(() {
+            getEnterQty();
+          });
+        });
+      } else {
+        ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
+      }
+    });
   }
 }

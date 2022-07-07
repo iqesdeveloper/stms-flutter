@@ -201,7 +201,6 @@ class ViewDialog extends StatelessWidget {
           fToast.init(context);
           showCustomSuccess('Delete Successful');
           Navigator.pop(context);
-
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
         }

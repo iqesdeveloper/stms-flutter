@@ -670,13 +670,13 @@ class _VsrListItemState extends State<VsrListItem> {
   Future<void> findInv(var selectedItem) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var itemAdjust = masterInvList.firstWhereOrNull(
-        (element) => element.id == selectedItem);
+    var itemAdjust = inventoryList.firstWhereOrNull(
+        (element) => element['item_inventory_id'] == selectedItem);
 
-    prefs.setString('vsrTracking', itemAdjust!.type);
-    prefs.setString('vsrItem', itemAdjust.sku);
+    prefs.setString('vsrTracking', itemAdjust['tracking_type']);
+    prefs.setString('vsrItem', itemAdjust['item_name']);
 
-    if (itemAdjust.type == '2') {
+    if (itemAdjust['tracking_type'] == '2') {
       var typeScan = 'invId';
       scanBarcodeNormal(typeScan);
     } else {
@@ -755,60 +755,104 @@ class _VsrListItemState extends State<VsrListItem> {
     var itemAdjust = inventoryList.firstWhereOrNull(
         (element) => element['item_inventory_id'] == selectedId);
 
-    if (itemAdjust != null) {
-      List currentSerial = itemAdjust['serial_list'];
-      var serialList =
-          currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
+    DBVendorReplaceItem().getAllVsrItem().then((value) {
+      // ignore: unnecessary_null_comparison
+      if (value != null) {
+        vsrItemListing = value;
+        // print('item Serial list: $value');
 
-      if (serialList != null) {
-        DBVendorReplaceItem().getAllVsrItem().then((value) {
-          // ignore: unnecessary_null_comparison
-          if (value != null) {
-            vsrItemListing = value;
-            // print('item Serial list: $value');
-
-            var itemVsr = vsrItemListing.firstWhereOrNull(
+        var itemVsr = vsrItemListing.firstWhereOrNull(
                 (element) => element['item_serial_no'] == barcodeScanRes);
-            if (null == itemVsr) {
-              prefs.setString("itemBarcode", barcodeScanRes);
+        if (null == itemVsr) {
+          prefs.setString("itemBarcode", barcodeScanRes);
 
-              Navigator.of(context)
-                  .pushNamed(StmsRoutes.vsrItemCreate)
-                  .whenComplete(() {
-                setState(() {
-                  var typeScan = 'invId';
-                  getEnterQty();
-                  getVsrItem();
-                  selectedItem = null;
-                  // scanBarcodeNormal(typeScan);
-                });
-              });
-            } else {
-              ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
-            }
-          } else {
-            // prefs.setString("itemSelect", json.encode(item));
-            prefs.setString("itemBarcode", barcodeScanRes);
-
-            // await Future.delayed(const Duration(seconds: 3));
-            Navigator.of(context)
-                .pushNamed(StmsRoutes.vsrItemCreate)
-                .whenComplete(() {
-              setState(() {
-                var typeScan = 'invId';
-                getEnterQty();
-                getVsrItem();
-                selectedItem = null;
-               // scanBarcodeNormal(typeScan);
-              });
+          Navigator.of(context)
+              .pushNamed(StmsRoutes.vsrItemCreate)
+              .whenComplete(() {
+            setState(() {
+              var typeScan = 'invId';
+              getEnterQty();
+              getVsrItem();
+              selectedItem = null;
+              scanBarcodeNormal(typeScan);
             });
-          }
-        });
+          });
+        } else {
+          ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
+        }
       } else {
-        ErrorDialog.showErrorDialog(
-            context, 'Serial No not match with document.');
+        // prefs.setString("itemSelect", json.encode(item));
+        prefs.setString("itemBarcode", barcodeScanRes);
+
+        // await Future.delayed(const Duration(seconds: 3));
+        Navigator.of(context)
+            .pushNamed(StmsRoutes.vsrItemCreate)
+            .whenComplete(() {
+          setState(() {
+            var typeScan = 'invId';
+            getEnterQty();
+            getVsrItem();
+            selectedItem = null;
+            scanBarcodeNormal(typeScan);
+          });
+        });
       }
-    }
+    });
+
+    // if (itemAdjust != null) {
+    //   List currentSerial = itemAdjust['serial_list'];
+    //   var serialList =
+    //       currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
+    //
+    //   if (serialList != null) {
+    //     DBVendorReplaceItem().getAllVsrItem().then((value) {
+    //       // ignore: unnecessary_null_comparison
+    //       if (value != null) {
+    //         vsrItemListing = value;
+    //         // print('item Serial list: $value');
+    //
+    //         var itemVsr = vsrItemListing.firstWhereOrNull(
+    //             (element) => element['item_serial_no'] == barcodeScanRes);
+    //         if (null == itemVsr) {
+    //           prefs.setString("itemBarcode", barcodeScanRes);
+    //
+    //           Navigator.of(context)
+    //               .pushNamed(StmsRoutes.vsrItemCreate)
+    //               .whenComplete(() {
+    //             setState(() {
+    //               var typeScan = 'invId';
+    //               getEnterQty();
+    //               getVsrItem();
+    //               selectedItem = null;
+    //               // scanBarcodeNormal(typeScan);
+    //             });
+    //           });
+    //         } else {
+    //           ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
+    //         }
+    //       } else {
+    //         // prefs.setString("itemSelect", json.encode(item));
+    //         prefs.setString("itemBarcode", barcodeScanRes);
+    //
+    //         // await Future.delayed(const Duration(seconds: 3));
+    //         Navigator.of(context)
+    //             .pushNamed(StmsRoutes.vsrItemCreate)
+    //             .whenComplete(() {
+    //           setState(() {
+    //             var typeScan = 'invId';
+    //             getEnterQty();
+    //             getVsrItem();
+    //             selectedItem = null;
+    //            // scanBarcodeNormal(typeScan);
+    //           });
+    //         });
+    //       }
+    //     });
+    //   } else {
+    //     ErrorDialog.showErrorDialog(
+    //         context, 'Serial No not match with document.');
+    //   }
+    // }
   }
 
   Future<void> searchSku(String skuScan) async {
@@ -852,7 +896,7 @@ class _VsrListItemState extends State<VsrListItem> {
       prefs.setString('vsrTracking', itemUpc.type);
       prefs.setString('vsrItem', itemUpc.sku);
 
-      if (itemUpc.type == '2') {
+      if (itemUpc.type == 'Serial Number') {
         scanItemSerial();
       } else {
         // prefs.setString('itemQty', itemSku['item_quantity']);

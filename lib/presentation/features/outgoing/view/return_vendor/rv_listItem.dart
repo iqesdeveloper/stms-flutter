@@ -677,20 +677,19 @@ class _RvListItemState extends State<RvListItem> {
   Future<void> findInv(String selectedItem) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var itemAdjust = invMasterList.firstWhereOrNull(
-        (element) => element.id == selectedItem);
+    var itemAdjust = inventoryList.firstWhereOrNull(
+            (element) => element['item_inventory_id'] == selectedItem);
 
-    prefs.setString('rvTracking', itemAdjust!.type);
-    prefs.setString('rvItem', itemAdjust.sku);
+    prefs.setString('rvTracking', itemAdjust['tracking_type']);
+    prefs.setString('rvItem', itemAdjust['item_name']);
 
-    if (itemAdjust.type == 'Serial Number') {
+    if (itemAdjust['tracking_type'] == '2') {
       var typeScan = 'invId';
       scanBarcodeNormal(typeScan);
     } else {
-      // prefs.setString('itemQty', itemAdjust['item_quantity']);
+      prefs.setString('itemQty', itemAdjust['item_quantity']);
       Navigator.of(context).pushNamed(StmsRoutes.rvItemCreate).whenComplete(() {
         setState(() {
-          getEnterQty();
           getRvItem();
         });
       });
@@ -733,70 +732,109 @@ class _RvListItemState extends State<RvListItem> {
 
   Future<void> saveData(String barcodeScanRes) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var selectedId = prefs.getString('rvItem');
 
-    var itemAdjust = inventoryList.firstWhereOrNull(
-        (element) => element['item_inventory_id'] == selectedId);
+    DBReturnVendorItem().getAllRvItem().then((value) {
+      if (value != null) {
+        rvItemListing = value;
 
-
-    print('TEST1: $itemAdjust');
-
-    if (itemAdjust != null) {
-      List currentSerial = itemAdjust['serial_list'];
-      var serialList =
-          currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
-
-      print('TEST2: $serialList');
-
-      if (serialList != null) {
-        DBReturnVendorItem().getAllRvItem().then((value) {
-          // ignore: unnecessary_null_comparison
-          if (value != null) {
-            rvItemListing = value;
-            print('item Serial list: $value');
-
-            var itemRv = rvItemListing.firstWhereOrNull(
+        var itemRv = rvItemListing.firstWhereOrNull(
                 (element) => element['item_serial_no'] == barcodeScanRes);
-            print('TEST3: $itemRv');
+        print('TEST2: $itemRv');
+        if (null == itemRv) {
+          prefs.setString("itemBarcode", barcodeScanRes);
 
-            if (null == itemRv) {
-              prefs.setString("itemBarcode", barcodeScanRes);
-
-              Navigator.of(context)
-                  .pushNamed(StmsRoutes.rvItemCreate)
-                  .whenComplete(() {
-                setState(() {
-                  var typeScan = 'invId';
-                  getEnterQty();
-                  getRvItem();
-                  scanBarcodeNormal(typeScan);
-                });
-              });
-            } else {
-              ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
-            }
-          } else {
-            // prefs.setString("itemSelect", json.encode(item));
-            prefs.setString("itemBarcode", barcodeScanRes);
-
-            // await Future.delayed(const Duration(seconds: 3));
-            Navigator.of(context)
-                .pushNamed(StmsRoutes.rvItemCreate)
-                .whenComplete(() {
-              setState(() {
-                var typeScan = 'invId';
-                getEnterQty();
-                getRvItem();
-                scanBarcodeNormal(typeScan);
-              });
+          Navigator.of(context)
+              .pushNamed(StmsRoutes.rvItemCreate)
+              .whenComplete(() {
+            setState(() {
+              var typeScan = 'invId';
+              getEnterQty();
+              getRvItem();
+              scanBarcodeNormal(typeScan);
             });
-          }
-        });
+          });
+        } else {
+          ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
+        }
       } else {
-        ErrorDialog.showErrorDialog(
-            context, 'Serial No not match with document.');
+        prefs.setString("itemBarcode", barcodeScanRes);
+
+        // await Future.delayed(const Duration(seconds: 3));
+        Navigator.of(context)
+            .pushNamed(StmsRoutes.rvItemCreate)
+            .whenComplete(() {
+          setState(() {
+            var typeScan = 'invId';
+            getEnterQty();
+            getRvItem();
+            scanBarcodeNormal(typeScan);
+          });
+        });
       }
-    }
+    });
+    // var selectedId = prefs.getString('rvItem');
+    //
+    // var itemAdjust = inventoryList.firstWhereOrNull(
+    //     (element) => element['item_inventory_id'] == selectedId);
+    //
+    // print('TEST1: $itemAdjust');
+    //
+    // if (itemAdjust != null) {
+    //   List currentSerial = itemAdjust['serial_list'];
+    //   var serialList =
+    //       currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
+    //
+    //   print('TEST2: $serialList');
+    //
+    //   if (serialList != null) {
+    //     DBReturnVendorItem().getAllRvItem().then((value) {
+    //       // ignore: unnecessary_null_comparison
+    //       if (value != null) {
+    //         rvItemListing = value;
+    //         print('item Serial list: $value');
+    //
+    //         var itemRv = rvItemListing.firstWhereOrNull(
+    //             (element) => element['item_serial_no'] == barcodeScanRes);
+    //         print('TEST3: $itemRv');
+    //
+    //         if (null == itemRv) {
+    //           prefs.setString("itemBarcode", barcodeScanRes);
+    //
+    //           Navigator.of(context)
+    //               .pushNamed(StmsRoutes.rvItemCreate)
+    //               .whenComplete(() {
+    //             setState(() {
+    //               var typeScan = 'invId';
+    //               getEnterQty();
+    //               getRvItem();
+    //               scanBarcodeNormal(typeScan);
+    //             });
+    //           });
+    //         } else {
+    //           ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
+    //         }
+    //       } else {
+    //         // prefs.setString("itemSelect", json.encode(item));
+    //         prefs.setString("itemBarcode", barcodeScanRes);
+    //
+    //         // await Future.delayed(const Duration(seconds: 3));
+    //         Navigator.of(context)
+    //             .pushNamed(StmsRoutes.rvItemCreate)
+    //             .whenComplete(() {
+    //           setState(() {
+    //             var typeScan = 'invId';
+    //             getEnterQty();
+    //             getRvItem();
+    //             scanBarcodeNormal(typeScan);
+    //           });
+    //         });
+    //       }
+    //     });
+    //   } else {
+    //     ErrorDialog.showErrorDialog(
+    //         context, 'Serial No not match with document.');
+    //   }
+    // }
   }
 
   Future<void> searchSku(String skuScan) async {
@@ -811,10 +849,10 @@ class _RvListItemState extends State<RvListItem> {
       prefs.setString('rvTracking', itemAdjust['tracking_type']);
       prefs.setString('rvItem', itemAdjust['item_name']);
 
-      if (itemAdjust['tracking_type'] == 'Serial Number') {
+      if (itemAdjust['tracking_type'] == '2') {
         scanItemSerial();
       } else {
-        //prefs.setString('itemQty', itemAdjust['item_quantity']);
+        prefs.setString('itemQty', itemAdjust['item_quantity']);
         Navigator.of(context)
             .pushNamed(StmsRoutes.rvItemCreate)
             .whenComplete(() {
@@ -831,52 +869,75 @@ class _RvListItemState extends State<RvListItem> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var itemAdjustUpc =
-        invMasterList.firstWhereOrNull((element) => element.upc == skuScan);
+    invMasterList.firstWhereOrNull((element) => element.upc == skuScan);
 
     if (itemAdjustUpc == null) {
       ErrorDialog.showErrorDialog(context, "No UPC match!");
     } else {
+      var itemAdjust = inventoryList.firstWhereOrNull(
+              (element) => element['item_name'] == itemAdjustUpc.sku);
 
-      prefs.setString('rvTracking', itemAdjustUpc.type);
-      prefs.setString('rvItem', itemAdjustUpc.sku);
+      if (itemAdjust != null) {
+        prefs.setString('rvTracking', itemAdjust['tracking_type']);
+        prefs.setString('rvItem', itemAdjust['item_name']);
 
-      if (itemAdjustUpc.type == 'Serial Number') {
-        scanItemSerial();
-      } else {
-       //  prefs.setString('itemQty', itemAdjust['item_quantity']);
-        Navigator.of(context)
-            .pushNamed(StmsRoutes.rvItemCreate)
-            .whenComplete(() {
-          setState(() {
-            getEnterQty();
-            getRvItem();
+        if (itemAdjust['tracking_type'] == '2') {
+          scanItemSerial();
+        } else {
+          prefs.setString('itemQty', itemAdjust['item_quantity']);
+          Navigator.of(context)
+              .pushNamed(StmsRoutes.rvItemCreate)
+              .whenComplete(() {
+            setState(() {
+              getEnterQty();
+              getRvItem();
+            });
           });
-        });
+        }
+      } else {
+        ErrorDialog.showErrorDialog(context, "No UPC match!");
       }
-
-      // var itemAdjust = inventoryList.firstWhereOrNull(
-      //     (element) => element['item_name'] == itemAdjustUpc.sku);
-
-      // if (itemAdjust != null) {
-      //   prefs.setString('rvTracking', itemAdjust['tracking_type']);
-      //   prefs.setString('rvItem', itemAdjust['item_inventory_id']);
-      //
-      //   if (itemAdjust['tracking_type'] == '2') {
-      //     scanItemSerial();
-      //   } else {
-      //     prefs.setString('itemQty', itemAdjust['item_quantity']);
-      //     Navigator.of(context)
-      //         .pushNamed(StmsRoutes.rvItemCreate)
-      //         .whenComplete(() {
-      //       setState(() {
-      //         getRvItem();
-      //       });
-      //     });
-      //   }
-      // } else {
-      //   ErrorDialog.showErrorDialog(context, "No UPC match!");
-      // }
     }
+    //
+    // prefs.setString('rvTracking', itemAdjustUpc.type);
+    // prefs.setString('rvItem', itemAdjustUpc.sku);
+    //
+    // if (itemAdjustUpc.type == 'Serial Number') {
+    //   scanItemSerial();
+    // } else {
+    //  //  prefs.setString('itemQty', itemAdjust['item_quantity']);
+    //   Navigator.of(context)
+    //       .pushNamed(StmsRoutes.rvItemCreate)
+    //       .whenComplete(() {
+    //     setState(() {
+    //       getEnterQty();
+    //       getRvItem();
+    //     });
+    //   });
+    // }
+
+    // var itemAdjust = inventoryList.firstWhereOrNull(
+    //     (element) => element['item_name'] == itemAdjustUpc.sku);
+
+    // if (itemAdjust != null) {
+    //   prefs.setString('rvTracking', itemAdjust['tracking_type']);
+    //   prefs.setString('rvItem', itemAdjust['item_inventory_id']);
+    //
+    //   if (itemAdjust['tracking_type'] == '2') {
+    //     scanItemSerial();
+    //   } else {
+    //     prefs.setString('itemQty', itemAdjust['item_quantity']);
+    //     Navigator.of(context)
+    //         .pushNamed(StmsRoutes.rvItemCreate)
+    //         .whenComplete(() {
+    //       setState(() {
+    //         getRvItem();
+    //       });
+    //     });
+    //   }
+    // } else {
+    //   ErrorDialog.showErrorDialog(context, "No UPC match!");
+    // }
   }
 
   Future scanItemSerial() async {

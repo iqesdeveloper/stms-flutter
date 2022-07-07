@@ -83,10 +83,21 @@ class DBPoItem {
     return res;
   }
 
+  // Delete certain item
+  Future<int> deleteSelectedPoItem(String itemInvID, String itemLineSeq) async {
+    final db = await database;
+    final res = await db.rawDelete(
+        'DELETE FROM poItem WHERE item_inventory_id == ? AND line_seq_no ==?', [itemInvID, itemLineSeq]);
+
+    return res;
+  }
+
   // Get data in []
   Future<dynamic> getUpload() async {
     final db = await database;
-    var results = await db.rawQuery('SELECT * FROM poItem');
+    var results = await db.rawQuery(
+        'SELECT item_inventory_id, vendor_item_number, item_serial_no FROM poItem'
+    );
     if (results.length > 0) {
       return results;
     }

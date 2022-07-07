@@ -739,7 +739,7 @@ class _CrListItemState extends State<CrListItem> {
               var typeScan = 'invId';
               getEnterQty();
               getCrItem();
-              // scanBarcodeNormal(typeScan);
+              scanBarcodeNormal(typeScan);
             });
           });
         } else {
@@ -757,7 +757,7 @@ class _CrListItemState extends State<CrListItem> {
             var typeScan = 'invId';
             getEnterQty();
             getCrItem();
-            // scanBarcodeNormal(typeScan);
+            scanBarcodeNormal(typeScan);
           });
         });
       }

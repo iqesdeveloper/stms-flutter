@@ -295,7 +295,7 @@ class _RcListItemState extends State<RcListItem> {
                                               Container(
                                                 height: 35,
                                                 child: Text(
-                                                  "${invName.name}",
+                                                  "${invName.sku}",
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   style: TextStyle(
@@ -809,58 +809,99 @@ class _RcListItemState extends State<RcListItem> {
         : repairList.firstWhereOrNull(
             (element) => element['item_inventory_id'] == selectedId);
 
-    if (itemAdjust != null) {
-      List currentSerial = itemAdjust['serial_list'];
+    DBReplaceCustItem().getAllRricItem().then((value) {
+      // ignore: unnecessary_null_comparison
+      if (value != null) {
+        rcItemListing = value;
 
-      var serialList =
-          currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
-      // print('serialList: $serialList');
-      if (serialList != null) {
-        DBReplaceCustItem().getAllRricItem().then((value) {
-          // ignore: unnecessary_null_comparison
-          if (value != null) {
-            rcItemListing = value;
-
-            var itemRc = rcItemListing.firstWhereOrNull(
+        var itemRc = rcItemListing.firstWhereOrNull(
                 (element) => element['item_serial_no'] == barcodeScanRes);
-            if (null == itemRc) {
-              prefs.setString("itemBarcode", barcodeScanRes);
+        if (null == itemRc) {
+          prefs.setString("itemBarcode", barcodeScanRes);
 
-              Navigator.of(context)
-                  .pushNamed(StmsRoutes.rcItemCreate)
-                  .whenComplete(() {
-                setState(() {
-                  var typeScan = 'invId';
-                  getEnterQty();
-                  getRcItem();
-                  // scanBarcodeNormal(typeScan);
-                });
-              });
-            } else {
-              ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
-            }
-          } else {
-            // prefs.setString("itemSelect", json.encode(item));
-            prefs.setString("itemBarcode", barcodeScanRes);
-
-            // await Future.delayed(const Duration(seconds: 3));
-            Navigator.of(context)
-                .pushNamed(StmsRoutes.rcItemCreate)
-                .whenComplete(() {
-              setState(() {
-                var typeScan = 'invId';
-                getEnterQty();
-                getRcItem();
-                // scanBarcodeNormal(typeScan);
-              });
+          Navigator.of(context)
+              .pushNamed(StmsRoutes.rcItemCreate)
+              .whenComplete(() {
+            setState(() {
+              var typeScan = 'invId';
+              getEnterQty();
+              getRcItem();
+              scanBarcodeNormal(typeScan);
             });
-          }
-        });
+          });
+        } else {
+          ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
+        }
       } else {
-        ErrorDialog.showErrorDialog(
-            context, 'Serial No not match with document.');
+        // prefs.setString("itemSelect", json.encode(item));
+        prefs.setString("itemBarcode", barcodeScanRes);
+
+        // await Future.delayed(const Duration(seconds: 3));
+        Navigator.of(context)
+            .pushNamed(StmsRoutes.rcItemCreate)
+            .whenComplete(() {
+          setState(() {
+            var typeScan = 'invId';
+            getEnterQty();
+            getRcItem();
+            scanBarcodeNormal(typeScan);
+          });
+        });
       }
-    }
+    });
+
+    // if (itemAdjust != null) {
+    //   List currentSerial = itemAdjust['serial_list'];
+    //
+    //   var serialList =
+    //       currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
+    //   // print('serialList: $serialList');
+    //   if (serialList != null) {
+    //     DBReplaceCustItem().getAllRricItem().then((value) {
+    //       // ignore: unnecessary_null_comparison
+    //       if (value != null) {
+    //         rcItemListing = value;
+    //
+    //         var itemRc = rcItemListing.firstWhereOrNull(
+    //             (element) => element['item_serial_no'] == barcodeScanRes);
+    //         if (null == itemRc) {
+    //           prefs.setString("itemBarcode", barcodeScanRes);
+    //
+    //           Navigator.of(context)
+    //               .pushNamed(StmsRoutes.rcItemCreate)
+    //               .whenComplete(() {
+    //             setState(() {
+    //               var typeScan = 'invId';
+    //               getEnterQty();
+    //               getRcItem();
+    //               scanBarcodeNormal(typeScan);
+    //             });
+    //           });
+    //         } else {
+    //           ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
+    //         }
+    //       } else {
+    //         // prefs.setString("itemSelect", json.encode(item));
+    //         prefs.setString("itemBarcode", barcodeScanRes);
+    //
+    //         // await Future.delayed(const Duration(seconds: 3));
+    //         Navigator.of(context)
+    //             .pushNamed(StmsRoutes.rcItemCreate)
+    //             .whenComplete(() {
+    //           setState(() {
+    //             var typeScan = 'invId';
+    //             getEnterQty();
+    //             getRcItem();
+    //             scanBarcodeNormal(typeScan);
+    //           });
+    //         });
+    //       }
+    //     });
+    //   } else {
+    //     ErrorDialog.showErrorDialog(
+    //         context, 'Serial No not match with document.');
+    //   }
+    // }
   }
 
   // - SCAN
