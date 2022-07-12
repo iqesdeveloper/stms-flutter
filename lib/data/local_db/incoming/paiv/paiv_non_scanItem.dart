@@ -28,7 +28,7 @@ class DBPaivNonItem {
     );
   }
 
-  // Insert PoItem on database
+  // Insert PaivItem on database
   Future<void> createPaivNonItem(PaivNonItem newPaivNonItem) async {
     // Get a reference to the database.
     final db = await database;
@@ -38,7 +38,7 @@ class DBPaivNonItem {
     );
   }
 
-  // Delete all PoItem
+  // Delete all PaivItem
   Future<int> deleteAllPaivNonItem() async {
     final db = await database;
     final res = await db.rawDelete('DELETE FROM paivNonItem');
@@ -46,7 +46,16 @@ class DBPaivNonItem {
     return res;
   }
 
-  // Get list of all PoItem
+  // Delete selected PaivNonItem
+  Future<int> deletePaivNonItem(String itemInvID) async {
+    final db = await database;
+    final res = await db.rawDelete('DELETE FROM paivNonItem WHERE item_inventory_id == ?',
+        [itemInvID]);
+
+    return res;
+  }
+
+  // Get list of all PaivItem
   Future<dynamic> getAllPaivNonItem() async {
     final db = await database;
     final res = await db.rawQuery("SELECT * FROM paivNonItem");
@@ -58,7 +67,7 @@ class DBPaivNonItem {
     return null;
   }
 
-  // Get list of certain PoItem
+  // Get list of certain PaivItem
   Future<dynamic> getPaivNonItem(String id) async {
     final db = await database;
     final res = await db.rawQuery(

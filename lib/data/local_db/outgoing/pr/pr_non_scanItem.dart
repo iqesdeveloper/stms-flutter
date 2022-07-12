@@ -28,7 +28,7 @@ class DBPurchaseReturnNonItem {
     );
   }
 
-  // Insert PoItem on database
+  // Insert PrItem on database
   Future<void> createPrNonItem(PurchaseReturnNon newPrNonItem) async {
     // Get a reference to the database.
     final db = await database;
@@ -38,7 +38,7 @@ class DBPurchaseReturnNonItem {
     );
   }
 
-  // Delete all PoItem
+  // Delete all PrItem
   Future<int> deleteAllPrNonItem() async {
     final db = await database;
     final res = await db.rawDelete('DELETE FROM prNonItem');
@@ -46,7 +46,16 @@ class DBPurchaseReturnNonItem {
     return res;
   }
 
-  // Get list of all PoItem
+  // Delete selected PrNonItem
+  Future<int> deletePrNonItem(String itemInvID) async {
+    final db = await database;
+    final res = await db.rawDelete('DELETE FROM prNonItem WHERE item_inventory_id == ?',
+        [itemInvID]);
+
+    return res;
+  }
+
+  // Get list of all PrItem
   Future<dynamic> getAllPrNonItem() async {
     final db = await database;
     final res = await db.rawQuery("SELECT * FROM prNonItem");
@@ -58,7 +67,7 @@ class DBPurchaseReturnNonItem {
     return null;
   }
 
-  // Get list of certain PoItem
+  // Get list of certain PrItem
   Future<dynamic> getPrNonItem(String id) async {
     final db = await database;
     final res = await db

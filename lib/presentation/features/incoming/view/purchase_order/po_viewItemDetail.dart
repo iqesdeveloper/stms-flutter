@@ -91,14 +91,18 @@ class _PoItemDetailsState extends State<PoItemDetails> {
       }
     });
     DBPoItem().getAllPoItem().then((value){
-      setState(() {
-        getAllPoItems = value;
-      });
+      if(value != null){
+        setState(() {
+          getAllPoItems = value;
+        });
+      }
     });
     DBPoNonItem().getAllPoNonItem().then((value){
-      setState(() {
-        getAllPoNonItems = value;
-      });
+      if(value != null){
+        setState(() {
+          getAllPoNonItems = value;
+        });
+      }
     });
   }
 
@@ -304,7 +308,8 @@ class _PoItemDetailsState extends State<PoItemDetails> {
             });
           } else {
             print('ITEM SEQUENCE: $itemSequence}');
-            var newQty = int.parse(itemQtyController.text) + int.parse(itemSequence['non_tracking_qty']);
+            var newQty = int.parse(itemQtyController.text) +
+                int.parse(itemSequence['non_tracking_qty']);
             print('Check non tracking: $newQty');
             DBPoNonItem()
                 .update(itemAdjust.id, newQty.toString(), selectedItemSequence)

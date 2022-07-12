@@ -419,45 +419,17 @@ class _RcListItemState extends State<RcListItem> {
                                               // Enter Quantity
                                               snapshot.data[index]['tracking_type'] == '2' ?
                                               Text(
-                                                // CHECK ALL ITEM GOT VALUE OR NOT
-                                                allRcItem.isNotEmpty ?
-                                                allRcItem.where((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id']).isNotEmpty ?
-                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
-                                                '${allRcItem.where((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id']).length}'
-                                                // ELSE, DISPLAY 0
-                                                    : '0'
-                                                // IF NO VALUE DISPLAY 0
-                                                    : '0',
+                                                '${snapshot.data[index]['item_inventory_id'].length}',
+                                                style:
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    fontSize: 16.0
-                                                ),
                                               ) :
                                               Text(
-                                                // CHECK ALL ITEM GOT VALUE OR NOT
-                                                allRcNonItem.isNotEmpty ?
-                                                allRcNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id']) != null ?
-                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
-                                                "${allRcNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
-                                                // ELSE, DISPLAY 0
-                                                    : '0'
-                                                // IF NO VALUE DISPLAY 0
-                                                    : '0',
+                                                '${snapshot.data[index]['non_tracking_qty']}',
+                                                style:
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    fontSize: 16.0
-                                                ),
                                               ),
-                                              // Text(
-                                              //   "${snapshot.data[index]['non_tracking_qty']}",
-                                              //   style:
-                                              //   TextStyle(fontSize: 16.0),
-                                              //   textAlign: TextAlign.center,
-                                              // ),
                                               Container(
                                                 alignment: Alignment.center,
                                                 child: IconButton(
@@ -536,9 +508,8 @@ class _RcListItemState extends State<RcListItem> {
       DBReplaceCustItem().deleteRricItem(itemInvId, itemSerialNo).then((value) {
         if (value == 1) {
           setState(() {
-            fToast.init(context);
             getRcItem();
-            showCustomSuccess('Delete Successful');
+            showSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -548,9 +519,8 @@ class _RcListItemState extends State<RcListItem> {
       DBReplaceCustNonItem().deleteRricNonItem(itemInvId).then((value) {
         if (value == 1) {
           setState(() {
-            fToast.init(context);
             getRcItem();
-            showCustomSuccess('Delete Successful');
+            showSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -651,7 +621,7 @@ class _RcListItemState extends State<RcListItem> {
                                     }).toList(),
                                     isExpanded: true,
                                     value:
-                                        selectedItem == "" ? "" : selectedItem,
+                                    selectedItem == "" ? "" : selectedItem,
                                     onChanged: (String? newValue) {
                                       setState(() {
                                         selectedItem = newValue;
@@ -720,8 +690,8 @@ class _RcListItemState extends State<RcListItem> {
                                     context, 'Please add an item');
                               } else {
                                 SharedPreferences prefs =
-                                    await SharedPreferences.getInstance();
-                                // prefs.setString('rcItem', selectedItem);
+                                await SharedPreferences.getInstance();
+                                prefs.setString('rcItem', selectedItem);
 
                                 findInv(selectedItem, newListItem);
                               }
@@ -745,10 +715,9 @@ class _RcListItemState extends State<RcListItem> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var itemAdjust = newListItem.firstWhereOrNull(
-        (element) => element['item_inventory_id'] == selectedItem);
+            (element) => element['item_inventory_id'] == selectedItem);
 
     prefs.setString('rcTracking', itemAdjust['tracking_type']);
-    prefs.setString('rcItem', itemAdjust['item_name']);
 
     if (itemAdjust['tracking_type'] == '2') {
       var typeScan = 'invId';
@@ -809,99 +778,58 @@ class _RcListItemState extends State<RcListItem> {
         : repairList.firstWhereOrNull(
             (element) => element['item_inventory_id'] == selectedId);
 
-    DBReplaceCustItem().getAllRricItem().then((value) {
-      // ignore: unnecessary_null_comparison
-      if (value != null) {
-        rcItemListing = value;
+    if (itemAdjust != null) {
+      List currentSerial = itemAdjust['serial_list'];
 
-        var itemRc = rcItemListing.firstWhereOrNull(
-                (element) => element['item_serial_no'] == barcodeScanRes);
-        if (null == itemRc) {
-          prefs.setString("itemBarcode", barcodeScanRes);
+      var serialList =
+      currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
+      // print('serialList: $serialList');
+      if (serialList != null) {
+        DBReplaceCustItem().getAllRricItem().then((value) {
+          // ignore: unnecessary_null_comparison
+          if (value != null) {
+            rcItemListing = value;
 
-          Navigator.of(context)
-              .pushNamed(StmsRoutes.rcItemCreate)
-              .whenComplete(() {
-            setState(() {
-              var typeScan = 'invId';
-              getEnterQty();
-              getRcItem();
-              scanBarcodeNormal(typeScan);
+            var itemRc = rcItemListing.firstWhereOrNull(
+                    (element) => element['item_serial_no'] == barcodeScanRes);
+            if (null == itemRc) {
+              prefs.setString("itemBarcode", barcodeScanRes);
+
+              Navigator.of(context)
+                  .pushNamed(StmsRoutes.rcItemCreate)
+                  .whenComplete(() {
+                setState(() {
+                  var typeScan = 'invId';
+                  getEnterQty();
+                  getRcItem();
+                  scanBarcodeNormal(typeScan);
+                });
+              });
+            } else {
+              ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
+            }
+          } else {
+            // prefs.setString("itemSelect", json.encode(item));
+            prefs.setString("itemBarcode", barcodeScanRes);
+
+            // await Future.delayed(const Duration(seconds: 3));
+            Navigator.of(context)
+                .pushNamed(StmsRoutes.rcItemCreate)
+                .whenComplete(() {
+              setState(() {
+                var typeScan = 'invId';
+                getEnterQty();
+                getRcItem();
+                scanBarcodeNormal(typeScan);
+              });
             });
-          });
-        } else {
-          ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
-        }
-      } else {
-        // prefs.setString("itemSelect", json.encode(item));
-        prefs.setString("itemBarcode", barcodeScanRes);
-
-        // await Future.delayed(const Duration(seconds: 3));
-        Navigator.of(context)
-            .pushNamed(StmsRoutes.rcItemCreate)
-            .whenComplete(() {
-          setState(() {
-            var typeScan = 'invId';
-            getEnterQty();
-            getRcItem();
-            scanBarcodeNormal(typeScan);
-          });
+          }
         });
+      } else {
+        ErrorDialog.showErrorDialog(
+            context, 'Serial No not match with document.');
       }
-    });
-
-    // if (itemAdjust != null) {
-    //   List currentSerial = itemAdjust['serial_list'];
-    //
-    //   var serialList =
-    //       currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
-    //   // print('serialList: $serialList');
-    //   if (serialList != null) {
-    //     DBReplaceCustItem().getAllRricItem().then((value) {
-    //       // ignore: unnecessary_null_comparison
-    //       if (value != null) {
-    //         rcItemListing = value;
-    //
-    //         var itemRc = rcItemListing.firstWhereOrNull(
-    //             (element) => element['item_serial_no'] == barcodeScanRes);
-    //         if (null == itemRc) {
-    //           prefs.setString("itemBarcode", barcodeScanRes);
-    //
-    //           Navigator.of(context)
-    //               .pushNamed(StmsRoutes.rcItemCreate)
-    //               .whenComplete(() {
-    //             setState(() {
-    //               var typeScan = 'invId';
-    //               getEnterQty();
-    //               getRcItem();
-    //               scanBarcodeNormal(typeScan);
-    //             });
-    //           });
-    //         } else {
-    //           ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
-    //         }
-    //       } else {
-    //         // prefs.setString("itemSelect", json.encode(item));
-    //         prefs.setString("itemBarcode", barcodeScanRes);
-    //
-    //         // await Future.delayed(const Duration(seconds: 3));
-    //         Navigator.of(context)
-    //             .pushNamed(StmsRoutes.rcItemCreate)
-    //             .whenComplete(() {
-    //           setState(() {
-    //             var typeScan = 'invId';
-    //             getEnterQty();
-    //             getRcItem();
-    //             scanBarcodeNormal(typeScan);
-    //           });
-    //         });
-    //       }
-    //     });
-    //   } else {
-    //     ErrorDialog.showErrorDialog(
-    //         context, 'Serial No not match with document.');
-    //   }
-    // }
+    }
   }
 
   // - SCAN
@@ -914,15 +842,15 @@ class _RcListItemState extends State<RcListItem> {
 
     var itemAdjust = transType == '1'
         ? inventoryList
-            .firstWhereOrNull((element) => element['item_name'] == skuScan)
+        .firstWhereOrNull((element) => element['item_name'] == skuScan)
         : repairList
-            .firstWhereOrNull((element) => element['item_name'] == skuScan);
+        .firstWhereOrNull((element) => element['item_name'] == skuScan);
 
     if (itemAdjust == null) {
       ErrorDialog.showErrorDialog(context, "No SKU match!");
     } else {
       prefs.setString('rcTracking', itemAdjust['tracking_type']);
-      prefs.setString('rcItem', itemAdjust['item_name']);
+      prefs.setString('rcItem', itemAdjust['item_inventory_id']);
 
       if (itemAdjust['tracking_type'] == '2') {
         print('inventory id: ${itemAdjust['item_inventory_id']}');
@@ -959,7 +887,7 @@ class _RcListItemState extends State<RcListItem> {
 
       if (itemAdjust != null) {
         prefs.setString('rcTracking', itemAdjust['tracking_type']);
-        prefs.setString('rcItem', itemAdjust['item_name']);
+        prefs.setString('rcItem', itemAdjust['item_inventory_id']);
 
         if (itemAdjust['tracking_type'] == '2') {
           print('inventory id: ${itemAdjust['item_inventory_id']}');

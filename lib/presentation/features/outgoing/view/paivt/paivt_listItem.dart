@@ -68,6 +68,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
       supplier,
       paivtSerial,
       paivtNonTrack,
+      allPaivtEmpty,
+      allPaivtNonEmpty,
       combineUpdated,
       itemName,
       locationId;
@@ -124,17 +126,27 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
     DBPaivtItem().getAllPaivtItem().then((value) {
       // make the PoItem is equal to the item store in scanDB
       // It is the save info
-      setState(() {
-        allPaivtItem = value;
-      });
+      if(value != null){
+        setState(() {
+          allPaivtItem = value;
+          allPaivtEmpty = allPaivtItem.length;
+        });
+      } else {
+        allPaivtEmpty = '0';
+        getPaivtItem.getPaivtItem();
+      }
     });
 
     DBPaivtNonItem().getAllPaivtNonItem().then((value) {
-      setState(() {
-        // Display and get all the PoNonItem after scanDB collected.
-        // It is the save info
-        allPaivtNonItem = value;
-      });
+      if(value != null){
+        setState(() {
+          allPaivtNonItem = value;
+          allPaivtNonEmpty = allPaivtNonItem.length;
+        });
+      } else {
+        allPaivtNonEmpty = '0';
+        getPaivtItem.getPaivtItem();
+      }
     });
   }
 
@@ -321,46 +333,129 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                                 textAlign: TextAlign.center,
                                               ),
                                               // Enter Quantity text
-                                              // Will display whether it pass in the value or not
-                                              // This s to check if Enter Quantity got value
-                                              // using the master file snapshot check
-                                              // THIS IS FOR ALLPaivtITEM
-                                              snapshot.data[index]['tracking_type'] == "2" ? Text(
-                                                // to check if allPoItem got value or not
-                                                // If got value, check in the master file snapshot and compare the item_inventory_id
-                                                // Using the 'where' will go through the check process like a looping
-                                                allPaivtItem.isNotEmpty ? allPaivtItem.where((element)
-                                                => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).isNotEmpty
-                                                // once check, if it is containing a value or the item_id in DB is same in the master file
-                                                // Get the length of the item_id
-                                                    ? '${allPaivtItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).length}'
-                                                // If there is no match, then the result is display '0'
-                                                    : '0'
-                                                // If the overall result is default as nothing, the display will also show '0'
-                                                    : '0',
-                                                style: TextStyle(
-                                                    fontSize: 16.0
+                                              Container(
+                                                height: height*0.11,
+                                                child: Stack(
+                                                  children: [
+                                                    // Ent Qty Text
+                                                    Center(
+                                                      child:
+                                                      // Will display whether it pass in the value or not
+                                                      // This s to check if Enter Quantity got value
+                                                      // using the master file snapshot check
+                                                      // THIS IS FOR ALLPOITEM
+                                                      snapshot.data[index]['tracking_type'] == "2" ? Text(
+                                                        // to check if allPoItem got value or not
+                                                        // If got value, check in the master file snapshot and compare the item_inventory_id
+                                                        // Using the 'where' will go through the check process like a looping
+
+                                                        allPaivtItem.isNotEmpty && allPaivtEmpty != '0' ? allPaivtItem.where((element)
+                                                        => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']).isNotEmpty
+                                                        // once check, if it is containing a value or the item_id in DB is same in the master file
+                                                        // Get the length of the item_id
+                                                            ? '${allPaivtItem.where((element) => element['item_inventory_id'] ==
+                                                            snapshot.data[index]['item_inventory_id']).length}'
+                                                        // If there is no match, then the result is display '0'
+                                                            : '0'
+                                                        // If the overall result is default as nothing, the display will also show '0'
+                                                            : '0',
+                                                        style: TextStyle(
+                                                            fontSize: 16.0
+                                                        ),
+                                                        textAlign: TextAlign.center,
+                                                      )
+                                                          : Text(
+                                                        allPaivtNonItem.isNotEmpty && allPaivtNonEmpty != '0' ? allPaivtNonItem.firstWhereOrNull((element) =>
+                                                        element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']) != null
+                                                            ? "${allPaivtNonItem.firstWhereOrNull((element) =>
+                                                        element['item_inventory_id'] == snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
+                                                            : '0' : '0',
+                                                        style: TextStyle(
+                                                            fontSize: 16.0
+                                                        ),
+                                                        textAlign: TextAlign.center,
+                                                      ),
+                                                    ),
+                                                    // Reset Icon
+                                                    SingleChildScrollView(
+                                                      child: Column(
+                                                        children: [
+                                                          SizedBox(height: height*0.07,),
+                                                          Align(
+                                                            alignment: Alignment.bottomCenter,
+                                                            child: IconButton(
+                                                              icon: Icon(
+                                                                Icons.update,
+                                                                color: Colors.red,
+                                                                size: 20,
+                                                              ),
+                                                              onPressed: (){
+                                                                // check if SN or not
+                                                                if(snapshot.data[index]['tracking_type'] == "2"){
+                                                                  setState(() {
+                                                                    deletePaivtItem(
+                                                                      snapshot.data[index]['item_inventory_id'],
+                                                                    );
+                                                                  });
+                                                                  // var getSelected = allPoItem.where((element) =>
+                                                                  // element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                                  //     && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+                                                                  //
+                                                                  // if(getSelected != null){
+                                                                  //   deletePoItem(
+                                                                  //     snapshot.data[index]['item_inventory_id'],
+                                                                  //     snapshot.data[index]['line_seq_no'],
+                                                                  //   );
+                                                                  //   fToast.init(context);
+                                                                  //   showCustomSuccess('Reset Successful');
+                                                                  //   resetEntQty();
+                                                                  // } else {
+                                                                  //   setState(() {
+                                                                  //     fToast.init(context);
+                                                                  //     showCustomSuccess('Already reset');
+                                                                  //     resetEntQty();
+                                                                  //   });
+                                                                  // }
+
+                                                                } else {
+                                                                  // If not SN
+                                                                  setState(() {
+                                                                    deletePaivtNonItem(
+                                                                      snapshot.data[index]['item_inventory_id'],
+                                                                    );
+                                                                  });
+
+                                                                  // print('ENT1.2: $enterQty');
+                                                                  // var getSelected = allPoNonItem.firstWhereOrNull((element) =>
+                                                                  // element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                                  //     && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+                                                                  //
+                                                                  // if(getSelected != null){
+                                                                  //   setState(() {
+                                                                  //     deletePoNonItem(
+                                                                  //       snapshot.data[index]['item_inventory_id'],
+                                                                  //       snapshot.data[index]['line_seq_no'],
+                                                                  //     );
+                                                                  //     fToast.init(context);
+                                                                  //     showCustomSuccess('Reset Successful');
+                                                                  //     resetEntQty();
+                                                                  //   });
+                                                                  // } else {
+                                                                  //   setState(() {
+                                                                  //     fToast.init(context);
+                                                                  //     showCustomSuccess('Already reset');
+                                                                  //     resetEntQty();
+                                                                  //   });
+                                                                  // }
+                                                                }
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                textAlign: TextAlign.center,
-                                              )
-                                                  : Text(
-                                                // This one is to check if AllPoNonItem got value
-                                                // ALLPAIVNONITEM section
-                                                // Need to check if there is a value after scan.
-                                                // Comparing both the DB and master file to check if there is a value before and after scan
-                                                allPaivtNonItem.isNotEmpty ? allPaivtNonItem.firstWhereOrNull((element) =>
-                                                element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']) != null
-                                                // If got value, then display the tracking_qty
-                                                    ? "${allPaivtNonItem.firstWhereOrNull((element) => element['item_inventory_id']
-                                                    == snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
-                                                // If no value after scan, which means it is not the same as in DB, then display '0'
-                                                    : "0"
-                                                // This is generally display '0' if no value is found
-                                                    : "0",
-                                                style: TextStyle(
-                                                    fontSize: 16.0
-                                                ),
-                                                textAlign: TextAlign.center,
                                               ),
                                               Column(
                                                 children: [
@@ -1066,7 +1161,11 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
       } else {
         var getList = DBPaivtItem().getBarcodePaivtItem(invNo);
         var getDb = 'DBPaivtItem';
-        ViewDialog.showViewDialog(context, getList, getDb);
+        ViewDialog.showViewDialog(context, getList, getDb).whenComplete((){
+          setState(() {
+            getEnterQty();
+          });
+        });
       }
     });
   }
@@ -1105,6 +1204,38 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
           ErrorDialog.showErrorDialog(context, value['message']);
         }
       });
+    });
+  }
+
+  deletePaivtItem(String itemInvId) {
+    DBPaivtItem().deleteSelectedPaivtItem(itemInvId).then((value){
+      if(value == 1){
+        setState(() {
+          fToast.init(context);
+          showCustomSuccess('Reset Successful');
+
+          getEnterQty();
+        });
+      } else {
+        fToast.init(context);
+        showCustomSuccess('Reset Already');
+      }
+    });
+  }
+
+  deletePaivtNonItem(String itemInvId) {
+    DBPaivtNonItem().deletePaivtNonItem(itemInvId).then((value){
+      if(value == 1){
+        setState(() {
+          fToast.init(context);
+          showCustomSuccess('Reset Successful');
+
+          getEnterQty();
+        });
+      } else {
+        fToast.init(context);
+        showCustomSuccess('Reset Already');
+      }
     });
   }
 }

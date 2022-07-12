@@ -57,7 +57,6 @@ class _VsrCreateItemState extends State<VsrCreateItem> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     vsrTrack = prefs.getString('vsrTracking');
     selectedInvtry = prefs.getString('vsrItem');
-    itemSelectedInventory.text = selectedInvtry;
     itemSnController.text = prefs.getString('itemBarcode')!;
   }
 
@@ -108,56 +107,85 @@ class _VsrCreateItemState extends State<VsrCreateItem> {
             body: Container(
               color: Colors.white,
               padding: EdgeInsets.all(10),
-              child: Container(
-                height: height * 0.85,
-                child: Column(
-                  children: [
-                    // Text field for Item Inventory ID
-                    TextField(
-                      controller: itemSelectedInventory,
-                      key: itemSelectedInvKey,
-                      readOnly: true,
-                      decoration: InputDecoration(
-                          labelText: 'Item Inventory ID',
-                          labelStyle: TextStyle(
-                            color: Colors.blue,
-                          )
+              child: SingleChildScrollView(
+                child: Container(
+                  height: height * 0.85,
+                  child: Column(
+                    children: [
+                      FormField<String>(
+                        builder: (FormFieldState<String> state) {
+                          return InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: 'Item Inventory ID',
+                              errorText:
+                              state.hasError ? state.errorText : null,
+                            ),
+                            isEmpty: false,
+                            child: new DropdownButtonHideUnderline(
+                              child: ButtonTheme(
+                                child: DropdownButton<String>(
+                                  isDense: true,
+                                  iconSize: 28,
+                                  iconEnabledColor: Colors.amber,
+                                  items: inventoryList.map((item) {
+                                    return new DropdownMenuItem(
+                                      child: Container(
+                                        width: width * 0.8,
+                                        child: Text(
+                                          item.sku,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      value: item.id.toString(),
+                                    );
+                                  }).toList(),
+                                  isExpanded: false,
+                                  value:
+                                  selectedInvtry, // == "" ? "" : selectedTxn,
+                                  onChanged: null,
+                                  // (String? newValue) {
+                                  //   setState(() {
+                                  //     selectedInvtry = newValue!;
+                                  //   });
+                                  // },
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      style: TextStyle(
-                        color: Colors.grey,
+                      vsrTrack == '2'
+                          ? StmsInputField(
+                        controller: itemSnController,
+                        hint: 'Serial No',
+                        key: itemSnKey,
+                        validator: Validator.valueExists,
+                      )
+                          : StmsInputField(
+                        controller: itemNonQtyController,
+                        hint: 'Quantity',
+                        key: itemNonQtyKey,
+                        keyboard: TextInputType.number,
+                        validator: Validator.valueExists,
                       ),
-                    ),
-                    vsrTrack == '2'
-                        ? StmsInputField(
-                      controller: itemSnController,
-                      hint: 'Serial No',
-                      key: itemSnKey,
-                      validator: Validator.valueExists,
-                    )
-                        : StmsInputField(
-                      controller: itemNonQtyController,
-                      hint: 'Quantity',
-                      key: itemNonQtyKey,
-                      keyboard: TextInputType.number,
-                      validator: Validator.valueExists,
-                    ),
-                    Expanded(
-                      child: Container(
-                        alignment: Alignment.bottomCenter,
-                        child: StmsStyleButton(
-                          title: 'SAVE',
-                          backgroundColor: Colors.amber,
-                          textColor: Colors.black,
-                          onPressed: () {
-                            saveData();
-                            // Navigator.popUntil(context,
-                            //     ModalRoute.withName(StmsRoutes.aiItemList));
-                          },
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.bottomCenter,
+                          child: StmsStyleButton(
+                            title: 'SAVE',
+                            backgroundColor: Colors.amber,
+                            textColor: Colors.black,
+                            onPressed: () {
+                              saveData();
+                              // Navigator.popUntil(context,
+                              //     ModalRoute.withName(StmsRoutes.aiItemList));
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 2),
-                  ],
+                      SizedBox(height: 2),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -181,132 +209,70 @@ class _VsrCreateItemState extends State<VsrCreateItem> {
       ErrorDialog.showErrorDialog(context, 'Minimum quantity is 1');
     } else {
       if (vsrTrack == "2") {
-        // Get all value from DB
-        DBVendorReplaceItem().getAllVsrItem().then((value){
-          var itemAdjust = inventoryList.firstWhereOrNull((element) =>
-          element.sku == selectedInvtry);
-
-          // First check if there is value or not
-          // If got value
-          // ignore: unnecessary_null_comparison
-          if(value != null){
-            setState(() {
-              // set the value to list
-              // variable allModifyItem is the list
-              allVendorReplaceItem = value;
-
-              // Check if SKU name present
-              if(itemAdjust != null) {
-                // search in DB if got the same item inventory id or not
-                // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
-                var currentItemInBD = allVendorReplaceItem.firstWhereOrNull((
-                    element) => element['item_inventory_id'] == itemAdjust.id);
-
-                // if already got item with the same item inventory id
-                if (currentItemInBD != null) {
-                  // display popup error and show popup error of the item already exist
-                  Navigator.popUntil(
-                      context, ModalRoute.withName(StmsRoutes.vsrItemList));
-                  ErrorDialog.showErrorDialog(
-                      context, 'Item SKU already exists.');
-                } else {
-                  // if no item with this item inventory id
-                  DBVendorReplaceItem()
-                      .createVsrItem(
-                    VsrItem(
-                      itemIvId: itemAdjust.id,
-                      itemSn: itemSnController.text,
-                      // itemReason: selectedReason,
-                    ),
-                  )
-                      .then((value) {
-                    showCustomSuccess('Item Save');
-                    Navigator.popUntil(
-                        context, ModalRoute.withName(StmsRoutes.vsrItemList));
-                  });
-                }
-              }
-            });
-            // if no value in DB at all
-          } else {
-            if(itemAdjust != null) {
-              DBVendorReplaceItem()
-                  .createVsrItem(
-                VsrItem(
-                  itemIvId: itemAdjust.id,
-                  itemSn: itemSnController.text,
-                  // itemReason: selectedReason,
-                ),
-              )
-                  .then((value) {
-                showCustomSuccess('Item Save');
-                Navigator.popUntil(
-                    context, ModalRoute.withName(StmsRoutes.vsrItemList));
-              });
-            }
-          }
+        DBVendorReplaceItem()
+            .createVsrItem(
+          VsrItem(
+            itemIvId: selectedInvtry,
+            itemSn: itemSnController.text,
+            // itemReason: selectedReason,
+          ),
+        )
+            .then((value) {
+          showSuccess('Item Save');
+          Navigator.popUntil(
+              context, ModalRoute.withName(StmsRoutes.vsrItemList));
         });
       } else {
-        // Get all value from DB
         DBVendorReplaceNonItem().getAllVsrNonItem().then((value) {
-          var itemAdjust = inventoryList.firstWhereOrNull((element) =>
-          element.sku == selectedInvtry);
-
-          // First check if there is value or not
-          // If got value
           // ignore: unnecessary_null_comparison
-          if(value != null){
-            setState(() {
-              // set the value to list
-              // variable allModifyNonItem is the list
-              allVendorReplaceNonItem = value;
+          if (value != null) {
+            var listingVsr = value;
 
-              if(itemAdjust != null) {
-                // search in DB if got the same item inventory id or not
-                // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
-                var currentItemInBD = allVendorReplaceNonItem.firstWhereOrNull((element)
-                => element['item_inventory_id'] == itemAdjust.id);
+            var itemVsr = listingVsr.firstWhereOrNull(
+                    (element) => element['item_inventory_id'] == selectedInvtry);
 
-                // if already got item with the same item inventory id
-                if(currentItemInBD != null){
-                  // display popup error and show popup error of the item already exist
-                  Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.vsrItemList));
-                  ErrorDialog.showErrorDialog(context, 'Item SKU already exists.');
-                } else {
-                  // if no item with this item inventory id
-                  DBVendorReplaceNonItem()
-                      .createVsrNonItem(
-                    VsrNonItem(
-                      itemIvId: itemAdjust.id,
-                      itemNonQty: itemNonQtyController.text,
-                      // itemReason: selectedReason,
-                    ),
-                  )
-                      .then((value) {
-                    showCustomSuccess('Item Save');
-                    Navigator.popUntil(
-                        context, ModalRoute.withName(StmsRoutes.vsrItemList));
-                  });
-                }
+            if (null == itemVsr) {
+              String? getQty = prefs.getString('itemQty');
+              var currentQty = int.parse(getQty!);
+
+              if (int.parse(itemNonQtyController.text) <= currentQty) {
+                DBVendorReplaceNonItem()
+                    .createVsrNonItem(
+                  VsrNonItem(
+                    itemIvId: selectedInvtry,
+                    itemNonQty: itemNonQtyController.text,
+                    // itemReason: selectedReason,
+                  ),
+                )
+                    .then((value) {
+                  showSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.vsrItemList));
+                });
+              } else {
+                ErrorDialog.showErrorDialog(
+                    context, 'Quantity cannot more than current quantity.');
               }
-            });
-            // if no value in DB at all
-          } else {
-            if(itemAdjust != null) {
-              DBVendorReplaceNonItem()
-                  .createVsrNonItem(
-                VsrNonItem(
-                  itemIvId: itemAdjust.id,
-                  itemNonQty: itemNonQtyController.text,
-                  // itemReason: selectedReason,
-                ),
-              )
-                  .then((value) {
-                showCustomSuccess('Item Save');
-                Navigator.popUntil(
-                    context, ModalRoute.withName(StmsRoutes.vsrItemList));
-              });
+            } else {
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.vsrItemList));
+
+              ErrorDialog.showErrorDialog(context, 'This SKU already exists.');
             }
+          } else {
+            DBVendorReplaceNonItem()
+                .createVsrNonItem(
+              VsrNonItem(
+                itemIvId: selectedInvtry,
+                itemNonQty: itemNonQtyController.text,
+                // itemReason: selectedReason,
+              ),
+            )
+                .then((value) {
+              showSuccess('Item Save');
+              Navigator.popUntil(
+                  context, ModalRoute.withName(StmsRoutes.vsrItemList));
+            });
           }
         });
       }

@@ -95,6 +95,20 @@ class _SrItemDetailsState extends State<SrItemDetails> {
         });
       }
     });
+    DBSaleReturnItem().getAllSrItem().then((value){
+      if(value != null){
+        setState(() {
+          getAllSrItems = value;
+        });
+      }
+    });
+    DBSaleReturnNonItem().getAllSrNonItem().then((value){
+      if(value != null){
+        setState(() {
+          getAllSrNonItems = value;
+        });
+      }
+    });
   }
 
   @override

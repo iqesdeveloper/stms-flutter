@@ -351,40 +351,52 @@ class _RvListItemState extends State<RvListItem> {
                                               ),
                                               // Enter Quantity
                                               snapshot.data[index]['tracking_type'] == '2' ?
+                                                  Text(
+                                                    '${snapshot.data[index]['item_inventory_id'].length}',
+                                                      style:
+                                                      TextStyle(fontSize: 16.0),
+                                                      textAlign: TextAlign.center,
+                                                  ) :
                                               Text(
-                                                // CHECK ALL ITEM GOT VALUE OR NOT
-                                                allRvItem.isNotEmpty ?
-                                                allRvItem.where((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id']).isNotEmpty ?
-                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
-                                                '${allRvItem.where((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id']).length}'
-                                                // ELSE, DISPLAY 0
-                                                    : '0'
-                                                // IF NO VALUE DISPLAY 0
-                                                    : '0',
+                                                '${snapshot.data[index]['non_tracking_qty']}',
+                                                style:
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    fontSize: 16.0
-                                                ),
-                                              ) :
-                                              Text(
-                                                // CHECK ALL ITEM GOT VALUE OR NOT
-                                                allRvNonItem.isNotEmpty ?
-                                                allRvNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id']) != null ?
-                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
-                                                "${allRvNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
-                                                // ELSE, DISPLAY 0
-                                                    : '0'
-                                                // IF NO VALUE DISPLAY 0
-                                                    : '0',
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    fontSize: 16.0
-                                                ),
                                               ),
+                                              // Text(
+                                              //   // CHECK ALL ITEM GOT VALUE OR NOT
+                                              //   allRvItem.isNotEmpty ?
+                                              //   allRvItem.where((element) => element['item_inventory_id'] ==
+                                              //       snapshot.data[index]['item_inventory_id']).isNotEmpty ?
+                                              //   // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                              //   '${allRvItem.where((element) => element['item_inventory_id'] ==
+                                              //       snapshot.data[index]['item_inventory_id']).length}'
+                                              //   // ELSE, DISPLAY 0
+                                              //       : '0'
+                                              //   // IF NO VALUE DISPLAY 0
+                                              //       : '0',
+                                              //   textAlign: TextAlign.center,
+                                              //   style: TextStyle(
+                                              //       fontSize: 16.0
+                                              //   ),
+                                              // ) :
+                                              // Text(
+                                              //   // CHECK ALL ITEM GOT VALUE OR NOT
+                                              //   allRvNonItem.isNotEmpty ?
+                                              //   allRvNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                              //       snapshot.data[index]['item_inventory_id']) != null ?
+                                              //   // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
+                                              //   "${allRvNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                              //       snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
+                                              //   // ELSE, DISPLAY 0
+                                              //       : '0'
+                                              //   // IF NO VALUE DISPLAY 0
+                                              //       : '0',
+                                              //   textAlign: TextAlign.center,
+                                              //   style: TextStyle(
+                                              //       fontSize: 16.0
+                                              //   ),
+                                              // ),
                                               // Text(
                                               //   "${snapshot.data[index]['non_tracking_qty']}",
                                               //   style:
@@ -465,9 +477,8 @@ class _RvListItemState extends State<RvListItem> {
       DBReturnVendorItem().deleteRvItem(itemInvId, itemSerialNo).then((value) {
         if (value == 1) {
           setState(() {
-            fToast.init(context);
             getRvItem();
-            showCustomSuccess('Delete Successful');
+            showSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -477,9 +488,8 @@ class _RvListItemState extends State<RvListItem> {
       DBReturnVendorNonItem().deleteRvNonItem(itemInvId).then((value) {
         if (value == 1) {
           setState(() {
-            fToast.init(context);
             getRvItem();
-            showCustomSuccess('Delete Successful');
+            showSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -584,7 +594,7 @@ class _RvListItemState extends State<RvListItem> {
                                     }).toList(),
                                     isExpanded: true,
                                     value:
-                                        selectedItem == "" ? "" : selectedItem,
+                                    selectedItem == "" ? "" : selectedItem,
                                     onChanged: (String? newValue) {
                                       setState(() {
                                         selectedItem = newValue;
@@ -653,8 +663,8 @@ class _RvListItemState extends State<RvListItem> {
                                     context, 'Please add an item');
                               } else {
                                 SharedPreferences prefs =
-                                    await SharedPreferences.getInstance();
-                                // prefs.setString('rvItem', selectedItem);
+                                await SharedPreferences.getInstance();
+                                prefs.setString('rvItem', selectedItem);
 
                                 findInv(selectedItem);
                               }
@@ -681,7 +691,6 @@ class _RvListItemState extends State<RvListItem> {
             (element) => element['item_inventory_id'] == selectedItem);
 
     prefs.setString('rvTracking', itemAdjust['tracking_type']);
-    prefs.setString('rvItem', itemAdjust['item_name']);
 
     if (itemAdjust['tracking_type'] == '2') {
       var typeScan = 'invId';
@@ -732,109 +741,63 @@ class _RvListItemState extends State<RvListItem> {
 
   Future<void> saveData(String barcodeScanRes) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    var selectedId = prefs.getString('rvItem');
 
-    DBReturnVendorItem().getAllRvItem().then((value) {
-      if (value != null) {
-        rvItemListing = value;
+    var itemAdjust = inventoryList.firstWhereOrNull(
+            (element) => element['item_inventory_id'] == selectedId);
 
-        var itemRv = rvItemListing.firstWhereOrNull(
-                (element) => element['item_serial_no'] == barcodeScanRes);
-        print('TEST2: $itemRv');
-        if (null == itemRv) {
-          prefs.setString("itemBarcode", barcodeScanRes);
+    if (itemAdjust != null) {
+      List currentSerial = itemAdjust['serial_list'];
+      var serialList =
+      currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
 
-          Navigator.of(context)
-              .pushNamed(StmsRoutes.rvItemCreate)
-              .whenComplete(() {
-            setState(() {
-              var typeScan = 'invId';
-              getEnterQty();
-              getRvItem();
-              scanBarcodeNormal(typeScan);
+      if (serialList != null) {
+        DBReturnVendorItem().getAllRvItem().then((value) {
+          // ignore: unnecessary_null_comparison
+          if (value != null) {
+            rvItemListing = value;
+            // print('item Serial list: $value');
+
+            var itemRv = rvItemListing.firstWhereOrNull(
+                    (element) => element['item_serial_no'] == barcodeScanRes);
+            if (null == itemRv) {
+              prefs.setString("itemBarcode", barcodeScanRes);
+
+              Navigator.of(context)
+                  .pushNamed(StmsRoutes.rvItemCreate)
+                  .whenComplete(() {
+                setState(() {
+                  var typeScan = 'invId';
+                  getEnterQty();
+                  getRvItem();
+                  scanBarcodeNormal(typeScan);
+                });
+              });
+            } else {
+              ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
+            }
+          } else {
+            // prefs.setString("itemSelect", json.encode(item));
+            prefs.setString("itemBarcode", barcodeScanRes);
+
+            // await Future.delayed(const Duration(seconds: 3));
+            Navigator.of(context)
+                .pushNamed(StmsRoutes.rvItemCreate)
+                .whenComplete(() {
+              setState(() {
+                var typeScan = 'invId';
+                getEnterQty();
+                getRvItem();
+                scanBarcodeNormal(typeScan);
+              });
             });
-          });
-        } else {
-          ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
-        }
-      } else {
-        prefs.setString("itemBarcode", barcodeScanRes);
-
-        // await Future.delayed(const Duration(seconds: 3));
-        Navigator.of(context)
-            .pushNamed(StmsRoutes.rvItemCreate)
-            .whenComplete(() {
-          setState(() {
-            var typeScan = 'invId';
-            getEnterQty();
-            getRvItem();
-            scanBarcodeNormal(typeScan);
-          });
+          }
         });
+      } else {
+        ErrorDialog.showErrorDialog(
+            context, 'Serial No not match with document.');
       }
-    });
-    // var selectedId = prefs.getString('rvItem');
-    //
-    // var itemAdjust = inventoryList.firstWhereOrNull(
-    //     (element) => element['item_inventory_id'] == selectedId);
-    //
-    // print('TEST1: $itemAdjust');
-    //
-    // if (itemAdjust != null) {
-    //   List currentSerial = itemAdjust['serial_list'];
-    //   var serialList =
-    //       currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
-    //
-    //   print('TEST2: $serialList');
-    //
-    //   if (serialList != null) {
-    //     DBReturnVendorItem().getAllRvItem().then((value) {
-    //       // ignore: unnecessary_null_comparison
-    //       if (value != null) {
-    //         rvItemListing = value;
-    //         print('item Serial list: $value');
-    //
-    //         var itemRv = rvItemListing.firstWhereOrNull(
-    //             (element) => element['item_serial_no'] == barcodeScanRes);
-    //         print('TEST3: $itemRv');
-    //
-    //         if (null == itemRv) {
-    //           prefs.setString("itemBarcode", barcodeScanRes);
-    //
-    //           Navigator.of(context)
-    //               .pushNamed(StmsRoutes.rvItemCreate)
-    //               .whenComplete(() {
-    //             setState(() {
-    //               var typeScan = 'invId';
-    //               getEnterQty();
-    //               getRvItem();
-    //               scanBarcodeNormal(typeScan);
-    //             });
-    //           });
-    //         } else {
-    //           ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
-    //         }
-    //       } else {
-    //         // prefs.setString("itemSelect", json.encode(item));
-    //         prefs.setString("itemBarcode", barcodeScanRes);
-    //
-    //         // await Future.delayed(const Duration(seconds: 3));
-    //         Navigator.of(context)
-    //             .pushNamed(StmsRoutes.rvItemCreate)
-    //             .whenComplete(() {
-    //           setState(() {
-    //             var typeScan = 'invId';
-    //             getEnterQty();
-    //             getRvItem();
-    //             scanBarcodeNormal(typeScan);
-    //           });
-    //         });
-    //       }
-    //     });
-    //   } else {
-    //     ErrorDialog.showErrorDialog(
-    //         context, 'Serial No not match with document.');
-    //   }
-    // }
+    }
   }
 
   Future<void> searchSku(String skuScan) async {
@@ -847,7 +810,7 @@ class _RvListItemState extends State<RvListItem> {
       ErrorDialog.showErrorDialog(context, "No SKU match!");
     } else {
       prefs.setString('rvTracking', itemAdjust['tracking_type']);
-      prefs.setString('rvItem', itemAdjust['item_name']);
+      prefs.setString('rvItem', itemAdjust['item_inventory_id']);
 
       if (itemAdjust['tracking_type'] == '2') {
         scanItemSerial();
@@ -857,8 +820,8 @@ class _RvListItemState extends State<RvListItem> {
             .pushNamed(StmsRoutes.rvItemCreate)
             .whenComplete(() {
           setState(() {
-            getEnterQty();
             getRvItem();
+            getEnterQty();
           });
         });
       }
@@ -879,7 +842,7 @@ class _RvListItemState extends State<RvListItem> {
 
       if (itemAdjust != null) {
         prefs.setString('rvTracking', itemAdjust['tracking_type']);
-        prefs.setString('rvItem', itemAdjust['item_name']);
+        prefs.setString('rvItem', itemAdjust['item_inventory_id']);
 
         if (itemAdjust['tracking_type'] == '2') {
           scanItemSerial();
@@ -889,8 +852,8 @@ class _RvListItemState extends State<RvListItem> {
               .pushNamed(StmsRoutes.rvItemCreate)
               .whenComplete(() {
             setState(() {
-              getEnterQty();
               getRvItem();
+              getEnterQty();
             });
           });
         }
@@ -898,46 +861,6 @@ class _RvListItemState extends State<RvListItem> {
         ErrorDialog.showErrorDialog(context, "No UPC match!");
       }
     }
-    //
-    // prefs.setString('rvTracking', itemAdjustUpc.type);
-    // prefs.setString('rvItem', itemAdjustUpc.sku);
-    //
-    // if (itemAdjustUpc.type == 'Serial Number') {
-    //   scanItemSerial();
-    // } else {
-    //  //  prefs.setString('itemQty', itemAdjust['item_quantity']);
-    //   Navigator.of(context)
-    //       .pushNamed(StmsRoutes.rvItemCreate)
-    //       .whenComplete(() {
-    //     setState(() {
-    //       getEnterQty();
-    //       getRvItem();
-    //     });
-    //   });
-    // }
-
-    // var itemAdjust = inventoryList.firstWhereOrNull(
-    //     (element) => element['item_name'] == itemAdjustUpc.sku);
-
-    // if (itemAdjust != null) {
-    //   prefs.setString('rvTracking', itemAdjust['tracking_type']);
-    //   prefs.setString('rvItem', itemAdjust['item_inventory_id']);
-    //
-    //   if (itemAdjust['tracking_type'] == '2') {
-    //     scanItemSerial();
-    //   } else {
-    //     prefs.setString('itemQty', itemAdjust['item_quantity']);
-    //     Navigator.of(context)
-    //         .pushNamed(StmsRoutes.rvItemCreate)
-    //         .whenComplete(() {
-    //       setState(() {
-    //         getRvItem();
-    //       });
-    //     });
-    //   }
-    // } else {
-    //   ErrorDialog.showErrorDialog(context, "No UPC match!");
-    // }
   }
 
   Future scanItemSerial() async {
@@ -978,22 +901,22 @@ class _RvListItemState extends State<RvListItem> {
                 Divider(thickness: 2),
                 Expanded(
                     child: Container(
-                  alignment: Alignment.center,
-                  // color: Colors.blue,
-                  child: ButtonTheme(
-                    minWidth: 200,
-                    height: 50,
-                    child: StmsStyleButton(
-                      title: 'SCAN SERIAL NO',
-                      backgroundColor: Colors.green,
-                      textColor: Colors.white,
-                      onPressed: () {
-                        var typeScan = 'invId';
-                        scanBarcodeNormal(typeScan);
-                      },
-                    ),
-                  ),
-                )),
+                      alignment: Alignment.center,
+                      // color: Colors.blue,
+                      child: ButtonTheme(
+                        minWidth: 200,
+                        height: 50,
+                        child: StmsStyleButton(
+                          title: 'SCAN SERIAL NO',
+                          backgroundColor: Colors.green,
+                          textColor: Colors.white,
+                          onPressed: () {
+                            var typeScan = 'invId';
+                            scanBarcodeNormal(typeScan);
+                          },
+                        ),
+                      ),
+                    )),
               ],
             ),
           ),

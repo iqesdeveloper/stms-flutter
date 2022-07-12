@@ -94,6 +94,20 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
         });
       }
     });
+    DBPaivtItem().getAllPaivtItem().then((value){
+      if(value != null){
+        setState(() {
+          getPaivtItem = value;
+        });
+      }
+    });
+    DBPaivtNonItem().getAllPaivtNonItem().then((value){
+      if(value != null){
+        setState(() {
+          getAllPaivtNonItems = value;
+        });
+      }
+    });
   }
 
   @override

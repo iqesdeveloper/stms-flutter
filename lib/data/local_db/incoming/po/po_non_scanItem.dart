@@ -51,7 +51,8 @@ class DBPoNonItem {
   // Delete selected PoNonItem
   Future<int> deletePoNonItem(String itemInvID, String itemLineSeq) async {
     final db = await database;
-    final res = await db.rawDelete('DELETE FROM poNonItem WHERE item_inventory_id == ? AND line_seq_no ==?',
+    final res = await db.rawDelete('DELETE FROM poNonItem WHERE item_inventory_id == ? '
+        'AND line_seq_no ==?',
         [itemInvID, itemLineSeq]);
 
     return res;

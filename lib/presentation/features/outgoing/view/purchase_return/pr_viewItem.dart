@@ -38,6 +38,8 @@ class _PrItemDetailsState extends State<PrItemDetails> {
 
   List<InventoryHive> inventoryList = [];
   List prItemList = [];
+  List getAllPrItem = [];
+  List getAllPrNonItem = [];
   // String _scanBarcode = 'Unknown';
   var selectedInvtry, tracking;
   final format = DateFormat("yyyy-MM-dd");
@@ -86,6 +88,20 @@ class _PrItemDetailsState extends State<PrItemDetails> {
       } else {
         setState(() {
           inventoryList = value;
+        });
+      }
+    });
+    DBPurchaseReturnItem().getAllPrItem().then((value){
+      if(value != null){
+        setState(() {
+          getAllPrItem = value;
+        });
+      }
+    });
+    DBPurchaseReturnNonItem().getAllPrNonItem().then((value){
+      if(value != null){
+        setState(() {
+          getAllPrNonItem = value;
         });
       }
     });

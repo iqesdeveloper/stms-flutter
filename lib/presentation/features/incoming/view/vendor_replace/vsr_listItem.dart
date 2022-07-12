@@ -340,45 +340,17 @@ class _VsrListItemState extends State<VsrListItem> {
                                               // Enter Quantity
                                               snapshot.data[index]['tracking_type'] == '2' ?
                                               Text(
-                                                // CHECK ALL ITEM GOT VALUE OR NOT
-                                                allVsrItem.isNotEmpty ?
-                                                allVsrItem.where((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id']).isNotEmpty ?
-                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
-                                                '${allVsrItem.where((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id']).length}'
-                                                // ELSE, DISPLAY 0
-                                                    : '0'
-                                                // IF NO VALUE DISPLAY 0
-                                                    : '0',
+                                                '${snapshot.data[index]['item_inventory_id'].length}',
+                                                style:
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    fontSize: 16.0
-                                                ),
                                               ) :
                                               Text(
-                                                // CHECK ALL ITEM GOT VALUE OR NOT
-                                                allVsrNonItem.isNotEmpty ?
-                                                allVsrNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id']) != null ?
-                                                // IF NOT EMPTY, DISPLAY TOTAL SAME ID IN DB
-                                                "${allVsrNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
-                                                    snapshot.data[index]['item_inventory_id'])['non_tracking_qty']}"
-                                                // ELSE, DISPLAY 0
-                                                    : '0'
-                                                // IF NO VALUE DISPLAY 0
-                                                    : '0',
+                                                '${snapshot.data[index]['non_tracking_qty']}',
+                                                style:
+                                                TextStyle(fontSize: 16.0),
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    fontSize: 16.0
-                                                ),
                                               ),
-                                              // Text(
-                                              //   "${snapshot.data[index]['non_tracking_qty']}",
-                                              //   style:
-                                              //   TextStyle(fontSize: 16.0),
-                                              //   textAlign: TextAlign.center,
-                                              // ),
                                               Container(
                                                 alignment: Alignment.center,
                                                 child: IconButton(
@@ -456,9 +428,8 @@ class _VsrListItemState extends State<VsrListItem> {
           .then((value) {
         if (value == 1) {
           setState(() {
-            fToast.init(context);
             getVsrItem();
-            showCustomSuccess('Delete Successful');
+            showSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -468,9 +439,8 @@ class _VsrListItemState extends State<VsrListItem> {
       DBVendorReplaceNonItem().deleteVsrNonItem(itemInvId).then((value) {
         if (value == 1) {
           setState(() {
-            fToast.init(context);
             getVsrItem();
-            showCustomSuccess('Delete Successful');
+            showSuccess('Delete Successful');
           });
         } else {
           ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
@@ -577,7 +547,7 @@ class _VsrListItemState extends State<VsrListItem> {
                                     }).toList(),
                                     isExpanded: true,
                                     value:
-                                        selectedItem == "" ? "" : selectedItem,
+                                    selectedItem == "" ? "" : selectedItem,
                                     onChanged: (String? newValue) {
                                       setState(() {
                                         selectedItem = newValue;
@@ -646,8 +616,8 @@ class _VsrListItemState extends State<VsrListItem> {
                                     context, 'Please add an item');
                               } else {
                                 SharedPreferences prefs =
-                                    await SharedPreferences.getInstance();
-                                // prefs.setString('vsrItem', selectedItem);
+                                await SharedPreferences.getInstance();
+                                prefs.setString('vsrItem', selectedItem);
 
                                 findInv(selectedItem);
                               }
@@ -671,46 +641,30 @@ class _VsrListItemState extends State<VsrListItem> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var itemAdjust = inventoryList.firstWhereOrNull(
-        (element) => element['item_inventory_id'] == selectedItem);
+            (element) => element['item_inventory_id'] == selectedItem);
 
     prefs.setString('vsrTracking', itemAdjust['tracking_type']);
-    prefs.setString('vsrItem', itemAdjust['item_name']);
 
-    if (itemAdjust['tracking_type'] == '2') {
-      var typeScan = 'invId';
-      scanBarcodeNormal(typeScan);
+    if (itemAdjust == null) {
+      ErrorDialog.showErrorDialog(context, "No SKU match!");
     } else {
-      // prefs.setString('itemQty', itemAdjust['item_quantity']);
+      if (itemAdjust['tracking_type'] == '2') {
+        var typeScan = 'invId';
+        scanBarcodeNormal(typeScan);
+      } else {
+        prefs.setString('itemQty', itemAdjust['item_quantity']);
 
-      Navigator.of(context)
-          .pushNamed(StmsRoutes.vsrItemCreate)
-          .whenComplete(() {
-        setState(() {
-          getEnterQty();
-          getVsrItem();
-          selectedItem = null;
+        Navigator.of(context)
+            .pushNamed(StmsRoutes.vsrItemCreate)
+            .whenComplete(() {
+          setState(() {
+            getVsrItem();
+            getEnterQty();
+            selectedItem = null;
+          });
         });
-      });
+      }
     }
-    // if (itemAdjust == null) {
-    //   ErrorDialog.showErrorDialog(context, "No SKU match!");
-    // } else {
-    //   if (itemAdjust.type == '2') {
-    //     var typeScan = 'invId';
-    //     scanBarcodeNormal(typeScan);
-    //   } else {
-    //    // prefs.setString('itemQty', itemAdjust['item_quantity']);
-    //
-    //     Navigator.of(context)
-    //         .pushNamed(StmsRoutes.vsrItemCreate)
-    //         .whenComplete(() {
-    //       setState(() {
-    //         getVsrItem();
-    //         selectedItem = null;
-    //       });
-    //     });
-    //   }
-    // }
   }
 
   Future<void> scanBarcodeNormal(String typeScan) async {
@@ -753,119 +707,75 @@ class _VsrListItemState extends State<VsrListItem> {
     var selectedId = prefs.getString('vsrItem');
 
     var itemAdjust = inventoryList.firstWhereOrNull(
-        (element) => element['item_inventory_id'] == selectedId);
+            (element) => element['item_inventory_id'] == selectedId);
 
-    DBVendorReplaceItem().getAllVsrItem().then((value) {
-      // ignore: unnecessary_null_comparison
-      if (value != null) {
-        vsrItemListing = value;
-        // print('item Serial list: $value');
+    if (itemAdjust != null) {
+      List currentSerial = itemAdjust['serial_list'];
+      var serialList =
+      currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
 
-        var itemVsr = vsrItemListing.firstWhereOrNull(
-                (element) => element['item_serial_no'] == barcodeScanRes);
-        if (null == itemVsr) {
-          prefs.setString("itemBarcode", barcodeScanRes);
+      if (serialList != null) {
+        DBVendorReplaceItem().getAllVsrItem().then((value) {
+          // ignore: unnecessary_null_comparison
+          if (value != null) {
+            vsrItemListing = value;
+            // print('item Serial list: $value');
 
-          Navigator.of(context)
-              .pushNamed(StmsRoutes.vsrItemCreate)
-              .whenComplete(() {
-            setState(() {
-              var typeScan = 'invId';
-              getEnterQty();
-              getVsrItem();
-              selectedItem = null;
-              scanBarcodeNormal(typeScan);
+            var itemVsr = vsrItemListing.firstWhereOrNull(
+                    (element) => element['item_serial_no'] == barcodeScanRes);
+            if (null == itemVsr) {
+              prefs.setString("itemBarcode", barcodeScanRes);
+
+              Navigator.of(context)
+                  .pushNamed(StmsRoutes.vsrItemCreate)
+                  .whenComplete(() {
+                setState(() {
+                  var typeScan = 'invId';
+                  getVsrItem();
+                  getEnterQty();
+                  selectedItem = null;
+                  scanBarcodeNormal(typeScan);
+                });
+              });
+            } else {
+              ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
+            }
+          } else {
+            // prefs.setString("itemSelect", json.encode(item));
+            prefs.setString("itemBarcode", barcodeScanRes);
+
+            // await Future.delayed(const Duration(seconds: 3));
+            Navigator.of(context)
+                .pushNamed(StmsRoutes.vsrItemCreate)
+                .whenComplete(() {
+              setState(() {
+                var typeScan = 'invId';
+                getVsrItem();
+                getEnterQty();
+                selectedItem = null;
+                scanBarcodeNormal(typeScan);
+              });
             });
-          });
-        } else {
-          ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
-        }
-      } else {
-        // prefs.setString("itemSelect", json.encode(item));
-        prefs.setString("itemBarcode", barcodeScanRes);
-
-        // await Future.delayed(const Duration(seconds: 3));
-        Navigator.of(context)
-            .pushNamed(StmsRoutes.vsrItemCreate)
-            .whenComplete(() {
-          setState(() {
-            var typeScan = 'invId';
-            getEnterQty();
-            getVsrItem();
-            selectedItem = null;
-            scanBarcodeNormal(typeScan);
-          });
+          }
         });
+      } else {
+        ErrorDialog.showErrorDialog(
+            context, 'Serial No not match with document.');
       }
-    });
-
-    // if (itemAdjust != null) {
-    //   List currentSerial = itemAdjust['serial_list'];
-    //   var serialList =
-    //       currentSerial.firstWhereOrNull((e) => e == barcodeScanRes);
-    //
-    //   if (serialList != null) {
-    //     DBVendorReplaceItem().getAllVsrItem().then((value) {
-    //       // ignore: unnecessary_null_comparison
-    //       if (value != null) {
-    //         vsrItemListing = value;
-    //         // print('item Serial list: $value');
-    //
-    //         var itemVsr = vsrItemListing.firstWhereOrNull(
-    //             (element) => element['item_serial_no'] == barcodeScanRes);
-    //         if (null == itemVsr) {
-    //           prefs.setString("itemBarcode", barcodeScanRes);
-    //
-    //           Navigator.of(context)
-    //               .pushNamed(StmsRoutes.vsrItemCreate)
-    //               .whenComplete(() {
-    //             setState(() {
-    //               var typeScan = 'invId';
-    //               getEnterQty();
-    //               getVsrItem();
-    //               selectedItem = null;
-    //               // scanBarcodeNormal(typeScan);
-    //             });
-    //           });
-    //         } else {
-    //           ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
-    //         }
-    //       } else {
-    //         // prefs.setString("itemSelect", json.encode(item));
-    //         prefs.setString("itemBarcode", barcodeScanRes);
-    //
-    //         // await Future.delayed(const Duration(seconds: 3));
-    //         Navigator.of(context)
-    //             .pushNamed(StmsRoutes.vsrItemCreate)
-    //             .whenComplete(() {
-    //           setState(() {
-    //             var typeScan = 'invId';
-    //             getEnterQty();
-    //             getVsrItem();
-    //             selectedItem = null;
-    //            // scanBarcodeNormal(typeScan);
-    //           });
-    //         });
-    //       }
-    //     });
-    //   } else {
-    //     ErrorDialog.showErrorDialog(
-    //         context, 'Serial No not match with document.');
-    //   }
-    // }
+    }
   }
 
   Future<void> searchSku(String skuScan) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var itemAdjust = inventoryList.firstWhereOrNull((element) =>
-        element['item_name'] == skuScan); // || element['upc'] == skuScan
+    element['item_name'] == skuScan); // || element['upc'] == skuScan
 
     if (itemAdjust == null) {
       ErrorDialog.showErrorDialog(context, "No SKU match!");
     } else {
       prefs.setString('vsrTracking', itemAdjust['tracking_type']);
-      prefs.setString('vsrItem', itemAdjust['item_name']);
+      prefs.setString('vsrItem', itemAdjust['item_inventory_id']);
 
       if (itemAdjust['tracking_type'] == '2') {
         scanItemSerial();
@@ -876,8 +786,8 @@ class _VsrListItemState extends State<VsrListItem> {
             .pushNamed(StmsRoutes.vsrItemCreate)
             .whenComplete(() {
           setState(() {
-            getEnterQty();
             getVsrItem();
+            getEnterQty();
             selectedItem = null;
           });
         });
@@ -889,24 +799,27 @@ class _VsrListItemState extends State<VsrListItem> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var itemUpc =
-        masterInvList.firstWhereOrNull((element) => element.upc == skuScan);
+    masterInvList.firstWhereOrNull((element) => element.upc == skuScan);
     // print('itemUpc: ${itemUpc!.name}');
 
-    if (itemUpc != null) {
-      prefs.setString('vsrTracking', itemUpc.type);
-      prefs.setString('vsrItem', itemUpc.sku);
+    var itemSku = inventoryList
+        .firstWhereOrNull((element) => element['item_name'] == itemUpc!.sku);
 
-      if (itemUpc.type == 'Serial Number') {
+    if (itemUpc != null && itemSku != null) {
+      prefs.setString('vsrTracking', itemSku['tracking_type']);
+      prefs.setString('vsrItem', itemSku['item_inventory_id']);
+
+      if (itemSku['tracking_type'] == '2') {
         scanItemSerial();
       } else {
-        // prefs.setString('itemQty', itemSku['item_quantity']);
+        prefs.setString('itemQty', itemSku['item_quantity']);
 
         Navigator.of(context)
             .pushNamed(StmsRoutes.vsrItemCreate)
             .whenComplete(() {
           setState(() {
-            getEnterQty();
             getVsrItem();
+            getEnterQty();
             selectedItem = null;
           });
         });
@@ -914,32 +827,6 @@ class _VsrListItemState extends State<VsrListItem> {
     } else {
       ErrorDialog.showErrorDialog(context, "No UPC match!");
     }
-
-
-    // var itemSku = inventoryList
-    //     .firstWhereOrNull((element) => element['item_name'] == itemUpc!.sku);
-    //
-    // if (itemUpc != null && itemSku != null) {
-    //   prefs.setString('vsrTracking', itemSku['tracking_type']);
-    //   prefs.setString('vsrItem', itemSku['item_serial_no']);
-    //
-    //   if (itemSku['tracking_type'] == '2') {
-    //     scanItemSerial();
-    //   } else {
-    //     prefs.setString('itemQty', itemSku['item_quantity']);
-    //
-    //     Navigator.of(context)
-    //         .pushNamed(StmsRoutes.vsrItemCreate)
-    //         .whenComplete(() {
-    //       setState(() {
-    //         getVsrItem();
-    //         selectedItem = null;
-    //       });
-    //     });
-    //   }
-    // } else {
-    //   ErrorDialog.showErrorDialog(context, "No UPC match!");
-    // }
   }
 
   Future scanItemSerial() async {
@@ -980,22 +867,22 @@ class _VsrListItemState extends State<VsrListItem> {
                 Divider(thickness: 2),
                 Expanded(
                     child: Container(
-                  alignment: Alignment.center,
-                  // color: Colors.blue,
-                  child: ButtonTheme(
-                    minWidth: 200,
-                    height: 50,
-                    child: StmsStyleButton(
-                      title: 'SCAN SERIAL NO',
-                      backgroundColor: Colors.green,
-                      textColor: Colors.white,
-                      onPressed: () {
-                        var typeScan = 'invId';
-                        scanBarcodeNormal(typeScan);
-                      },
-                    ),
-                  ),
-                )),
+                      alignment: Alignment.center,
+                      // color: Colors.blue,
+                      child: ButtonTheme(
+                        minWidth: 200,
+                        height: 50,
+                        child: StmsStyleButton(
+                          title: 'SCAN SERIAL NO',
+                          backgroundColor: Colors.green,
+                          textColor: Colors.white,
+                          onPressed: () {
+                            var typeScan = 'invId';
+                            scanBarcodeNormal(typeScan);
+                          },
+                        ),
+                      ),
+                    )),
               ],
             ),
           ),

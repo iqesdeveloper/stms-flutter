@@ -28,7 +28,7 @@ class DBSaleReturnItem {
     );
   }
 
-  // Insert PoItem on database
+  // Insert SrItem on database
   Future<void> createSrItem(SaleReturn newSrItem) async {
     // Get a reference to the database.
     final db = await database;
@@ -38,7 +38,7 @@ class DBSaleReturnItem {
     );
   }
 
-  // Delete all PoItem
+  // Delete all SrItem
   Future<int> deleteAllSrItem() async {
     final db = await database;
     final res = await db.rawDelete('DELETE FROM srItem');
@@ -46,7 +46,7 @@ class DBSaleReturnItem {
     return res;
   }
 
-  // Get list of all PoItem
+  // Get list of all SrItem
   Future<dynamic> getAllSrItem() async {
     final db = await database;
     final res = await db.rawQuery("SELECT * FROM srItem");
@@ -76,6 +76,15 @@ class DBSaleReturnItem {
     final db = await database;
     final res = await db.rawDelete(
         'DELETE FROM srItem WHERE item_serial_no == ?', [itemSerial]);
+
+    return res;
+  }
+
+  // Delete certain item
+  Future<int> deleteSelectedSrItem(String itemInvID) async {
+    final db = await database;
+    final res = await db.rawDelete(
+        'DELETE FROM srItem WHERE item_inventory_id == ?', [itemInvID]);
 
     return res;
   }

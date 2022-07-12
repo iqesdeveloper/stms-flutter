@@ -37,6 +37,8 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
   var getCommonData = CommonService();
 
   List<InventoryHive> inventoryList = [];
+  List getAllPaivItem = [];
+  List getAllPaivNonItem = [];
   // String _scanBarcode = 'Unknown';
   var selectedInvtry, tracking;
   final format = DateFormat("yyyy-MM-dd");
@@ -88,6 +90,20 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
       } else {
         setState(() {
           inventoryList = value;
+        });
+      }
+    });
+    DBPaivItem().getAllPaivItem().then((value){
+      if(value != null){
+        setState(() {
+          getAllPaivItem = value;
+        });
+      }
+    });
+    DBPaivNonItem().getAllPaivNonItem().then((value){
+      if(value != null){
+        setState(() {
+          getAllPaivNonItem = value;
         });
       }
     });
@@ -203,7 +219,6 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
             itemSerialNo: itemSNController.text,
           ))
               .then((value) {
-            // SuccessDialog.showSuccessDialog(context, 'Item Save');
             showCustomSuccess('Item Save');
             Navigator.popUntil(
                 context, ModalRoute.withName(StmsRoutes.paivItemList));
@@ -219,7 +234,6 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
               itemSerialNo: itemSNController.text,
             ))
                 .then((value) {
-              // SuccessDialog.showSuccessDialog(context, 'Item Save');
               showCustomSuccess('Item Save');
               Navigator.popUntil(
                   context, ModalRoute.withName(StmsRoutes.paivItemList));
@@ -231,7 +245,6 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
       } else {
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>
         element.sku == selectedInvtry);
-
 
         if(itemAdjust == null){
           DBPaivNonItem()

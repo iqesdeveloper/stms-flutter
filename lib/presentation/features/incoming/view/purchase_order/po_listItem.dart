@@ -79,6 +79,8 @@ class _PoItemListViewState extends State<PoItemListView> {
       supplier,
       poSerial,
       poNonTrack,
+      allPoEmpty,
+      allPoNonEmpty,
       combineUpdated,
       receiveQty,
       enterQty,
@@ -100,7 +102,6 @@ class _PoItemListViewState extends State<PoItemListView> {
     // call the enterQty whenever at start of this page
     getEnterQty();
     _future = getPurchaseOrderItem.getPurchaseOrderItem();
-
     fToast = FToast();
     fToast.init(context);
   }
@@ -157,9 +158,12 @@ class _PoItemListViewState extends State<PoItemListView> {
       if(value != null){
         setState(() {
           allPoItem = value;
+          allPoEmpty = allPoItem.length;
         });
+      } else {
+        allPoEmpty = '0';
+        getPurchaseOrderItem.getPurchaseOrderItem();
       }
-
     });
 
     DBPoNonItem().getAllPoNonItem().then((value) {
@@ -168,7 +172,11 @@ class _PoItemListViewState extends State<PoItemListView> {
           // Display and get all the PoNonItem after scanDB collected.
           // It is the save info
           allPoNonItem = value;
+          allPoNonEmpty = allPoNonItem.length;
         });
+      } else {
+        allPoNonEmpty = '0';
+        getPurchaseOrderItem.getPurchaseOrderItem();
       }
     });
   }
@@ -310,6 +318,29 @@ class _PoItemListViewState extends State<PoItemListView> {
                                           .data[index]['item_quantity']) -
                                           int.parse(receiveQty);
 
+                                      // if (snapshot.data[index]['tracking_type'] == '2'){
+                                      //   var entering = allPoItem.where((element) =>
+                                      //   element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                      //       && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+                                      //
+                                      //   if(entering != null){
+                                      //     enterQty = entering.length;
+                                      //   } else {
+                                      //     enterQty = '0';
+                                      //   }
+                                      // } else {
+                                      //   var entering = allPoNonItem.firstWhereOrNull((element) =>
+                                      //   element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                      //       && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+                                      //
+                                      //   if(entering != null){
+                                      //     enterQty = entering['non_tracking_qty'];
+                                      //     print('ENT2: $entering');
+                                      //   } else {
+                                      //     enterQty = '0';
+                                      //   }
+                                      // }
+
                                       return Material(
                                         // color: index % 2 == 0 ? Colors.white : Colors.grey[400],
                                         child: Table(
@@ -373,7 +404,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           // If got value, check in the master file snapshot and compare the item_inventory_id
                                                           // Using the 'where' will go through the check process like a looping
 
-                                                          allPoItem.isNotEmpty ? allPoItem.where((element)
+                                                          allPoItem.isNotEmpty && allPoEmpty != '0' ? allPoItem.where((element)
                                                           => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
                                                               && element['line_seq_no'] == snapshot.data[index]['line_seq_no']).isNotEmpty
                                                           // once check, if it is containing a value or the item_id in DB is same in the master file
@@ -390,7 +421,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           textAlign: TextAlign.center,
                                                         )
                                                             : Text(
-                                                          allPoNonItem.isNotEmpty ? allPoNonItem.firstWhereOrNull((element) =>
+                                                          allPoNonItem.isNotEmpty && allPoNonEmpty != '0' ? allPoNonItem.firstWhereOrNull((element) =>
                                                           element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
                                                               && element['line_seq_no'] == snapshot.data[index]['line_seq_no']) != null
                                                               ? "${allPoNonItem.firstWhereOrNull((element) =>
@@ -412,59 +443,72 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                               alignment: Alignment.bottomCenter,
                                                               child: IconButton(
                                                                 icon: Icon(
-                                                                  Icons.lock_reset,
+                                                                  Icons.update,
                                                                   color: Colors.red,
                                                                   size: 20,
                                                                 ),
                                                                 onPressed: (){
                                                                   // check if SN or not
                                                                   if(snapshot.data[index]['tracking_type'] == "2"){
-                                                                    // get the selected item to delete
-                                                                    var getSelected = allPoItem.firstWhereOrNull((element)
-                                                                    => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                                        && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+                                                                    setState(() {
+                                                                      deletePoItem(
+                                                                        snapshot.data[index]['item_inventory_id'],
+                                                                        snapshot.data[index]['line_seq_no'],
+                                                                      );
+                                                                      getEnterQty();
+                                                                    });
+                                                                    // var getSelected = allPoItem.where((element) =>
+                                                                    // element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                                    //     && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+                                                                    //
+                                                                    // if(getSelected != null){
+                                                                    //   deletePoItem(
+                                                                    //     snapshot.data[index]['item_inventory_id'],
+                                                                    //     snapshot.data[index]['line_seq_no'],
+                                                                    //   );
+                                                                    //   fToast.init(context);
+                                                                    //   showCustomSuccess('Reset Successful');
+                                                                    //   resetEntQty();
+                                                                    // } else {
+                                                                    //   setState(() {
+                                                                    //     fToast.init(context);
+                                                                    //     showCustomSuccess('Already reset');
+                                                                    //     resetEntQty();
+                                                                    //   });
+                                                                    // }
 
-                                                                    print('HHHHH: $getSelected');
-
-                                                                    // If there is value in selected item
-                                                                    if(getSelected != null){
-                                                                      setState(() {
-                                                                        deletePoItem(
-                                                                          snapshot.data[index]['item_inventory_id'],
-                                                                          snapshot.data[index]['line_seq_no'],
-                                                                        );
-                                                                        fToast.init(context);
-                                                                        showCustomSuccess('Reset Successful');
-                                                                        getEnterQty();
-                                                                      });
-                                                                    } else {
-                                                                      setState(() {
-                                                                        fToast.init(context);
-                                                                        showCustomSuccess('Already reset');
-                                                                      });
-                                                                    }
                                                                   } else {
                                                                     // If not SN
-                                                                    var getSelected = allPoNonItem.firstWhereOrNull((element) =>
-                                                                    element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                                        && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
-
-                                                                    if(getSelected != null){
-                                                                      setState(() {
-                                                                        deletePoNonItem(
-                                                                          snapshot.data[index]['item_inventory_id'],
-                                                                          snapshot.data[index]['line_seq_no'],
-                                                                        );
-                                                                        fToast.init(context);
-                                                                        showCustomSuccess('Reset Successful');
-                                                                      });
+                                                                    setState(() {
+                                                                      deletePoNonItem(
+                                                                        snapshot.data[index]['item_inventory_id'],
+                                                                        snapshot.data[index]['line_seq_no'],
+                                                                      );
                                                                       getEnterQty();
-                                                                    } else {
-                                                                      setState(() {
-                                                                        fToast.init(context);
-                                                                        showCustomSuccess('Already reset');
-                                                                      });
-                                                                    }
+                                                                    });
+
+                                                                   // print('ENT1.2: $enterQty');
+                                                                    // var getSelected = allPoNonItem.firstWhereOrNull((element) =>
+                                                                    // element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                                                    //     && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+                                                                    //
+                                                                    // if(getSelected != null){
+                                                                    //   setState(() {
+                                                                    //     deletePoNonItem(
+                                                                    //       snapshot.data[index]['item_inventory_id'],
+                                                                    //       snapshot.data[index]['line_seq_no'],
+                                                                    //     );
+                                                                    //     fToast.init(context);
+                                                                    //     showCustomSuccess('Reset Successful');
+                                                                    //     resetEntQty();
+                                                                    //   });
+                                                                    // } else {
+                                                                    //   setState(() {
+                                                                    //     fToast.init(context);
+                                                                    //     showCustomSuccess('Already reset');
+                                                                    //     resetEntQty();
+                                                                    //   });
+                                                                    // }
                                                                   }
                                                                 },
                                                               ),
@@ -1341,14 +1385,14 @@ class _PoItemListViewState extends State<PoItemListView> {
     DBPoItem().deleteSelectedPoItem(itemInvId, itemLineSeq).then((value){
       if(value == 1){
         setState(() {
-          DBPoItem().getAllPoItem().whenComplete((){
-            setState(() {
-              getEnterQty();
-            });
-          });
+          fToast.init(context);
+          showCustomSuccess('Reset Successful');
+
+          getEnterQty();
         });
       } else {
-        ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
+        fToast.init(context);
+        showCustomSuccess('Reset Already');
       }
     });
   }
@@ -1356,13 +1400,15 @@ class _PoItemListViewState extends State<PoItemListView> {
   deletePoNonItem(String itemInvId, String itemLineSeq) {
     DBPoNonItem().deletePoNonItem(itemInvId, itemLineSeq).then((value){
       if(value == 1){
-        DBPoNonItem().getAllPoNonItem().whenComplete((){
-          setState(() {
-            getEnterQty();
-          });
+        setState(() {
+          fToast.init(context);
+          showCustomSuccess('Reset Successful');
+
+          getEnterQty();
         });
       } else {
-        ErrorDialog.showErrorDialog(context, 'Unsuccessful Delete!');
+        fToast.init(context);
+        showCustomSuccess('Reset Already');
       }
     });
   }

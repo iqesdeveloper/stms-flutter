@@ -28,7 +28,7 @@ class DBSaleReturnNonItem {
     );
   }
 
-  // Insert PoItem on database
+  // Insert SrItem on database
   Future<void> createSrNonItem(SaleReturnNon newSrNonItem) async {
     // Get a reference to the database.
     final db = await database;
@@ -46,6 +46,15 @@ class DBSaleReturnNonItem {
     return res;
   }
 
+  // Delete selected SrNonItem
+  Future<int> deleteSrNonItem(String itemInvID) async {
+    final db = await database;
+    final res = await db.rawDelete('DELETE FROM SrNonItem WHERE item_inventory_id == ?',
+        [itemInvID]);
+
+    return res;
+  }
+
   // Get list of all srNonItem
   Future<dynamic> getAllSrNonItem() async {
     final db = await database;
@@ -58,7 +67,7 @@ class DBSaleReturnNonItem {
     return null;
   }
 
-  // Get list of certain PoItem
+  // Get list of certain SrItem
   Future<dynamic> getSrNonItem(String id) async {
     final db = await database;
     final res = await db

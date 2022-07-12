@@ -69,10 +69,8 @@ class _SiItemDetailsState extends State<SiItemDetails> {
 
     if (tracking == "2") {
       itemSNController.text = prefs.getString('itemBarcode')!;
-      print('TEST1.0: ${itemSNController.text}');
     } else {
       itemSNController.text = prefs.getString('itemBarcode')!;
-      print('TEST2.0: ${itemSNController.text}');
     }
 
     itemSelectedInventory.text = selectedInvtry;
@@ -89,6 +87,20 @@ class _SiItemDetailsState extends State<SiItemDetails> {
       } else {
         setState(() {
           inventoryList = value;
+        });
+      }
+    });
+    DBSaleInvoiceItem().getAllSiItem().then((value){
+      if(value != null){
+        setState(() {
+          getAllSiItems = value;
+        });
+      }
+    });
+    DBSaleInvoiceNonItem().getAllSiNonItem().then((value){
+      if(value != null){
+        setState(() {
+          getAllSiNonItems = value;
         });
       }
     });
@@ -229,6 +241,8 @@ class _SiItemDetailsState extends State<SiItemDetails> {
                 context, ModalRoute.withName(StmsRoutes.siItemList));
           });
         } else {
+          var itemTracking = getAllSiNonItems.firstWhereOrNull((element) =>
+          element['item_inventory_id'] == itemAdjust.id);
           DBSaleInvoiceNonItem()
               .update(itemAdjust.id, itemQtyController.text)
               .then((value) {
@@ -237,6 +251,36 @@ class _SiItemDetailsState extends State<SiItemDetails> {
                 context, ModalRoute.withName(StmsRoutes.siItemList));
           });
         }
+
+        // if(itemAdjust == null){}else {
+        //   var itemTracking = getAllSiNonItems.firstWhereOrNull((element) =>
+        //   element['item_name'] == itemAdjust.sku);
+        //   print('CHECK QTY: ${itemAdjust.sku}');
+        //
+        //
+        //   if(itemTracking == null){
+        //     DBSaleInvoiceNonItem()
+        //         .createSiNonItem(SaleInvoiceNon(
+        //       itemInvId: itemAdjust.id,
+        //       nonTracking: itemQtyController.text,
+        //     ))
+        //         .then((value) {
+        //       showCustomSuccess('Item Save');
+        //       Navigator.popUntil(
+        //           context, ModalRoute.withName(StmsRoutes.siItemList));
+        //     });
+        //   } else {
+        //     print('CHECK QTY3: ${itemTracking['item_name']}');
+        //     print('CHECK QTY2: ${itemQtyController.text}');
+        //     DBSaleInvoiceNonItem()
+        //         .update(itemAdjust.id, itemQtyController.text)
+        //         .then((value) {
+        //       showCustomSuccess('Item Save');
+        //       Navigator.popUntil(
+        //           context, ModalRoute.withName(StmsRoutes.siItemList));
+        //     });
+        //   }
+        // }
       }
     }
   }
