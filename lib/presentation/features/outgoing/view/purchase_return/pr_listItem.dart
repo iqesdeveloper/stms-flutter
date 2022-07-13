@@ -390,6 +390,7 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                                     deletePrItem(
                                                                       snapshot.data[index]['item_inventory_id'],
                                                                     );
+                                                                    getEnterQty();
                                                                   });
                                                                   // var getSelected = allPoItem.where((element) =>
                                                                   // element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
@@ -417,6 +418,7 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                                     deletePrNonItem(
                                                                       snapshot.data[index]['item_inventory_id'],
                                                                     );
+                                                                    getEnterQty();
                                                                   });
 
                                                                   // print('ENT1.2: $enterQty');
@@ -875,7 +877,7 @@ class _PrItemListViewState extends State<PrItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        prefs.setString('selectedPrID', selectedItem);
 
         if (nonTrackingType == 'scan') {
           DBPurchaseReturnNonItem().getPrNonItem(itemSku.id).then((value) {
@@ -941,7 +943,7 @@ class _PrItemListViewState extends State<PrItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        prefs.setString('selectedPrID', selectedItem);
 
         if (nonTrackingType == 'scan') {
           DBPurchaseReturnNonItem().getPrNonItem(itemUpc.id).then((value) {

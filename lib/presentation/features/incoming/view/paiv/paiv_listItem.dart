@@ -912,7 +912,7 @@ class _PaivItemListViewState extends State<PaivItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        prefs.setString('selectedPaIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
           DBPaivNonItem().getPaivNonItem(itemSku.id).then((value) {
@@ -981,7 +981,7 @@ class _PaivItemListViewState extends State<PaivItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        prefs.setString('selectedPaIvID', selectedItem);
 
         if (nonTrackingType == 'scan') {
           DBPaivNonItem().getPaivNonItem(itemSku.id).then((value) {

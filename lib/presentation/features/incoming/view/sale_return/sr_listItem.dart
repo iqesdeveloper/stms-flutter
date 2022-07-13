@@ -400,6 +400,7 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                                     deleteSrItem(
                                                                       snapshot.data[index]['item_inventory_id'],
                                                                     );
+                                                                    getEnterQty();
                                                                   });
                                                                   // var getSelected = allPoItem.where((element) =>
                                                                   // element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
@@ -427,6 +428,7 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                                     deleteSrNonItem(
                                                                       snapshot.data[index]['item_inventory_id'],
                                                                     );
+                                                                    getEnterQty();
                                                                   });
                                                                   // print('ENT1.2: $enterQty');
                                                                   // var getSelected = allPoNonItem.firstWhereOrNull((element) =>
@@ -952,7 +954,7 @@ class _SrItemListViewState extends State<SrItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        prefs.setString('selectedSrID', selectedItem);
 
         if (nonTrackingType == 'scan') {
           DBSaleReturnNonItem().getSrNonItem(itemSku.id).then((value) {
@@ -1018,7 +1020,7 @@ class _SrItemListViewState extends State<SrItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        prefs.setString('selectedSrID', selectedItem);
 
         if (nonTrackingType == 'scan') {
           DBSaleReturnNonItem().getSrNonItem(itemUpc.id).then((value) {

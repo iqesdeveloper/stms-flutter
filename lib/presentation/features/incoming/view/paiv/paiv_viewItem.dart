@@ -246,25 +246,34 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>
         element.sku == selectedInvtry);
 
-        if(itemAdjust == null){
-          DBPaivNonItem()
-              .createPaivNonItem(PaivNonItem(
-            itemInvId: itemAdjust!.id,
-            nonTracking: itemQtyController.text,
-          ))
-              .then((value) {
-            // SuccessDialog.showSuccessDialog(context, 'Item Save');
-            showCustomSuccess('Item Save');
-            Navigator.popUntil(
-                context, ModalRoute.withName(StmsRoutes.paivItemList));
-          });
-        } else {
-          DBPaivNonItem()
-              .update(itemAdjust.id, itemQtyController.text)
-              .then((value) {
-            showCustomSuccess('Item Save');
-            Navigator.popUntil(
-                context, ModalRoute.withName(StmsRoutes.paivItemList));
+        if(itemAdjust != null){
+          DBPaivNonItem().getAllPaivNonItem().then((value){
+            if(value == null){
+              DBPaivNonItem()
+                  .createPaivNonItem(PaivNonItem(
+                itemInvId: itemAdjust.id,
+                nonTracking: itemQtyController.text,
+              ))
+                  .then((value) {
+                // SuccessDialog.showSuccessDialog(context, 'Item Save');
+                showCustomSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.paivItemList));
+              });
+            } else {
+              List allDBValue = value;
+              var itemTracking = allDBValue.firstWhereOrNull((element) =>
+              element['item_inventory_id'] == itemAdjust.id);
+              var newQty = int.parse(itemQtyController.text) + int.parse(itemTracking['non_tracking_qty']);
+
+              DBPaivNonItem()
+                  .update(itemAdjust.id, newQty.toString())
+                  .then((value) {
+                showCustomSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.paivItemList));
+              });
+            }
           });
         }
       }

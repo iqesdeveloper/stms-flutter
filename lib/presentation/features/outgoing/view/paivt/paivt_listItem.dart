@@ -396,6 +396,7 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                                                     deletePaivtItem(
                                                                       snapshot.data[index]['item_inventory_id'],
                                                                     );
+                                                                    getEnterQty();
                                                                   });
                                                                   // var getSelected = allPoItem.where((element) =>
                                                                   // element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
@@ -423,6 +424,7 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                                                     deletePaivtNonItem(
                                                                       snapshot.data[index]['item_inventory_id'],
                                                                     );
+                                                                    getEnterQty();
                                                                   });
 
                                                                   // print('ENT1.2: $enterQty');
@@ -959,7 +961,7 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        prefs.setString('selectedPaivtID', selectedItem);
 
         if (nonTrackingType == 'scan') {
           DBPaivtNonItem().getPaivtNonItem(itemSku.id).then((value) {
@@ -1025,7 +1027,7 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        prefs.setString('selectedPaivtID', selectedItem);
 
         if (nonTrackingType == 'scan') {
           DBPaivtNonItem().getPaivtNonItem(itemUpc.id).then((value) {

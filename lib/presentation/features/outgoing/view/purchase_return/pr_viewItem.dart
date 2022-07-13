@@ -233,24 +233,34 @@ class _PrItemDetailsState extends State<PrItemDetails> {
         element.sku == selectedInvtry);
 
         if(itemAdjust != null){
-          DBPurchaseReturnNonItem()
-              .createPrNonItem(PurchaseReturnNon(
-            itemInvId: itemAdjust.id,
-            nonTracking: itemQtyController.text,
-          ))
-              .then((value) {
-            // SuccessDialog.showSuccessDialog(context, 'Item Save');
-            showCustomSuccess('Item Save');
-            Navigator.popUntil(
-                context, ModalRoute.withName(StmsRoutes.prItemList));
-          });
-        } else {
-          DBPurchaseReturnNonItem()
-              .update(itemAdjust!.id, itemQtyController.text)
-              .then((value) {
-            showCustomSuccess('Item Save');
-            Navigator.popUntil(
-                context, ModalRoute.withName(StmsRoutes.prItemList));
+          DBPurchaseReturnNonItem().getAllPrNonItem().then((value){
+            if(value == null){
+              DBPurchaseReturnNonItem()
+                  .createPrNonItem(PurchaseReturnNon(
+                itemInvId: itemAdjust.id,
+                nonTracking: itemQtyController.text,
+              ))
+                  .then((value) {
+                // SuccessDialog.showSuccessDialog(context, 'Item Save');
+                showCustomSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.prItemList));
+              });
+            } else {
+              List allDBValue = value;
+              var itemTracking = allDBValue.firstWhereOrNull((element) =>
+              element['item_inventory_id'] == itemAdjust.id);
+              print('$allDBValue');
+              var newQty = int.parse(itemQtyController.text) + int.parse(itemTracking['non_tracking_qty']);
+
+              DBPurchaseReturnNonItem()
+                  .update(itemAdjust.id, newQty.toString())
+                  .then((value) {
+                showCustomSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.prItemList));
+              });
+            }
           });
         }
       }

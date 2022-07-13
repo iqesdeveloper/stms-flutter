@@ -234,24 +234,33 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
         var itemAdjust = inventoryList.firstWhereOrNull((element) =>
         element.sku == selectedInvtry);
 
-        if(itemAdjust == null){
-          DBPaivtNonItem()
-              .createPaivtNonItem(PaivtNon(
-            itemInvId: itemAdjust!.id,
-            nonTracking: itemQtyController.text,
-          ))
-              .then((value) {
-            showCustomSuccess('Item Save');
-            Navigator.popUntil(
-                context, ModalRoute.withName(StmsRoutes.paivtItemList));
-          });
-        } else {
-          DBPaivtNonItem()
-              .update(itemAdjust.id, itemQtyController.text)
-              .then((value) {
-            showCustomSuccess('Item Save');
-            Navigator.popUntil(
-                context, ModalRoute.withName(StmsRoutes.paivtItemList));
+        if(itemAdjust != null){
+          DBPaivtNonItem().getAllPaivtNonItem().then((value){
+            if(value == null){
+              DBPaivtNonItem()
+                  .createPaivtNonItem(PaivtNon(
+                itemInvId: itemAdjust.id,
+                nonTracking: itemQtyController.text,
+              ))
+                  .then((value) {
+                showCustomSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.paivtItemList));
+              });
+            } else {
+              List allDBValue = value;
+              var itemTracking = allDBValue.firstWhereOrNull((element) =>
+              element['item_inventory_id'] == itemAdjust.id);
+              var newQty = int.parse(itemQtyController.text) + int.parse(itemTracking['non_tracking_qty']);
+
+              DBPaivtNonItem()
+                  .update(itemAdjust.id, newQty.toString())
+                  .then((value) {
+                showCustomSuccess('Item Save');
+                Navigator.popUntil(
+                    context, ModalRoute.withName(StmsRoutes.paivtItemList));
+              });
+            }
           });
         }
       }

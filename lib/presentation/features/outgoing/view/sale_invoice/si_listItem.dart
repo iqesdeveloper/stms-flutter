@@ -924,7 +924,7 @@ class _SiItemListViewState extends State<SiItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        prefs.setString('selectedSiID', selectedItem);
 
         if (nonTrackingType == 'scan') {
           DBSaleInvoiceNonItem().getSiNonItem(itemSku.id).then((value) {
@@ -990,7 +990,7 @@ class _SiItemListViewState extends State<SiItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        prefs.setString('selectedSiID', selectedItem);
 
         if (nonTrackingType == 'scan') {
           DBSaleInvoiceNonItem().getSiNonItem(itemUpc.id).then((value) {

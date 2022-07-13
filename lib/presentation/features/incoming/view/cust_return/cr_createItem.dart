@@ -192,7 +192,11 @@ class _CrCreateItemState extends State<CrCreateItem> {
                 // search in DB if got the same item inventory id or not
                 // Also make sure the same item inventory id is equal to the item inventory id that in selected before getting to this page
                 var currentItemInBD = allCustomerReturnItem.firstWhereOrNull((
-                    element) => element['item_inventory_id'] == itemAdjust.id);
+                    element) => element['item_inventory_id'] == itemAdjust.id
+                    && element['item_name'] == itemAdjust.sku);
+
+                print('TEST: $currentItemInBD');
+                print('TEST2: ${itemAdjust.sku}');
 
                 // if already got item with the same item inventory id
                 if (currentItemInBD != null) {
