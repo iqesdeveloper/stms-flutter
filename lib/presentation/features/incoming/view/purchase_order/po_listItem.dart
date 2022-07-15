@@ -43,25 +43,10 @@ class PoItemListView extends StatefulWidget {
   _PoItemListViewState createState() => _PoItemListViewState();
 }
 
+// Detail page, display the item of the selected document from previous page
 class _PoItemListViewState extends State<PoItemListView> {
+  // Initialize variable
   var getPurchaseOrderItem = IncomingService();
-  late Future<List<Map<String, dynamic>>> _future;
-  DateTime date = DateTime.now();
-  // bool _isDisable = true;
-  List locList = [];
-  List poItemList = [];
-  List<InventoryHive> poSkuListing = [];
-  List poItemListing = [];
-  List poBarcodeListing = [];
-  List allPoItem = [];
-  List allPoNonItem = [];
-  List receiptTypeList = [
-    {"id": 1, "name": "Shipment"},
-    {"id": 3, "name": "Shipment with invoice"},
-  ];
-
-  // ignore: unused_field
-  String _scanBarcode = 'Unknown';
   var formatDate,
       selectedTxn = '0',
       selectedStatus,
@@ -86,111 +71,151 @@ class _PoItemListViewState extends State<PoItemListView> {
       enterQty,
       itemName,
       locationId;
+
+  late Future<List<Map<String, dynamic>>> _future;                               // variable get from domain
+
+  // Initialize variable for date and time
+  DateTime date = DateTime.now();
+
+  // Initialize list
+  List locList = [];
+  List poItemList = [];
+  List<InventoryHive> poSkuListing = [];
+  List poItemListing = [];
+  List poBarcodeListing = [];
+  List allPoItem = [];
+  List allPoNonItem = [];
+  List receiptTypeList = [
+    {"id": 1, "name": "Shipment"},
+    {"id": 3, "name": "Shipment with invoice"},
+  ];
+
+  String _scanBarcode = 'Unknown';
+
   // final _masterInventory = Hive.box<InventoryHive>('inventory');
   final format = DateFormat("yyyy-MM-dd");
-  final TextEditingController vendorNoController = TextEditingController();
-  final GlobalKey<StmsInputFieldState> vendorNoKey = GlobalKey();
+  final TextEditingController vendorNoController = TextEditingController();      // variable for Text Editing
+  final GlobalKey<StmsInputFieldState> vendorNoKey = GlobalKey();                // key use in Text Editing
 
-  // call the function at start of page open
+  // Initialize function
   @override
   void initState() {
     super.initState();
-    scanData();
-    formatDate = DateFormat('yyyy-MM-dd').format(date);
-    getItemPo();
-    getCommon();
-    // call the enterQty whenever at start of this page
-    getEnterQty();
-    _future = getPurchaseOrderItem.getPurchaseOrderItem();
+    // scanData();
+    formatDate = DateFormat('yyyy-MM-dd').format(date);                          // Get date on page refresh
+    getItemPo();                                                                 // Call getItemPo function on page refresh
+    getCommon();                                                                 // Call getCommon function on page refresh
+    getEnterQty();                                                               // Call getEnterQty function on page refresh
+    _future = getPurchaseOrderItem.getPurchaseOrderItem();                       // Store API data of PO in _future variable
+
+    // Call custom toast class
     fToast = FToast();
     fToast.init(context);
   }
 
-  scanData() async {
-    DBPoNonItem().getAllPoNonItem().then((value) => print(value));
-  }
+  // scanData() async {
+  //   DBPoNonItem().getAllPoNonItem().then((value) => print(value));
+  // }
 
-  // get po from API
+  // Function for calling data from API
   getItemPo() async {
+    // SharedPreferences use to get and save selected data
     SharedPreferences prefs = await SharedPreferences.getInstance();
     getPurchaseOrderItem.getPurchaseOrderItem().then((value) {
       setState(() {
+        // Get data from API and store into selected variable
         infoPO = prefs.getString('poId_info');
         getInfoPO = json.decode(infoPO);
-        poItemList = value;
+        poItemList = value;                                                      // Store API value into poItemList variable
 
-        poDoc = getInfoPO['po_doc'];
-        poDate = getInfoPO['po_date'];
-        poShipDate = getInfoPO['po_ship_date'];
-        supplier = getInfoPO['supplier_name'];
+        poDoc = getInfoPO['po_doc'];                                             // Get po_doc from API into poDoc variable
+        poDate = getInfoPO['po_date'];                                           // Get po_date from API into poDate variable
+        poShipDate = getInfoPO['po_ship_date'];                                  // Get po_ship_date API into poShipDate variable
+        supplier = getInfoPO['supplier_name'];                                   // Get supplier_name API into supplier variable
       });
     });
   }
 
-  // Get master location and master inventory file
+  // Function for calling data from Master Page
   getCommon() {
+    // Master Page
     DBMasterLocation().getAllMasterLoc().then((value) {
-      // print('value loc: $value');
+      // Check if got data from Master
       if (value == null) {
+        // If no data
         ErrorDialog.showErrorDialog(
             context, 'Please download location file at master page first');
       } else {
+        // If have data
         setState(() {
-          locList = value;
+          locList = value;                                                       // Store data in locList variable
         });
       }
     });
 
+    // API
     DBMasterInventoryHive().getAllInvHive().then((value) {
+      // Check if got data in API / Master page
       if (value == null || value == []) {
+        // If no data
         ErrorDialog.showErrorDialog(
             context, 'Please download inventory file at master page first');
       }
     });
   }
 
-  // check and get all the purchase order item and purchase order non item
-  // POItem & PoNonItem
+  // Function for calling enter quantity data from Database
   getEnterQty() {
+    // For PoItem
     DBPoItem().getAllPoItem().then((value) {
-      // make the PoItem is equal to the item store in scanDB
-      // It is the save info
+      // Check if got value or not
       if(value != null){
+        // If got value
         setState(() {
-          allPoItem = value;
-          allPoEmpty = allPoItem.length;
+          allPoItem = value;                                                     // Store DB value into allPoItem variable
+          allPoEmpty = allPoItem.length;                                         // Get the total item present (base on how many) and store in allPoEmpty
         });
+        // If no value
       } else {
-        allPoEmpty = '0';
+        allPoEmpty = '0';                                                        // Set the allPoEmpty variable to 0
+
+        // Call Po Item from API to get back the value
         getPurchaseOrderItem.getPurchaseOrderItem();
       }
     });
 
+    // For PoNonItem
     DBPoNonItem().getAllPoNonItem().then((value) {
+      // Check if got value or not
       if(value != null){
+        // If got value
         setState(() {
-          // Display and get all the PoNonItem after scanDB collected.
-          // It is the save info
-          allPoNonItem = value;
-          allPoNonEmpty = allPoNonItem.length;
+          allPoNonItem = value;                                                  // Store DB value into allPoNonItem variable
+          allPoNonEmpty = allPoNonItem.length;                                   // Get the total item present (base on how many) and store in allPoNonEmpty
         });
+        // If no value
       } else {
-        allPoNonEmpty = '0';
+        allPoNonEmpty = '0';                                                     // Set the allPoNonEmpty variable to 0
+
+        // Call Po Item from API to get back the value
         getPurchaseOrderItem.getPurchaseOrderItem();
       }
     });
   }
 
+  // UI layout
   @override
   Widget build(BuildContext context) {
     // Height and width of the screen size is set in this variable
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
+    // Safe Area for matching phone screen size
     return SafeArea(
       child: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
           if (state is ProfileProcessing) {
+            // Loading circle
             return Container(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
@@ -200,6 +225,7 @@ class _PoItemListViewState extends State<PoItemListView> {
               ),
             );
           }
+          // The whole layout
           return StmsScaffold(
             title: '',
             body: SingleChildScrollView(
@@ -228,13 +254,14 @@ class _PoItemListViewState extends State<PoItemListView> {
                         shrinkWrap: true,
                         primary: false,
                         children: [
+                          // Table header title
                           Container(
-                            // The header of the table
                             child: Table(
                               defaultVerticalAlignment:
                               TableCellVerticalAlignment.middle,
                               border: TableBorder.all(
                                   color: Colors.black, width: 1),
+                              // Set fixed table column width
                               columnWidths: const <int, TableColumnWidth>{
                                 0: FixedColumnWidth(70.0),
                                 1: FixedColumnWidth(40.0),
@@ -243,11 +270,13 @@ class _PoItemListViewState extends State<PoItemListView> {
                                 4: FixedColumnWidth(40.0),
                               },
                               children: [
+                                // Table title design
                                 TableRow(
                                   children: [
                                     Container(
                                       height: 35,
                                       alignment: Alignment.center,
+                                      // Title text for SKU / Serial Number
                                       child: Text(
                                         'SKU',
                                         style: TextStyle(
@@ -257,26 +286,31 @@ class _PoItemListViewState extends State<PoItemListView> {
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
+                                    // Title text for Production Quantity
                                     Text(
                                       'PO Qty',
                                       style: TextStyle(fontSize: 16.0),
                                       textAlign: TextAlign.center,
                                     ),
+                                    // Title text for Received Quantity
                                     Text(
                                       'Received Qty',
                                       style: TextStyle(fontSize: 16.0),
                                       textAlign: TextAlign.center,
                                     ),
+                                    // Title text for Entered Quantity
                                     Text(
                                       'ENT Qty',
                                       style: TextStyle(fontSize: 16.0),
                                       textAlign: TextAlign.center,
                                     ),
+                                    // Title text for Balance Quantity
                                     Text(
                                       'BAL Qty',
                                       style: TextStyle(fontSize: 16.0),
                                       textAlign: TextAlign.center,
                                     ),
+                                    // Empty spot
                                     Text(
                                       ' ',
                                       style: TextStyle(fontSize: 16.0),
@@ -287,16 +321,19 @@ class _PoItemListViewState extends State<PoItemListView> {
                               ],
                             ),
                           ),
-                          // The content of the table
+                          // Table content
                           Container(
                             child: FutureBuilder(
+                              // Call _future variable
                               future: _future,
                               builder: (BuildContext context,
                                   AsyncSnapshot snapshot) {
                                 if (!snapshot.hasData) {
+                                  // Loading layout
                                   return Center(
                                     child: CircularProgressIndicator(),
                                   );
+                                  // Table content layout
                                 } else {
                                   return ListView.builder(
                                     shrinkWrap: true,
@@ -304,45 +341,57 @@ class _PoItemListViewState extends State<PoItemListView> {
                                     itemCount: snapshot.data.length,
                                     itemBuilder:
                                         (BuildContext context, int index) {
-                                      if (snapshot
-                                          .data[index]['item_receive_qty']
-                                          ?.isEmpty ??
-                                          true) {
+                                      // Check if got data in received quantity
+                                      if (snapshot.data[index]['item_receive_qty']?.isEmpty ?? true) {
+                                        // If no data
                                         receiveQty = '0';
                                       } else {
-                                        receiveQty = snapshot.data[index]
-                                        ['item_receive_qty'];
+                                        // If got data
+                                        receiveQty = snapshot.data[index]['item_receive_qty'];
                                       }
 
-                                      var balQty = int.parse(snapshot
-                                          .data[index]['item_quantity']) -
-                                          int.parse(receiveQty);
+                                      // Method to get enter quantity
+                                      // Check if Serial Number or not
+                                      if(snapshot.data[index]['tracking_type'] == '2'){
+                                        // If Serial Number
 
-                                      // if (snapshot.data[index]['tracking_type'] == '2'){
-                                      //   var entering = allPoItem.where((element) =>
-                                      //   element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                      //       && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
-                                      //
-                                      //   if(entering != null){
-                                      //     enterQty = entering.length;
-                                      //   } else {
-                                      //     enterQty = '0';
-                                      //   }
-                                      // } else {
-                                      //   var entering = allPoNonItem.firstWhereOrNull((element) =>
-                                      //   element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                      //       && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
-                                      //
-                                      //   if(entering != null){
-                                      //     enterQty = entering['non_tracking_qty'];
-                                      //     print('ENT2: $entering');
-                                      //   } else {
-                                      //     enterQty = '0';
-                                      //   }
-                                      // }
+                                        // Compare value based on ID and line sequence
+                                        var entering = allPoItem.where((element) =>
+                                        element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                            && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
 
+                                        // Check if entering got value and allPoEmpty variable is not 0
+                                        if(allPoEmpty != '0'){
+                                          // If got value and allPoEmpty not 0
+                                          enterQty = entering.length.toString();
+                                        } else {
+                                          // If no value
+                                          enterQty = '0';
+                                        }
+                                      } else {
+                                        // If not Serial Number
+
+                                        // Compare value based on ID and line sequence
+                                        var entering = allPoNonItem.firstWhereOrNull((element) =>
+                                        element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                            && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+
+                                        // Check if entering got value and allPoNonEmpty variable is not 0
+                                        if(entering != null && allPoNonEmpty != '0'){
+                                          // If got value and allPoNonEmpty not 0
+                                          enterQty = entering['non_tracking_qty'];
+                                          print('ENT2: $entering');
+                                        } else {
+                                          // If no value
+                                          enterQty = '0';
+                                        }
+                                      }
+
+                                      // Method to get balance quantity
+                                      var balQty = int.parse(snapshot.data[index]['item_quantity']) - int.parse(enterQty);
+
+                                      // Table content
                                       return Material(
-                                        // color: index % 2 == 0 ? Colors.white : Colors.grey[400],
                                         child: Table(
                                           border: TableBorder.all(
                                             color: Colors.black,
@@ -359,12 +408,12 @@ class _PoItemListViewState extends State<PoItemListView> {
                                             4: FixedColumnWidth(40.0),
                                           },
                                           children: [
+                                            // Content Description
                                             TableRow(
                                               children: [
+                                                // SKU / Serial Number Name
                                                 Container(
-                                                  // height: 50,
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      2, 0, 0, 0),
+                                                  padding: EdgeInsets.fromLTRB(2, 0, 0, 0),
                                                   alignment: Alignment.center,
                                                   child: Text(
                                                     "${snapshot.data[index]['item_name']}",
@@ -375,44 +424,58 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                     textAlign: TextAlign.center,
                                                   ),
                                                 ),
+                                                // Item quantity value
                                                 Text(
                                                   "${snapshot.data[index]['item_quantity']}",
                                                   style:
                                                   TextStyle(fontSize: 16.0),
                                                   textAlign: TextAlign.center,
                                                 ),
+                                                // Receive quantity value
                                                 Text(
                                                   "$receiveQty",
                                                   style:
                                                   TextStyle(fontSize: 16.0),
                                                   textAlign: TextAlign.center,
                                                 ),
-                                                // Enter Quantity text
+                                                // Enter quantity value
                                                 Container(
                                                   height: height*0.11,
                                                   child: Stack(
                                                     children: [
-                                                      // Ent Qty Text
+                                                      // Enter Quantity text
+                                                      Center(
+                                                        child: Text(
+                                                          "$enterQty",
+                                                          style: TextStyle(
+                                                              fontSize: 16.0),
+                                                          textAlign: TextAlign.center,
+                                                        ),
+                                                      ),
+                                                      /*
                                                       Center(
                                                         child:
-                                                        // Will display whether it pass in the value or not
-                                                        // This s to check if Enter Quantity got value
-                                                        // using the master file snapshot check
-                                                        // THIS IS FOR ALLPOITEM
+                                                        // For AllPoItem
+                                                        // Check if item under Serial or Non Serial
                                                         snapshot.data[index]['tracking_type'] == "2" ? Text(
-                                                          // to check if allPoItem got value or not
-                                                          // If got value, check in the master file snapshot and compare the item_inventory_id
-                                                          // Using the 'where' will go through the check process like a looping
 
-                                                          allPoItem.isNotEmpty && allPoEmpty != '0' ? allPoItem.where((element)
-                                                          => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                              && element['line_seq_no'] == snapshot.data[index]['line_seq_no']).isNotEmpty
-                                                          // once check, if it is containing a value or the item_id in DB is same in the master file
-                                                          // Get the length of the item_id
-                                                              ? '${allPoItem.where((element) => element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                              && element['line_seq_no'] == snapshot.data[index]['line_seq_no']).length}'
+                                                          // Check if got value and also if value not 0
+                                                          allPoItem.isNotEmpty && allPoEmpty != '0' ?
+                                                              // Compare value based on ID and line sequence
+                                                          allPoItem.where((element) => element['item_inventory_id'] ==
+                                                              snapshot.data[index]['item_inventory_id']
+                                                              && element['line_seq_no'] ==
+                                                                  snapshot.data[index]['line_seq_no']).isNotEmpty
+
+                                                          // If got value
+                                                              ? '${allPoItem.where((element) => element['item_inventory_id'] ==
+                                                              snapshot.data[index]['item_inventory_id']
+                                                              && element['line_seq_no'] ==
+                                                                  snapshot.data[index]['line_seq_no']).length}'
+
                                                           // If there is no match, then the result is display '0'
                                                               : '0'
+
                                                           // If the overall result is default as nothing, the display will also show '0'
                                                               : '0',
                                                           style: TextStyle(
@@ -420,25 +483,41 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           ),
                                                           textAlign: TextAlign.center,
                                                         )
+
+                                                        // For AllPoNonItem
+                                                        // Check if got value and also if value is 0
                                                             : Text(
-                                                          allPoNonItem.isNotEmpty && allPoNonEmpty != '0' ? allPoNonItem.firstWhereOrNull((element) =>
-                                                          element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                              && element['line_seq_no'] == snapshot.data[index]['line_seq_no']) != null
-                                                              ? "${allPoNonItem.firstWhereOrNull((element) =>
-                                                          element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                              && element['line_seq_no'] == snapshot.data[index]['line_seq_no'])['non_tracking_qty']}"
-                                                              : '0' : '0',
+                                                          allPoNonItem.isNotEmpty && allPoNonEmpty != '0' ?
+                                                          // Compare value based on ID and line sequence
+                                                          allPoNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                              snapshot.data[index]['item_inventory_id']
+                                                              && element['line_seq_no'] ==
+                                                                  snapshot.data[index]['line_seq_no']) != null
+                                                          // If got value
+                                                              ? "${allPoNonItem.firstWhereOrNull((element) => element['item_inventory_id'] ==
+                                                              snapshot.data[index]['item_inventory_id']
+                                                              && element['line_seq_no'] ==
+                                                                  snapshot.data[index]['line_seq_no'])['non_tracking_qty']}"
+
+                                                          // If there is no match, then the result is display '0'
+                                                              : '0'
+
+                                                          // If the overall result is default as nothing, the display will also show '0'
+                                                              : '0',
                                                           style: TextStyle(
                                                               fontSize: 16.0
                                                           ),
                                                           textAlign: TextAlign.center,
                                                         ),
                                                       ),
+                                                      */
                                                       // Reset Icon
                                                       SingleChildScrollView(
                                                         child: Column(
                                                           children: [
+                                                            // Empty space
                                                             SizedBox(height: height*0.07,),
+                                                            // Reset Icon position
                                                             Align(
                                                               alignment: Alignment.bottomCenter,
                                                               child: IconButton(
@@ -450,65 +529,29 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                                 onPressed: (){
                                                                   // check if SN or not
                                                                   if(snapshot.data[index]['tracking_type'] == "2"){
+                                                                    // If Serial Number
                                                                     setState(() {
+                                                                      // Call delete PoNonItem function
+                                                                      // Delete Id and line sequence
                                                                       deletePoItem(
                                                                         snapshot.data[index]['item_inventory_id'],
                                                                         snapshot.data[index]['line_seq_no'],
                                                                       );
+                                                                      // Call getEnterQty function
                                                                       getEnterQty();
                                                                     });
-                                                                    // var getSelected = allPoItem.where((element) =>
-                                                                    // element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                                    //     && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
-                                                                    //
-                                                                    // if(getSelected != null){
-                                                                    //   deletePoItem(
-                                                                    //     snapshot.data[index]['item_inventory_id'],
-                                                                    //     snapshot.data[index]['line_seq_no'],
-                                                                    //   );
-                                                                    //   fToast.init(context);
-                                                                    //   showCustomSuccess('Reset Successful');
-                                                                    //   resetEntQty();
-                                                                    // } else {
-                                                                    //   setState(() {
-                                                                    //     fToast.init(context);
-                                                                    //     showCustomSuccess('Already reset');
-                                                                    //     resetEntQty();
-                                                                    //   });
-                                                                    // }
-
                                                                   } else {
-                                                                    // If not SN
+                                                                    // If not Serial Number
                                                                     setState(() {
+                                                                      // Call delete PoNonItem function
+                                                                      // Delete Id and line sequence
                                                                       deletePoNonItem(
                                                                         snapshot.data[index]['item_inventory_id'],
                                                                         snapshot.data[index]['line_seq_no'],
                                                                       );
+                                                                      // Call getEnterQty function
                                                                       getEnterQty();
                                                                     });
-
-                                                                   // print('ENT1.2: $enterQty');
-                                                                    // var getSelected = allPoNonItem.firstWhereOrNull((element) =>
-                                                                    // element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                                                    //     && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
-                                                                    //
-                                                                    // if(getSelected != null){
-                                                                    //   setState(() {
-                                                                    //     deletePoNonItem(
-                                                                    //       snapshot.data[index]['item_inventory_id'],
-                                                                    //       snapshot.data[index]['line_seq_no'],
-                                                                    //     );
-                                                                    //     fToast.init(context);
-                                                                    //     showCustomSuccess('Reset Successful');
-                                                                    //     resetEntQty();
-                                                                    //   });
-                                                                    // } else {
-                                                                    //   setState(() {
-                                                                    //     fToast.init(context);
-                                                                    //     showCustomSuccess('Already reset');
-                                                                    //     resetEntQty();
-                                                                    //   });
-                                                                    // }
                                                                   }
                                                                 },
                                                               ),
@@ -519,7 +562,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                     ],
                                                   ),
                                                 ),
-
+                                                // Balance quantity value
                                                 Text(
                                                   "$balQty",
                                                   style:
@@ -530,19 +573,23 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                 Column(
                                                   children: [
                                                     // SCAN BUTTON
-                                                    snapshot.data[index][
-                                                    'tracking_type'] ==
-                                                        "2"
-                                                        ? Container(
+                                                    // Check if Serial Number or not
+                                                    snapshot.data[index]['tracking_type'] == "2" ? Container(
                                                       width: width,
+                                                      // If Serial Number
                                                       child: ElevatedButton(
                                                         style: ElevatedButton.styleFrom(
                                                           primary: Colors.blueAccent,
                                                           minimumSize: Size(width * 0.015, height * 0.05),),
+
+                                                        // Check if balance got value
                                                         onPressed: balQty == 0 || balQty < 0 ? () {
+                                                          // If no value
                                                           ErrorDialog.showErrorDialog(context,
                                                               '${snapshot.data[index]['item_name']} is already received all qty.');}
                                                             : () async {
+                                                          // If got value
+                                                          // SharedPreferences use to get and save selected data
                                                           SharedPreferences prefs = await SharedPreferences.getInstance();
 
                                                           // save selected item_inventory id
@@ -557,39 +604,47 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           selectedItemSequence = snapshot.data[index]['line_seq_no'];
                                                           prefs.setString('line_seq_no', selectedItemSequence);
 
+                                                          // Save selected tracking no
                                                           prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
+
+                                                          // Set variable tracking and typeScan as tracking type
                                                           var tracking = snapshot.data[index]['tracking_type'];
                                                           var typeScan = 'scan';
-                                                          itemName = snapshot.data[index]['item_name'];
-                                                          checkReceiptType(tracking, typeScan);
 
-                                                          // scanBarcodeNormal();
+                                                          // Store item name into itemName variable
+                                                          itemName = snapshot.data[index]['item_name'];
+
+                                                          // Call checkReceiptType function as pop up dialog
+                                                          checkReceiptType(tracking, typeScan);
                                                         },
+                                                        // SCAN Button Text
                                                         child: Text(
                                                           'SCAN',
-                                                          style:
-                                                          TextStyle(
-                                                            fontSize:
-                                                            16.0,
-                                                            color: Colors
-                                                                .white,
+                                                          style: TextStyle(
+                                                            fontSize: 16.0,
+                                                            color: Colors.white,
                                                           ),
                                                         ),
                                                       ),
-                                                    )
-                                                        : Container(
+                                                    ) : Container(
                                                       width: width,
+                                                      // If Non Serial
                                                       child: ElevatedButton(
                                                         style: ElevatedButton.styleFrom(
                                                           primary: Colors.blueAccent,
                                                           minimumSize: Size(width * 0.015, height * 0.05),),
+
+                                                        // Check if balance got value
                                                         onPressed: balQty == 0 || balQty < 0 ? () {
+                                                          // If no value
                                                           ErrorDialog.showErrorDialog(
                                                               context, '${snapshot.data[index]['item_name']} is already received all qty.');
                                                         } : () async {
+                                                          // If got value
+                                                          // SharedPreferences use to get and save selected data
                                                           SharedPreferences prefs = await SharedPreferences.getInstance();
 
-                                                          // save selected item_inventory id
+                                                          // Save selected item_inventory id
                                                           selectedItem = snapshot.data[index]['item_name'];
                                                           prefs.setString('selectedIvID', selectedItem);
 
@@ -601,62 +656,56 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           selectedItemSequence = snapshot.data[index]['line_seq_no'];
                                                           prefs.setString('line_seq_no', selectedItemSequence);
 
-                                                          // save selected tracking no
+                                                          // Save selected tracking no
                                                           prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
+
+                                                          // Set variable tracking and typeScan as tracking type
                                                           var tracking = snapshot.data[index]['tracking_type'];
                                                           var typeScan = 'scan';
+
+                                                          // Store item name into itemName variable
                                                           itemName = snapshot.data[index]['item_name'];
+
+                                                          // Call checkReceiptType function as pop up dialog
                                                           SkuUpcDialog.showSkuUpcDialog(context).then((value) {
                                                             checkReceiptType(tracking, typeScan);});
-                                                          // scanBarcodeNormal();
                                                         },
+                                                        // SCAN Button Text
                                                         child: Text(
                                                           'SCAN',
-                                                          style:
-                                                          TextStyle(
-                                                            fontSize:
-                                                            16.0,
-                                                            color: Colors
-                                                                .white,
+                                                          style: TextStyle(
+                                                            fontSize: 16.0,
+                                                            color: Colors.white,
                                                           ),
                                                         ),
                                                       ),
                                                     ),
                                                     // MANUAL BUTTON
-                                                    snapshot.data[index][
-                                                    'tracking_type'] ==
-                                                        "2"
-                                                        ? Column(
+                                                    // Check if Serial Number or not
+                                                    snapshot.data[index]['tracking_type'] == "2" ? Column(
                                                       children: [
-                                                        // MANUAL BUTTON
                                                         Container(
                                                           width: width,
+                                                          // If Serial Number
                                                           child: ElevatedButton(
-                                                            style: ElevatedButton
-                                                                .styleFrom(
-                                                              primary: Colors
-                                                                  .blueAccent,
+                                                            style: ElevatedButton.styleFrom(
+                                                              primary: Colors.blueAccent,
                                                               minimumSize: Size(
-                                                                  width *
-                                                                      0.015,
-                                                                  height *
-                                                                      0.05),
+                                                                  width * 0.015,
+                                                                  height * 0.05),
                                                             ),
-                                                            onPressed: balQty ==
-                                                                0 ||
-                                                                balQty <
-                                                                    0
-                                                                ? () {
+                                                            // Check if balance got value
+                                                            onPressed: balQty == 0 || balQty < 0 ? () {
+                                                              // If no value
                                                               ErrorDialog.showErrorDialog(
                                                                   context,
                                                                   '${snapshot.data[index]['item_name']} is already received all qty.');
-                                                            }
-                                                                : () async {
-                                                              SharedPreferences
-                                                              prefs =
-                                                              await SharedPreferences.getInstance();
+                                                            } : () async {
+                                                              // If got value
+                                                              // SharedPreferences use to get and save selected data
+                                                              SharedPreferences prefs = await SharedPreferences.getInstance();
 
-                                                              // save selected item_inventory id
+                                                              // Save selected item_inventory id
                                                               selectedItem = snapshot.data[index]['item_name'];
                                                               prefs.setString('selectedIvID', selectedItem);
 
@@ -668,25 +717,20 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                               selectedItemSequence = snapshot.data[index]['line_seq_no'];
                                                               prefs.setString('line_seq_no', selectedItemSequence);
 
-                                                              prefs.setString(
-                                                                  'poTracking',
-                                                                  snapshot.data[index]['tracking_type']);
-                                                              var tracking =
-                                                              snapshot.data[index]['tracking_type'];
-                                                              var typeScan =
-                                                                  'manual';
-                                                              checkReceiptType(
-                                                                  tracking,
-                                                                  typeScan);
+                                                              // Set variable tracking and typeScan as tracking type
+                                                              prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
+                                                              var tracking = snapshot.data[index]['tracking_type'];
+                                                              var typeScan = 'manual';
+
+                                                              // Call checkReceiptType function as pop up dialog
+                                                              checkReceiptType(tracking, typeScan);
                                                             },
+                                                            // MANUAL Button Text
                                                             child: Text(
                                                               'MANUAL',
-                                                              style:
-                                                              TextStyle(
-                                                                fontSize:
-                                                                16.0,
-                                                                color: Colors
-                                                                    .white,
+                                                              style: TextStyle(
+                                                                fontSize: 16.0,
+                                                                color: Colors.white,
                                                               ),
                                                             ),
                                                           ),
@@ -694,68 +738,52 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                         // VIEW BUTTON
                                                         Container(
                                                           width: width,
-                                                          child:
-                                                          ElevatedButton(
-                                                            style: ElevatedButton
-                                                                .styleFrom(
-                                                              primary: Colors
-                                                                  .green,
+                                                          child: ElevatedButton(
+                                                            style: ElevatedButton.styleFrom(
+                                                              primary: Colors.green,
                                                               minimumSize: Size(
-                                                                  width *
-                                                                      0.015,
-                                                                  height *
-                                                                      0.05),
+                                                                  width * 0.015,
+                                                                  height * 0.05),
                                                             ),
-                                                            onPressed:
-                                                                () {
+                                                            // Call viewBarcode function
+                                                            // Call ID and line sequence
+                                                            onPressed: () {
                                                               viewBarcode(
                                                                   snapshot.data[index]['item_inventory_id'],
                                                                   snapshot.data[index]['line_seq_no']);
                                                             },
+                                                            // VIEW button text
                                                             child: Text(
                                                               'VIEW',
-                                                              style:
-                                                              TextStyle(
-                                                                fontSize:
-                                                                16.0,
-                                                                color: Colors
-                                                                    .white,
+                                                              style: TextStyle(
+                                                                fontSize: 16.0,
+                                                                color: Colors.white,
                                                               ),
                                                             ),
                                                           ),
                                                         ),
                                                       ],
-                                                    )
-                                                        : Container(
+                                                    ) : Container(
                                                       width: width,
-                                                      child:
-                                                      ElevatedButton(
-                                                        style:
-                                                        ElevatedButton
-                                                            .styleFrom(
-                                                          primary: Colors
-                                                              .blueAccent,
+                                                      // If Non Serial Number
+                                                      child: ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(
+                                                          primary: Colors.blueAccent,
                                                           minimumSize: Size(
-                                                              width *
-                                                                  0.015,
-                                                              height *
-                                                                  0.05),
+                                                              width * 0.015,
+                                                              height * 0.05),
                                                         ),
-                                                        onPressed: balQty ==
-                                                            0 ||
-                                                            balQty < 0
-                                                            ? () {
+                                                        // Check if balance got value
+                                                        onPressed: balQty == 0 || balQty < 0 ? () {
+                                                          // If no value
                                                           ErrorDialog.showErrorDialog(
                                                               context,
                                                               '${snapshot.data[index]['item_name']} is already received all qty.');
-                                                        }
-                                                            : () async {
-                                                          SharedPreferences
-                                                          prefs =
-                                                          await SharedPreferences
-                                                              .getInstance();
-                                                          var typeScan =
-                                                              'manual';
+                                                        } : () async {
+                                                          // If got value
+                                                          // SharedPreferences use to get and save selected data
+                                                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                          var typeScan = 'manual';
 
                                                           // save selected item_inventory id
                                                           selectedItem = snapshot.data[index]['item_name'];
@@ -769,32 +797,23 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           selectedItemSequence = snapshot.data[index]['line_seq_no'];
                                                           prefs.setString('line_seq_no', selectedItemSequence);
 
-                                                          prefs.setString(
-                                                              'poTracking',
-                                                              snapshot.data[index]
-                                                              [
-                                                              'tracking_type']);
-                                                          itemName =
-                                                          snapshot.data[index]
-                                                          [
-                                                          'item_name'];
-                                                          SkuUpcDialog.showSkuUpcDialog(
-                                                              context)
-                                                              .then(
-                                                                  (value) {
-                                                                checkReceiptType(
-                                                                    snapshot.data[index]['tracking_type'],
-                                                                    typeScan);
+                                                          // Set variable tracking and typeScan as tracking type
+                                                          prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
+
+                                                          // Store item name into itemName variable
+                                                          itemName = snapshot.data[index]['item_name'];
+
+                                                          // Call checkReceiptType function as pop up dialog
+                                                          SkuUpcDialog.showSkuUpcDialog(context).then((value) {
+                                                                checkReceiptType(snapshot.data[index]['tracking_type'], typeScan);
                                                               });
                                                         },
+                                                        // MANUAL Button Text
                                                         child: Text(
                                                           'MANUAL',
-                                                          style:
-                                                          TextStyle(
-                                                            fontSize:
-                                                            16.0,
-                                                            color: Colors
-                                                                .white,
+                                                          style: TextStyle(
+                                                            fontSize: 16.0,
+                                                            color: Colors.white,
                                                           ),
                                                         ),
                                                       ),
@@ -842,20 +861,23 @@ class _PoItemListViewState extends State<PoItemListView> {
     );
   }
 
-  // pop up dialog box
-  // Fill up credential before scan the item
+  // Function for pop up dialog
   Future checkReceiptType(tracking, String typeScan) async {
+    // SharedPreferences use to get and save selected data
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var valueReceipt = prefs.getString('poReceiptType');
+    var valueReceipt = prefs.getString('poReceiptType');                         // Get poReceiptType from onPressed Scan / Manual button
     print('receipt Type: $valueReceipt');
 
+    // Check if got value or not
     if (valueReceipt == null) {
+      // If no value, create a form in a pop-up dialog format
       return showDialog(
         context: context,
         builder: (context) {
           var height = MediaQuery.of(context).size.height;
           var width = MediaQuery.of(context).size.width;
 
+          // Dialog widget
           return AlertDialog(
             contentPadding: EdgeInsets.all(10.0),
             backgroundColor: Colors.white,
@@ -872,12 +894,13 @@ class _PoItemListViewState extends State<PoItemListView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // Receipt type
                   Container(
                     height: height / 13,
                     child: FormField<String>(
                       builder: (FormFieldState<String> state) {
+                        // Receipt type title text
                         return Container(
-                          // padding: EdgeInsets.symmetric(horizontal: 5),
                           child: InputDecorator(
                             decoration: InputDecoration(
                               labelText: 'Receipt Type',
@@ -885,6 +908,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                               state.hasError ? state.errorText : null,
                             ),
                             isEmpty: false,
+                            // Drop down menu
                             child: StatefulBuilder(
                               builder: (BuildContext context,
                                   StateSetter setState) {
@@ -895,6 +919,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                       iconSize: 28,
                                       iconEnabledColor: Colors.amber,
                                       items: receiptTypeList.map((item) {
+                                        // Item name list from drop down
                                         return new DropdownMenuItem(
                                           child: Text(
                                             item['name'],
@@ -909,6 +934,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                           : selectedReceipt,
                                       onChanged: (String? newValue) {
                                         setState(() {
+                                          // Drop down content change base on content selected
                                           selectedReceipt = newValue;
                                         });
                                       },
@@ -922,14 +948,17 @@ class _PoItemListViewState extends State<PoItemListView> {
                       },
                     ),
                   ),
+                  // Doc number text
                   StmsInputField(
                     key: vendorNoKey,
                     controller: vendorNoController,
                     hint: 'Vendor Doc No',
                     validator: Validator.valueExists,
                   ),
+                  // Item location drop down
                   FormField<String>(
                     builder: (FormFieldState<String> state) {
+                      // Item location title text
                       return InputDecorator(
                         decoration: InputDecoration(
                           labelText: 'Item Location',
@@ -944,9 +973,9 @@ class _PoItemListViewState extends State<PoItemListView> {
                             color: Colors.amber,
                             size: 28,
                           ),
-                          // iconEnabledColor: Colors.amberAccent,
                           iconDisabledColor: Colors.grey[350],
                           items: locList.map((item) {
+                            // Item name list from drop down
                             return new DropdownMenuItem(
                               child: Text(
                                 item['name'],
@@ -958,6 +987,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                           value: selectedLoc,
                           onChanged: (value) {
                             setState(() {
+                              // Drop down content change base on content selected
                               selectedLoc = value;
                               var locId = locList.firstWhereOrNull(
                                       (element) => element['name'] == value);
@@ -996,42 +1026,51 @@ class _PoItemListViewState extends State<PoItemListView> {
                         backgroundColor: Colors.amber,
                         textColor: Colors.black,
                         onPressed: () async {
+                          // Check if form is filled or not
                           if (selectedReceipt == null) {
+                            // If receipt type is empty
                             ErrorDialog.showErrorDialog(
                                 context, 'Please select receipt type');
                           } else if (vendorNoKey.currentState
-                              ?.validate() !=
-                              null) {
+                              ?.validate() != null) {
+                            // If vendor doc is empty
                             ErrorDialog.showErrorDialog(context,
                                 'Vendor doc no. cannot be empty');
                           } else if (selectedLoc == null) {
+                            // If location is empty
                             ErrorDialog.showErrorDialog(
                                 context, 'Please select Location');
                           } else {
-                            SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
-                            prefs.setString(
-                                'poReceiptType', selectedReceipt);
-                            prefs.setString(
-                                'povendorNo', vendorNoController.text);
+                            // If not empty
+
+                            // SharedPreferences use to get and save selected data
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            prefs.setString('poReceiptType', selectedReceipt);
+                            prefs.setString('povendorNo', vendorNoController.text);
                             prefs.setString('poLocation', locationId);
 
                             print('location: $locationId');
                             Navigator.pop(context);
 
+                            // Check if serial and if type of scan
                             if (tracking == "2" && typeScan == 'scan') {
+                              // If serial number and type is 'scan'
+
+                              // Call scan Barcode function
                               scanBarcodeNormal();
-                            } else if (tracking == "2" &&
-                                typeScan == 'manual') {
-                              Navigator.of(context)
-                                  .pushNamed(StmsRoutes.poItemManual).then((value){
+                            } else if (tracking == "2" && typeScan == 'manual') {
+                              // If serial number and type is 'manual'
+
+                              // Navigate to itemManual page
+                              Navigator.of(context).pushNamed(StmsRoutes.poItemManual).then((value){
+                                // Call getEnterQt
                                 getEnterQty();
                               });
                             } else {
+                              // Store scan type
                               prefs.setString('nontypeScan', typeScan);
+                              // Call scanSku function
                               scanSKU();
-                              // Navigator.of(context)
-                              //     .pushNamed(StmsRoutes.poItemDetail);
                             }
                           }
                         },
@@ -1045,20 +1084,31 @@ class _PoItemListViewState extends State<PoItemListView> {
         },
       );
     } else {
+      // If got value
+      // check if serial number is what type
       if (tracking == "2" && typeScan == 'scan') {
+        // If serial number is type scan
+
+        // Call scanBarcodeNormal function
         scanBarcodeNormal();
       } else if (tracking == "2" && typeScan == 'manual') {
+        // If serial number is type scan manual
+
+        // Navigate to create item Manual page
         Navigator.of(context).pushNamed(StmsRoutes.poItemManual).then((value){
-          getEnterQty();
+          getEnterQty();                                                         // Call enter quantity function
         });
       } else {
+        // If not serial number
+
+        // Store data of type scan
         prefs.setString('nontypeScan', typeScan);
-        scanSKU();
+        scanSKU();                                                               // Call scanSKU function
       }
     }
   }
 
-  // scan code
+  // Function for scan if select SKU and UPC
   Future<void> scanSKU() async {
     String skuBarcode;
     var typeScanning = Storage().typeScan;
@@ -1067,10 +1117,14 @@ class _PoItemListViewState extends State<PoItemListView> {
       skuBarcode = await FlutterBarcodeScanner.scanBarcode(
           '#ff6666', '', true, ScanMode.BARCODE);
       print('skuBarcode: $skuBarcode');
+
+      // Check which scan type
       if (skuBarcode != '-1') {
         if (typeScanning == 'sku') {
+          // If select SKU
           searchSKU(skuBarcode);
         } else {
+          // If select UPC
           searchUPC(skuBarcode);
         }
         // widget.changeView(changeType: ViewChangeType.Forward);
@@ -1091,33 +1145,41 @@ class _PoItemListViewState extends State<PoItemListView> {
     });
   }
 
-// search scan SKU code
+  // Function for search SKU after scan SKU
   searchSKU(String skuBarcode) async {
+    // SharedPreferences use to get and save selected data
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    DBMasterInventoryHive().getAllInvHive().then((value) {
-      poSkuListing = value;
-      // print('sku master: $poSkuListing');
 
+    DBMasterInventoryHive().getAllInvHive().then((value) {
+      poSkuListing = value;                                                      // Get value from API into poSkuListing variable
+
+      // Compare similar item name / sku
       var itemSku = poSkuListing.firstWhereOrNull(
               (element) => element.sku == skuBarcode && element.sku == itemName);
 
-      // print('itemSku: $itemSku');
-      // print('itemSku: ${itemSku!.sku}');
-
       // ignore: unnecessary_null_comparison
+      // Check if got value or not
       if (null == itemSku) {
+        // If no value
         ErrorDialog.showErrorDialog(
             context, 'SKU not match with master inventory');
       } else {
+        // If fot value
         var nonTrackingType = prefs.getString('nontypeScan');
        prefs.setString('selectedIvID', selectedItem);
 
         print("selectedItem: $selectedItem");
+
+        // Check the type of scan
         if (nonTrackingType == 'scan') {
-          // Any update on the DB, need to call the value here as it will go and search through the model and db
-          // Removing and addition will need to change here
+          // If type is 'scan'
+          // Get data from DB
           DBPoNonItem().getPoNonItem(itemSku.id, selectedItemSequence).then((value) {
+            // Check if got value in DB
             if (value == null) {
+              // If no value
+
+              // Create new data
               DBPoNonItem()
                   .createPoNonItem(PoNonItem(
                 itemInvId: itemSku.id,
@@ -1126,23 +1188,31 @@ class _PoItemListViewState extends State<PoItemListView> {
                 nonTracking: '1',
               ))
                   .then((value) {
-                // SuccessDialog.showSuccessDialog(context, 'Item Save');
                 setState(() {
+
+                  // Pop up message
                   fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
-                // call and update the enterQty function
-                getEnterQty();
+                getEnterQty();                                                   // Call getEnterQty function
+
+                // Create a duration for loop to scanSKU function to call again
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
             } else {
-              List nonItem = value;
+              // If got value in DB
+              List nonItem = value;                                              // Store DB value in nonItem variable
+
+              // Compare similar value from DB base on ID and line sequence
               var getItem = nonItem.firstWhereOrNull(
                       (element) => element['item_inventory_id'] == itemSku.id
                           && element['line_seq_no'] == selectedItemSequence);
-              // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
+
+              // Get enter qty value and add by one each time scan
               var newQty = int.parse(getItem['non_tracking_qty'])+1;
+
+              // Update the new data into DB
               DBPoNonItem()
                   .update(itemSku.id, newQty.toString(), selectedItemSequence)
                   .then((value) {
@@ -1150,15 +1220,19 @@ class _PoItemListViewState extends State<PoItemListView> {
                   fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
-                getEnterQty();
+                getEnterQty();                                                   // Call getEnterQty function
+                // Create a duration for loop to scanSKU function to call again
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
             }
           });
         } else {
-          Navigator.of(context).pushNamed(StmsRoutes.poItemDetail)
-              .then((value){
+          // If type scan is not 'scan'
+
+          // Navigate to itemDetail page
+          Navigator.of(context).pushNamed(StmsRoutes.poItemDetail).then((value){
+            // Create duration for loop to call getEnterQty function
             var _duration = Duration(seconds: 1);
             return Timer(_duration, getEnterQty);
           });
@@ -1167,28 +1241,38 @@ class _PoItemListViewState extends State<PoItemListView> {
     });
   }
 
-  // search scanUPC code
+  // Function for search SKU after scan SKU
   searchUPC(String skuBarcode) async {
+    // SharedPreferences use to get and save selected data
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    DBMasterInventoryHive().getAllInvHive().then((value) {
-      poSkuListing = value;
 
+    DBMasterInventoryHive().getAllInvHive().then((value) {
+      poSkuListing = value;                                                      // Get value from API into poSkuListing variable
+
+      // Compare similar itemName at API
       var itemUpc = poSkuListing.firstWhereOrNull(
               (element) => element.upc == skuBarcode && element.sku == itemName);
 
+      // Check if go value or not at API
       if (null == itemUpc) {
+        // If no value
         ErrorDialog.showErrorDialog(
             context, 'UPC not match with master inventory');
       } else {
+        // If got value
         var nonTrackingType = prefs.getString('nontypeScan');
         prefs.setString('selectedIvID', selectedItem);
 
-        print("selecteditem :$selectedItem");
+        // Check the type of scan
         if (nonTrackingType == 'scan') {
-          // Any update on the DB, need to call the value here as it will go and search through the model and db
-          // Removing and addition will need to change here
+          // If type is 'scan'
+          // Get data from DB
           DBPoNonItem().getPoNonItem(itemUpc.id, selectedItemSequence).then((value) {
+            // Check if got value in DB
             if (value == null) {
+              // If no value
+
+              // Create data
               DBPoNonItem()
                   .createPoNonItem(PoNonItem(
                 itemInvId: itemUpc.id,
@@ -1197,42 +1281,50 @@ class _PoItemListViewState extends State<PoItemListView> {
                 nonTracking: '1',
               ))
                   .then((value) {
-                // SuccessDialog.showSuccessDialog(context, 'Item Save');
                 setState(() {
+
+                  // Pop up message
                   fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
-                // call and update the enterQty function
-                getEnterQty();
+                getEnterQty();                                                   // Call getEnterQty function
+                // Create a duration for loop to scanSKU function to call again
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
             } else {
-              List nonItem = value;
+              List nonItem = value;                                              // Store DB value in nonItem variable
+
+              // Compare similar value from DB base on ID and line sequence
               var getItem = nonItem.firstWhereOrNull(
                       (element) => element['item_inventory_id'] == itemUpc.id
                           && element['line_seq_no'] == selectedItemSequence);
 
-
-              // print('value non qty: ${getItem['non_tracking_qty'].toString()}');
-              // getItem['non_tracking_qty'] == 0;
+              // Get enter qty value and add by one each time scan
               var newQty = int.parse(getItem['non_tracking_qty'])+1;
+
+              // Update new data into DB
               DBPoNonItem()
                   .update(itemUpc.id, newQty.toString(), selectedItemSequence)
                   .then((value) {
-                getEnterQty();
+                getEnterQty();                                                   // Call getEnterQty function
+
                 setState(() {
+                  // Call pop up message
                   fToast.init(context);
                   showCustomSuccess('Item Save');
                 });
+                // Create a duration for loop to scanSKU function to call again
                 var _duration = Duration(seconds: 1);
                 return Timer(_duration, scanSKU);
               });
             }
           });
         } else {
+          // If type scan is not 'scan'
           Navigator.of(context).pushNamed(StmsRoutes.poItemDetail)
               .then((value) {
+            // Create a duration for loop to getEnterQty function to call again
             var _duration = Duration(seconds: 1);
             return Timer(_duration, getEnterQty);
           });
@@ -1241,7 +1333,7 @@ class _PoItemListViewState extends State<PoItemListView> {
     });
   }
 
-  // Scan for trackingType == '2'. Item that got serial no
+  // Function for scan if Serial Number
   Future<void> scanBarcodeNormal() async {
 
     String barcodeScanRes;
@@ -1250,11 +1342,15 @@ class _PoItemListViewState extends State<PoItemListView> {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
           '#ff6666', '', true, ScanMode.BARCODE);
       print('barcodeScanRes: $barcodeScanRes');
+
+      // Check if scan have value or not
       if (barcodeScanRes != '-1') {
+        // If got value
         print('barcode: $barcodeScanRes');
-        saveData(barcodeScanRes);
+        saveData(barcodeScanRes);                                                // Call saveData function
         // widget.changeView(changeType: ViewChangeType.Forward);
       } else {
+        // If no value
         ErrorDialog.showErrorDialog(context, 'No barcode/qrcode detected');
       }
     } on PlatformException {
@@ -1271,37 +1367,51 @@ class _PoItemListViewState extends State<PoItemListView> {
     });
   }
 
+  // Function to search and save data from Serial number scan
   Future<void> saveData(String barcodeScanRes) async {
+    // SharedPreferences use to get and save selected data
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    // Get value from DB
     DBPoItem().getAllPoItem().then((value) {
+      // Check if got value from DB or not
       if (value != null) {
-        poItemListing = value;
+        // If got value in DB
 
+        poItemListing = value;                                                   // Get value from DB into poItemListing variable
+
+        // Compare similar data base on Serial Number and line sequence
         var itemPO = poItemListing.firstWhereOrNull(
                 (element) => element['item_serial_no'] == barcodeScanRes
                     && element['line_seq_no'] == selectedItemSequence);
+
+        // Check if there is data from compare value
         if (null == itemPO) {
+          // If no data
           prefs.setString("itemBarcode", barcodeScanRes);
 
+          // Navigate to itemDetail page
           Navigator.of(context)
               .pushNamed(StmsRoutes.poItemDetail)
               .then((value) {
-            // sent update Ent qty result
-            getEnterQty();
+            getEnterQty();                                                       // Call getEnterQty function
+            // Create a duration for loop to scanBarcodeNormal function to call again
             var _duration = Duration(seconds: 1);
             return Timer(_duration, scanBarcodeNormal);
           });
         } else {
+          // If got data
           ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
         }
       } else {
+        // If no value in DB
         prefs.setString("itemBarcode", barcodeScanRes);
 
-        // await Future.delayed(const Duration(seconds: 3));
+        // Navigate to itemDetail page
         Navigator.of(context).pushNamed(StmsRoutes.poItemDetail).then((value) {
           // sent update Ent qty result
-          getEnterQty();
+          getEnterQty();                                                         // Call getEnterQty function
+          // Create a duration for loop to scanBarcodeNormal function to call again
           var _duration = Duration(seconds: 1);
           return Timer(_duration, scanBarcodeNormal);
         });
@@ -1309,104 +1419,156 @@ class _PoItemListViewState extends State<PoItemListView> {
     });
   }
 
+  // Function to view Id and line sequence of item
   viewBarcode(String invNo, String lineSqeNo) async {
+    // Get value from DB
     DBPoItem().getBarcodePoItem(invNo, lineSqeNo).then((value) {
+      // Check if there is value in DB or not
       if (value == null) {
+        // If no value
         ErrorDialog.showErrorDialog(context, 'No Serial No have been scan');
       } else {
+        // If got value
+
+        // Store value in getList variable
         var getList = DBPoItem().getBarcodePoItem(invNo, lineSqeNo);
         var getDb = 'DBPoItem';
+
+        // call viewDialog pop up message
         ViewDialog.showViewDialog(context, getList, getDb).whenComplete((){
           setState(() {
-            getEnterQty();
+            getEnterQty();                                                       // Call getEnterQty function
           });
         });
       }
     });
   }
 
+  // Function to upload to API
   Future<void> uploadData() async {
+    // SharedPreferences use to get and save selected data
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print('poId: ${prefs.getString('poId_upload')}');
-    var receiptType = prefs.getString('poReceiptType');
 
+    print('poId: ${prefs.getString('poId_upload')}');
+    var receiptType = prefs.getString('poReceiptType');                          // Get receipt type data into receiptType variable
+
+    // Call and get upload data from DB for PoItem
     DBPoItem().getUpload().then((value) {
-      // print('value serial po: $value');
-      poSerial = value;
+      poSerial = value;                                                          // Upload data from DB store into poSerial variable
     });
 
+    // Call and get upload data from DB for PoNonItem
     DBPoNonItem().getUpload().then((value) {
       print('value non Po: $value');
-      poNonTrack = value;
+      poNonTrack = value;                                                        // Upload data from DB store into poSerial variable
+
+      // Check if there is data in both poItem and poNonItem
       if (poSerial != null && poNonTrack != null) {
+        // If got value
+
+        // Upload both to API
         combineUpdated = []
           ..addAll(poSerial)
           ..addAll(poNonTrack);
       } else if (poSerial == null) {
+        // If poItem no value
+
+        // Upload only poNonItem
         combineUpdated = poNonTrack;
       } else {
+        // If no value
+
+        // Upload only poItem
         combineUpdated = poSerial;
       }
-      print('CHECK: $poSerial');
-      print('CHECK2: $poNonTrack');
-      print('CHECK3: $combineUpdated');
 
+      // Get value from API
       IncomingService().sendToServer(combineUpdated).then((value) {
+        // Check if there is value in API
         if (value['status'] == true) {
-          DBPoItem().deleteAllPoItem();
-          DBPoNonItem().deleteAllPoNonItem();
-          // prefs.remove('poReceiptType');
-          prefs.remove('povendorNo');
-          prefs.remove('poLocation');
-          prefs.remove('poId_info');
+          DBPoItem().deleteAllPoItem();                                          // Delete all poItem fromDB
+          DBPoNonItem().deleteAllPoNonItem();                                    // Delete all poNonItem from DB
+
+          prefs.remove('povendorNo');                                            // Remove data store for poVendorNo
+          prefs.remove('poLocation');                                            // Remove data store for poLocation
+          prefs.remove('poId_info');                                             // Remove data store for poID
+
+          // Navigate to purchaseOrder page
           Navigator.popUntil(
               context, ModalRoute.withName(StmsRoutes.purchaseOrder));
+
+          // Check if receipt type have value or is 1
           if (receiptType == '1') {
+            // If have value or is 1
+
+            // Pop up message
             SuccessDialog.showSuccessDialog(
                 context, "Shipment created successfully")
                 .then((value) {
-              prefs.remove('poReceiptType');
+              prefs.remove('poReceiptType');                                     // Remove data of poReceiptType
             }); //value['message']
           } else {
+            // If n value or value is not 1
+
+            // Pop up message
             SuccessDialog.showSuccessDialog(
                 context, "Shipment Invoice created successfully")
                 .then((value) {
-              prefs.remove('poReceiptType');
+              prefs.remove('poReceiptType');                                     // Remove data of poReceiptType
             });
           }
         } else {
+          // If there is no value on API
           ErrorDialog.showErrorDialog(context, value['message']);
         }
       });
     });
   }
 
+  // Function for delete item for poItem in DB
   deletePoItem(String itemInvId, String itemLineSeq) {
+    // Get value of delete data from DB
     DBPoItem().deleteSelectedPoItem(itemInvId, itemLineSeq).then((value){
+      // Check if got value
       if(value == 1){
+        // If got value
         setState(() {
+
+          // Pop up message
           fToast.init(context);
           showCustomSuccess('Reset Successful');
 
-          getEnterQty();
+          getEnterQty();                                                         // Call getEnterQty function
         });
       } else {
+        // If no value
+
+        // Pop up message
         fToast.init(context);
         showCustomSuccess('Reset Already');
       }
     });
   }
 
+  // Function for delete item for poNonItem in DB
   deletePoNonItem(String itemInvId, String itemLineSeq) {
+    // Get value of delete data from DB
     DBPoNonItem().deletePoNonItem(itemInvId, itemLineSeq).then((value){
+      // Get value of delete data from DB
       if(value == 1){
         setState(() {
+          // If got value
+
+          // Pop up message
           fToast.init(context);
           showCustomSuccess('Reset Successful');
 
-          getEnterQty();
+          getEnterQty();                                                         // Call getEnterQty function
         });
       } else {
+        // If no value
+
+        // Pop up message
         fToast.init(context);
         showCustomSuccess('Reset Already');
       }

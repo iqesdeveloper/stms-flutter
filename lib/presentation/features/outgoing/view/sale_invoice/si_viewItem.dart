@@ -246,14 +246,28 @@ class _SiItemDetailsState extends State<SiItemDetails> {
               List allDBValue = value;
               var itemTracking = allDBValue.firstWhereOrNull((element) =>
               element['item_inventory_id'] == itemAdjust.id);
-              var newQty = int.parse(itemQtyController.text) + int.parse(itemTracking['non_tracking_qty']);
-              DBSaleInvoiceNonItem()
-                  .update(itemAdjust.id, newQty.toString())
-                  .then((value) {
-                showCustomSuccess('Item Save');
-                Navigator.popUntil(
-                    context, ModalRoute.withName(StmsRoutes.siItemList));
-              });
+
+              if(itemTracking != null){
+                var newQty = int.parse(itemQtyController.text) + int.parse(itemTracking['non_tracking_qty']);
+                DBSaleInvoiceNonItem()
+                    .update(itemAdjust.id, newQty.toString())
+                    .then((value) {
+                  showCustomSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.siItemList));
+                });
+              } else {
+                DBSaleInvoiceNonItem()
+                    .createSiNonItem(SaleInvoiceNon(
+                  itemInvId: itemAdjust.id,
+                  nonTracking: itemQtyController.text,
+                ))
+                    .then((value) {
+                  showCustomSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.siItemList));
+                });
+              }
             }
           });
         }

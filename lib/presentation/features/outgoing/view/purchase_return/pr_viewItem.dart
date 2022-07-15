@@ -250,16 +250,31 @@ class _PrItemDetailsState extends State<PrItemDetails> {
               List allDBValue = value;
               var itemTracking = allDBValue.firstWhereOrNull((element) =>
               element['item_inventory_id'] == itemAdjust.id);
-              print('$allDBValue');
-              var newQty = int.parse(itemQtyController.text) + int.parse(itemTracking['non_tracking_qty']);
 
-              DBPurchaseReturnNonItem()
-                  .update(itemAdjust.id, newQty.toString())
-                  .then((value) {
-                showCustomSuccess('Item Save');
-                Navigator.popUntil(
-                    context, ModalRoute.withName(StmsRoutes.prItemList));
-              });
+              if(itemTracking != null){
+                var newQty = int.parse(itemQtyController.text) +
+                    int.parse(itemTracking['non_tracking_qty']);
+
+                DBPurchaseReturnNonItem()
+                    .update(itemAdjust.id, newQty.toString())
+                    .then((value) {
+                  showCustomSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.prItemList));
+                });
+              } else {
+                DBPurchaseReturnNonItem()
+                    .createPrNonItem(PurchaseReturnNon(
+                  itemInvId: itemAdjust.id,
+                  nonTracking: itemQtyController.text,
+                ))
+                    .then((value) {
+                  // SuccessDialog.showSuccessDialog(context, 'Item Save');
+                  showCustomSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.prItemList));
+                });
+              }
             }
           });
         }

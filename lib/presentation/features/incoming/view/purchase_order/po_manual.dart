@@ -12,8 +12,9 @@ import 'package:stms/presentation/widgets/independent/input_field.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/style_button.dart';
 
+
+// Manual page for serial number manual scan
 class PoManual extends StatefulWidget {
-  // final Function changeView;
 
   const PoManual({Key? key}) : super(key: key); //, required this.changeView
 
@@ -22,11 +23,18 @@ class PoManual extends StatefulWidget {
 }
 
 class _PoManualState extends State<PoManual> {
+  // Initialize list
   List poItemListing = [];
-  var selectedLoc, selectedInvtry, tracking;
-  final TextEditingController itemSNController = TextEditingController();
-  final GlobalKey<StmsInputFieldState> itemSNKey = GlobalKey();
 
+  // Initialize variable
+  var selectedLoc,
+      selectedInvtry,
+      tracking;
+
+  final TextEditingController itemSNController = TextEditingController();        // variable for Text Editing
+  final GlobalKey<StmsInputFieldState> itemSNKey = GlobalKey();                  // key use in Text Editing
+
+  // Initialize function
   @override
   void initState() {
     super.initState();
@@ -38,6 +46,7 @@ class _PoManualState extends State<PoManual> {
       child: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
           if (state is ProfileProcessing) {
+            // Loading screen
             return Container(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
@@ -54,6 +63,7 @@ class _PoManualState extends State<PoManual> {
               padding: EdgeInsets.all(10),
               child: Column(
                 children: [
+                  // Item Serial No Text field
                   Container(
                     decoration: ShapeDecoration(
                       shape: ContinuousRectangleBorder(
@@ -68,6 +78,7 @@ class _PoManualState extends State<PoManual> {
                       ),
                     ),
                     margin: EdgeInsets.fromLTRB(10, 30, 10, 0),
+                    // Item Serial No content
                     child: StmsInputField(
                       key: itemSNKey,
                       controller: itemSNController,
@@ -76,6 +87,7 @@ class _PoManualState extends State<PoManual> {
                       textline: TextDecoration.none,
                     ),
                   ),
+                  // SELECT Button
                   Expanded(
                     child: Align(
                       alignment: Alignment.bottomCenter,
@@ -89,6 +101,7 @@ class _PoManualState extends State<PoManual> {
                             backgroundColor: Colors.amber,
                             textColor: Colors.black,
                             onPressed: () {
+                              // Call saveData function
                               saveData(itemSNController.text);
                             },
                           ),
@@ -105,29 +118,44 @@ class _PoManualState extends State<PoManual> {
     );
   }
 
+  // Function to check and store data
   Future<void> saveData(String serial) async {
+    // SharedPreferences use to get and save selected data
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    // Check if form text field got value in or not
     if (itemSNKey.currentState?.validate() != null) {
+      // If not value
       ErrorDialog.showErrorDialog(context, 'Serial Number cannot be empty');
     } else {
+      // If got value
+      // Get data from DB
       DBPoItem().getAllPoItem().then((value) {
+        // Check if got data in DB or not
         if (value != null) {
-          poItemListing = value;
+          // If got data
+          poItemListing = value;                                                 // Get DB value into poItemListing variable
 
+          // Compare similar item based on item serial number
           var itemPO = poItemListing.firstWhereOrNull(
               (element) => element['item_serial_no'] == serial);
+
+          // Check if compare value present of not
           if (null == itemPO) {
+            // If no value
             prefs.setString("itemBarcode", serial);
 
+            // Navigate to poItemDetail page
             Navigator.of(context).pushNamed(StmsRoutes.poItemDetail);
           } else {
+            // If got value
             ErrorDialog.showErrorDialog(context, 'Serial No already exists.');
           }
         } else {
+          // If no data in DB
           prefs.setString("itemBarcode", serial);
 
-          // await Future.delayed(const Duration(seconds: 3));
+          // Navigate to poItemDetail page
           Navigator.of(context).pushNamed(StmsRoutes.poItemDetail);
         }
       });

@@ -21,57 +21,59 @@ class PoDownloadView extends StatefulWidget {
   _PoDownloadViewState createState() => _PoDownloadViewState();
 }
 
+// Selection page, choose which Document and vendor
 class _PoDownloadViewState extends State<PoDownloadView> {
-  var getPurchaseOrder = IncomingService();
+  // Initialize variable
+  var getPurchaseOrder = IncomingService();                                      // Link variable to server data
+  var selectedVendor,
+      selectedPo,
+      poTotalItem;
+
+  // Initialize list
   List vendorList = [];
   List poList = [];
-  var testList;
-  var selectedVendor, selectedPo, poTotalItem;
 
-  // upon start this page, it will run the vendorList function
-  // vendorList function calls the item contain vendor in API
+  // Initialize function
   @override
   void initState() {
     super.initState();
 
-    getVendorList();
-    // getPoList();
-    removeListItem();
+    getVendorList();                                                             // Call getVendorList function on page refresh
+    removeListItem();                                                            // Call removeListItem function on page refresh
   }
 
-  // vendor obtained from the portal and store into vendorList variable
-  // vendorList variable holds the content and will display under drop down menus
+  // Function for calling data from Master Page
   getVendorList() {
     DBMasterSupplier().getAllMasterSupplier().then((value) {
+      // Check if got data from Master
       if (value == null) {
+        // If no data
         ErrorDialog.showErrorDialog(
             context, 'Please Download Vendor at Master File First');
       } else {
+        // If have data
         setState(() {
-          vendorList = value;
-          testList = List<Map<String, dynamic>>.of(value);
-          // vendorList = value.map((item) => Supplier.fromJson(item)).toList();
-          // print('vendor list value: $vendorList');
+          vendorList = value;                                                    // Store data in vendorList variable
         });
       }
     });
   }
 
-  // get the PO from the API and store into the poList variable
-  // poList variable holds the content and will display under drop down menu
+  // Function for calling data from server / API
   getPoList(String selectedVendor) {
-    var token = Storage().token;
+    var token = Storage().token;                                                 // Create variable to store data temporarily
     getPurchaseOrder.getPurchaseOrderList(token).then((value) {
+      // Check if got value in API
       if (value == []) {
+        // If no value
         ErrorDialog.showErrorDialog(context, 'No File to Download');
       } else {
         setState(() {
           print('selectedVen: $selectedVendor');
 
-          poList =
-              value.where((w) => w['supplier_id'] == selectedVendor).toList();
-          poList.sort((a, b) =>
-              a["po_doc"].toLowerCase().compareTo(b["po_doc"].toLowerCase()));
+          // Store value in variable poList and do sorting
+          poList = value.where((w) => w['supplier_id'] == selectedVendor).toList();
+          poList.sort((a, b) => a["po_doc"].toLowerCase().compareTo(b["po_doc"].toLowerCase()));
           print('poList list new');
           print(poList);
         });
@@ -79,12 +81,14 @@ class _PoDownloadViewState extends State<PoDownloadView> {
     });
   }
 
-  // remove item
+  // Function for removing data
   removeListItem() async {
+    // SharedPreferences use to get and save selected data
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    DBPoItem().deleteAllPoItem();
-    DBPoNonItem().deleteAllPoNonItem();
+    DBPoItem().deleteAllPoItem();                                                // Call delete from database for poItem
+    DBPoNonItem().deleteAllPoNonItem();                                          // Call delete from database for poNonItem
 
+    // Remove data
     prefs.remove('poReceiptType');
     prefs.remove('poId_info');
     prefs.remove('poLocation');
@@ -93,9 +97,6 @@ class _PoDownloadViewState extends State<PoDownloadView> {
   // UI layout
   @override
   Widget build(BuildContext context) {
-    // var width = MediaQuery.of(context).size.width;
-    // var height = MediaQuery.of(context).size.height;
-
     return Container(
       color: Colors.white,
       padding: EdgeInsets.all(10),
@@ -280,8 +281,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                     backgroundColor: Colors.amber,
                     textColor: Colors.black,
                     onPressed: () {
-                      // Navigator.of(context)
-                      //     .pushNamed(StmsRoutes.purchaseOrderItem);
+                      // Go to savePO function
                       savePo();
                     },
                   ),
@@ -294,25 +294,27 @@ class _PoDownloadViewState extends State<PoDownloadView> {
     );
   }
 
-  // the save function, calling and get the selected option to the next section
+  // Function when press save Button
   Future<void> savePo() async {
+    // Check if the drop down list is filled
     if (selectedPo == null) {
+      // If no value in drop down list
       ErrorDialog.showErrorDialog(context, 'Please select Purchase Order');
     } else {
-      // poTotalItem = poList.firstWhereOrNull((element) => element['po_id']
-      // == selectedPo);
-
-      // print('TEST: ${poTotalItem['total_item']}');
+      // If have value in drop down list
+      // SharedPreferences use to get and save selected data
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('poID', selectedPo);
-   //   prefs.setString('poTotalItem', poTotalItem['total_item']);
-      removeListItem();
+      prefs.setString('poID', selectedPo);                                       // Store poId sata
+      removeListItem();                                                          // Remove function
 
+      // Call server address class for get the data from API
       IncomingService().getPurchaseOrderItem().then((value) {
         setState(() {
+          // Set variable to null to reset the value
           selectedVendor = null;
           selectedPo = null;
         });
+        // Navigate to different class
         Navigator.of(context).pushNamed(StmsRoutes.poItemList);
       });
     }

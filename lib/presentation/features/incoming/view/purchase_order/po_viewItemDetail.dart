@@ -20,7 +20,6 @@ import 'package:stms/presentation/widgets/independent/input_field.dart';
 import 'package:stms/presentation/widgets/independent/scaffold.dart';
 import 'package:stms/presentation/widgets/independent/style_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stms/presentation/widgets/independent/toast_dialog.dart';
 
 class PoItemDetails extends StatefulWidget {
   // final Function changeView;
@@ -32,16 +31,20 @@ class PoItemDetails extends StatefulWidget {
   _PoItemDetailsState createState() => _PoItemDetailsState();
 }
 
+// Detail item page once click manual scan for both serial number and not
 class _PoItemDetailsState extends State<PoItemDetails> {
   var getPurchaseOrderItem = IncomingService();
   var getCommonData = CommonService();
+  var selectedInvtry,
+      selectedVendorItem,
+      selectedItemSequence,
+      tracking;
 
   List<InventoryHive> inventoryList = [];
   List poItemList = [];
   List getAllPoNonItems = [];
   List getAllPoItems = [];
-  // String _scanBarcode = 'Unknown';
-  var selectedInvtry, selectedVendorItem, selectedItemSequence,tracking;
+
   final format = DateFormat("yyyy-MM-dd");
   final TextEditingController itemSNController = TextEditingController();
   final TextEditingController itemQtyController = TextEditingController();

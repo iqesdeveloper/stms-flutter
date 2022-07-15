@@ -251,15 +251,29 @@ class _PaivtItemDetailsState extends State<PaivtItemDetails> {
               List allDBValue = value;
               var itemTracking = allDBValue.firstWhereOrNull((element) =>
               element['item_inventory_id'] == itemAdjust.id);
-              var newQty = int.parse(itemQtyController.text) + int.parse(itemTracking['non_tracking_qty']);
 
-              DBPaivtNonItem()
-                  .update(itemAdjust.id, newQty.toString())
-                  .then((value) {
-                showCustomSuccess('Item Save');
-                Navigator.popUntil(
-                    context, ModalRoute.withName(StmsRoutes.paivtItemList));
-              });
+              if(itemTracking != null){
+                var newQty = int.parse(itemQtyController.text) + int.parse(itemTracking['non_tracking_qty']);
+
+                DBPaivtNonItem()
+                    .update(itemAdjust.id, newQty.toString())
+                    .then((value) {
+                  showCustomSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.paivtItemList));
+                });
+              } else {
+                DBPaivtNonItem()
+                    .createPaivtNonItem(PaivtNon(
+                  itemInvId: itemAdjust.id,
+                  nonTracking: itemQtyController.text,
+                ))
+                    .then((value) {
+                  showCustomSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.paivtItemList));
+                });
+              }
             }
           });
         }

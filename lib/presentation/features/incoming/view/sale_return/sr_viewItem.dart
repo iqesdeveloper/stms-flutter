@@ -268,17 +268,34 @@ class _SrItemDetailsState extends State<SrItemDetails> {
               });
             } else {
               List allDBValue = value;
+
               var itemTracking = allDBValue.firstWhereOrNull((element) =>
               element['item_inventory_id'] == itemAdjust.id);
-              var newQty = int.parse(itemQtyController.text) + int.parse(itemTracking['non_tracking_qty']);
 
-              DBSaleReturnNonItem()
-                  .update(itemAdjust.id, newQty.toString())
-                  .then((value) {
-                showCustomSuccess('Item Save');
-                Navigator.popUntil(
-                    context, ModalRoute.withName(StmsRoutes.srItemList));
-              });
+              if(itemTracking != null){
+                var newQty = int.parse(itemQtyController.text)
+                    + int.parse(itemTracking['non_tracking_qty']);
+
+                DBSaleReturnNonItem()
+                    .update(itemAdjust.id, newQty.toString())
+                    .then((value) {
+                  showCustomSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.srItemList));
+                });
+              } else {
+                DBSaleReturnNonItem()
+                    .createSrNonItem(SaleReturnNon(
+                  itemInvId: itemAdjust.id,
+                  nonTracking: itemQtyController.text,
+                ))
+                    .then((value) {
+                  // SuccessDialog.showSuccessDialog(context, 'Item Save');
+                  showCustomSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.srItemList));
+                });
+              }
             }
           });
         }
