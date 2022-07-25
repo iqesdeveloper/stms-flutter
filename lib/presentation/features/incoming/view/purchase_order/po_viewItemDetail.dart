@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:stms/config/routes.dart';
+import 'package:stms/config/storage.dart';
 import 'package:stms/data/api/models/incoming/po/po_non_model.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
 import 'package:stms/data/api/repositories/api_json/api_common.dart';
@@ -60,6 +61,11 @@ class _PoItemDetailsState extends State<PoItemDetails> {
     getCommon();
     getItemPo();
 
+    selectedInvtry = Storage().selectedInvId;
+    itemSelectedInventory.text = selectedInvtry;
+
+    selectedItemSequence = Storage().lineSeqNo;
+
     fToast = FToast();
     fToast.init(context);
   }
@@ -68,7 +74,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // serialNo = prefs.getString('itemBarcode')!;
 
-    selectedInvtry = prefs.getString('selectedIvID');
+    // selectedInvtry = prefs.getString('selectedIvID');
     selectedVendorItem = prefs.getString('vendorItemNo');
 
     if (tracking == "2") {
@@ -77,8 +83,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
       itemSNController.text = prefs.getString('itemBarcode')!;
     }
 
-    selectedItemSequence = prefs.getString('line_seq_no');
-    itemSelectedInventory.text = selectedInvtry;
+    // selectedItemSequence = prefs.getString('line_seq_no');
     tracking = prefs.getString('poTracking');
   }
 
@@ -246,8 +251,8 @@ class _PoItemDetailsState extends State<PoItemDetails> {
         var itemSequence = getAllPoItems.firstWhereOrNull((element) =>
         element['line_seq_no'] == selectedItemSequence);
 
-        print('ITEM ADJUST: $itemAdjust');
-        print('ITEM SEQUENCE: $itemSequence');
+        print('ITEM ADJUST1: $itemAdjust');
+        print('ITEM SEQUENCE1: $itemSequence');
 
         if(itemAdjust == null){} else {
           if(itemSequence == null){
@@ -259,12 +264,13 @@ class _PoItemDetailsState extends State<PoItemDetails> {
               itemSerialNo: itemSNController.text,
             ))
                 .then((value) {
-              // SuccessDialog.showSuccessDialog(context, 'Item Save');
               showCustomSuccess('Item Save');
               Navigator.popUntil(
                   context, ModalRoute.withName(StmsRoutes.poItemList));
             });
           } else {
+            print('ITEM ADJUST2: $itemAdjust');
+            print('ITEM SEQUENCE2: $itemSequence');
             if(itemSequence['line_seq_no'] == selectedItemSequence &&
                 itemSequence['item_serial_no'] == itemSNController.text &&
                 itemSequence['vendor_item_number'] == itemSNController.text){
@@ -279,7 +285,6 @@ class _PoItemDetailsState extends State<PoItemDetails> {
                 itemSerialNo: itemSNController.text,
               ))
                   .then((value) {
-                // SuccessDialog.showSuccessDialog(context, 'Item Save');
                 showCustomSuccess('Item Save');
                 Navigator.popUntil(
                     context, ModalRoute.withName(StmsRoutes.poItemList));

@@ -350,45 +350,49 @@ class _PoItemListViewState extends State<PoItemListView> {
                                         receiveQty = snapshot.data[index]['item_receive_qty'];
                                       }
 
-                                      // Method to get enter quantity
-                                      // Check if Serial Number or not
-                                      if(snapshot.data[index]['tracking_type'] == '2'){
-                                        // If Serial Number
-
-                                        // Compare value based on ID and line sequence
-                                        var entering = allPoItem.where((element) =>
-                                        element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                            && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
-
-                                        // Check if entering got value and allPoEmpty variable is not 0
-                                        if(allPoEmpty != '0'){
-                                          // If got value and allPoEmpty not 0
-                                          enterQty = entering.length.toString();
-                                        } else {
-                                          // If no value
-                                          enterQty = '0';
-                                        }
-                                      } else {
-                                        // If not Serial Number
-
-                                        // Compare value based on ID and line sequence
-                                        var entering = allPoNonItem.firstWhereOrNull((element) =>
-                                        element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
-                                            && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
-
-                                        // Check if entering got value and allPoNonEmpty variable is not 0
-                                        if(entering != null && allPoNonEmpty != '0'){
-                                          // If got value and allPoNonEmpty not 0
-                                          enterQty = entering['non_tracking_qty'];
-                                          print('ENT2: $entering');
-                                        } else {
-                                          // If no value
-                                          enterQty = '0';
-                                        }
-                                      }
+                                      // // Method to get enter quantity
+                                      // // Check if Serial Number or not
+                                      // if(snapshot.data[index]['tracking_type'] == '2'){
+                                      //   // If Serial Number
+                                      //
+                                      //   // Compare value based on ID and line sequence
+                                      //   var entering = allPoItem.where((element) =>
+                                      //   element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                      //       && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+                                      //
+                                      //   // Check if entering got value and allPoEmpty variable is not 0
+                                      //   if(allPoEmpty != '0'){
+                                      //     // If got value and allPoEmpty not 0
+                                      //     enterQty = entering.length.toString();
+                                      //   } else {
+                                      //     // If no value
+                                      //     enterQty = '0';
+                                      //   }
+                                      // } else {
+                                      //   // If not Serial Number
+                                      //
+                                      //   // Compare value based on ID and line sequence
+                                      //   var entering = allPoNonItem.firstWhereOrNull((element) =>
+                                      //   element['item_inventory_id'] == snapshot.data[index]['item_inventory_id']
+                                      //       && element['line_seq_no'] == snapshot.data[index]['line_seq_no']);
+                                      //
+                                      //   // Check if entering got value and allPoNonEmpty variable is not 0
+                                      //   if(entering != null && allPoNonEmpty != '0'){
+                                      //     // If got value and allPoNonEmpty not 0
+                                      //     enterQty = entering['non_tracking_qty'];
+                                      //     print('ENT2: $entering');
+                                      //   } else {
+                                      //     // If no value
+                                      //     enterQty = '0';
+                                      //   }
+                                      // }
 
                                       // Method to get balance quantity
-                                      var balQty = int.parse(snapshot.data[index]['item_quantity']) - int.parse(enterQty);
+                                      // var balQty = int.parse(snapshot.data[index]['item_quantity']) - int.parse(enterQty);
+
+                                      var balQty = int.parse(snapshot
+                                          .data[index]['item_quantity']) -
+                                          int.parse(receiveQty);
 
                                       // Table content
                                       return Material(
@@ -444,15 +448,15 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                   child: Stack(
                                                     children: [
                                                       // Enter Quantity text
-                                                      Center(
-                                                        child: Text(
-                                                          "$enterQty",
-                                                          style: TextStyle(
-                                                              fontSize: 16.0),
-                                                          textAlign: TextAlign.center,
-                                                        ),
-                                                      ),
-                                                      /*
+                                                      // Center(
+                                                      //   child: Text(
+                                                      //     "$enterQty",
+                                                      //     style: TextStyle(
+                                                      //         fontSize: 16.0),
+                                                      //     textAlign: TextAlign.center,
+                                                      //   ),
+                                                      // ),
+
                                                       Center(
                                                         child:
                                                         // For AllPoItem
@@ -510,7 +514,7 @@ class _PoItemListViewState extends State<PoItemListView> {
                                                           textAlign: TextAlign.center,
                                                         ),
                                                       ),
-                                                      */
+
                                                       // Reset Icon
                                                       SingleChildScrollView(
                                                         child: Column(
@@ -594,7 +598,8 @@ class _PoItemListViewState extends State<PoItemListView> {
 
                                                           // save selected item_inventory id
                                                           selectedItem = snapshot.data[index]['item_name'];
-                                                          prefs.setString('selectedIvID', selectedItem);
+                                                          // prefs.setString('selectedIvID', selectedItem);
+                                                          Storage().selectedInvId = selectedItem;
 
                                                           // Save selected vendor item no
                                                           selectedVendorItem = snapshot.data[index]['vendor_item_number'];
@@ -602,7 +607,8 @@ class _PoItemListViewState extends State<PoItemListView> {
 
                                                           // Save selected item sequence no
                                                           selectedItemSequence = snapshot.data[index]['line_seq_no'];
-                                                          prefs.setString('line_seq_no', selectedItemSequence);
+                                                          // prefs.setString('line_seq_no', selectedItemSequence);
+                                                          Storage().lineSeqNo = selectedItemSequence;
 
                                                           // Save selected tracking no
                                                           prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
@@ -646,7 +652,8 @@ class _PoItemListViewState extends State<PoItemListView> {
 
                                                           // Save selected item_inventory id
                                                           selectedItem = snapshot.data[index]['item_name'];
-                                                          prefs.setString('selectedIvID', selectedItem);
+                                                          // prefs.setString('selectedIvID', selectedItem);
+                                                          Storage().selectedInvId = selectedItem;
 
                                                           // Save selected vendor item no
                                                           selectedVendorItem = snapshot.data[index]['vendor_item_number'];
@@ -654,7 +661,8 @@ class _PoItemListViewState extends State<PoItemListView> {
 
                                                           // Save selected item sequence no
                                                           selectedItemSequence = snapshot.data[index]['line_seq_no'];
-                                                          prefs.setString('line_seq_no', selectedItemSequence);
+                                                          // prefs.setString('line_seq_no', selectedItemSequence);
+                                                          Storage().lineSeqNo = selectedItemSequence;
 
                                                           // Save selected tracking no
                                                           prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
@@ -707,7 +715,8 @@ class _PoItemListViewState extends State<PoItemListView> {
 
                                                               // Save selected item_inventory id
                                                               selectedItem = snapshot.data[index]['item_name'];
-                                                              prefs.setString('selectedIvID', selectedItem);
+                                                              // prefs.setString('selectedIvID', selectedItem);
+                                                              Storage().selectedInvId = selectedItem;
 
                                                               // Save selected vendor number
                                                               selectedVendorItem = snapshot.data[index]['vendor_item_number'];
@@ -715,7 +724,8 @@ class _PoItemListViewState extends State<PoItemListView> {
 
                                                               // Save selected item sequence no
                                                               selectedItemSequence = snapshot.data[index]['line_seq_no'];
-                                                              prefs.setString('line_seq_no', selectedItemSequence);
+                                                              // prefs.setString('line_seq_no', selectedItemSequence);
+                                                              Storage().lineSeqNo = selectedItemSequence;
 
                                                               // Set variable tracking and typeScan as tracking type
                                                               prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
@@ -787,7 +797,8 @@ class _PoItemListViewState extends State<PoItemListView> {
 
                                                           // save selected item_inventory id
                                                           selectedItem = snapshot.data[index]['item_name'];
-                                                          prefs.setString('selectedIvID', selectedItem);
+                                                          // prefs.setString('selectedIvID', selectedItem);
+                                                          Storage().selectedInvId = selectedItem;
 
                                                           // Save selected vendor item no
                                                           selectedVendorItem = snapshot.data[index]['vendor_item_number'];
@@ -795,7 +806,8 @@ class _PoItemListViewState extends State<PoItemListView> {
 
                                                           // Save selected item sequence no
                                                           selectedItemSequence = snapshot.data[index]['line_seq_no'];
-                                                          prefs.setString('line_seq_no', selectedItemSequence);
+                                                          // prefs.setString('line_seq_no', selectedItemSequence);
+                                                          Storage().lineSeqNo = selectedItemSequence;
 
                                                           // Set variable tracking and typeScan as tracking type
                                                           prefs.setString('poTracking', snapshot.data[index]['tracking_type']);
@@ -1166,7 +1178,8 @@ class _PoItemListViewState extends State<PoItemListView> {
       } else {
         // If fot value
         var nonTrackingType = prefs.getString('nontypeScan');
-       prefs.setString('selectedIvID', selectedItem);
+       // prefs.setString('selectedIvID', selectedItem);
+        Storage().selectedInvId = selectedItem;
 
         print("selectedItem: $selectedItem");
 
@@ -1261,7 +1274,8 @@ class _PoItemListViewState extends State<PoItemListView> {
       } else {
         // If got value
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedIvID', selectedItem);
+        // prefs.setString('selectedIvID', selectedItem);
+        Storage().selectedInvId = selectedItem;
 
         // Check the type of scan
         if (nonTrackingType == 'scan') {
@@ -1481,6 +1495,8 @@ class _PoItemListViewState extends State<PoItemListView> {
         // Upload only poItem
         combineUpdated = poSerial;
       }
+
+      print('Value: $combineUpdated');
 
       // Get value from API
       IncomingService().sendToServer(combineUpdated).then((value) {

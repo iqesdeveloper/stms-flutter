@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:stms/config/routes.dart';
+import 'package:stms/config/storage.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
 import 'package:stms/data/api/models/outgoing/si/si_model.dart';
 import 'package:stms/data/api/models/outgoing/si/si_non_model.dart';
@@ -57,6 +58,8 @@ class _SiItemDetailsState extends State<SiItemDetails> {
     getCommon();
     getItemSi();
 
+    selectedInvtry = Storage().selectedInvId;
+
     fToast = FToast();
     fToast.init(context);
   }
@@ -65,11 +68,9 @@ class _SiItemDetailsState extends State<SiItemDetails> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // serialNo = prefs.getString('itemBarcode')!;
 
-    selectedInvtry = prefs.getString('selectedSiID');
+    // selectedInvtry = prefs.getString('selectedSiID');
 
-    if (tracking == "2") {
-      itemSNController.text = prefs.getString('itemBarcode')!;
-    } else {
+    if (prefs.getString('itemBarcode') != null) {
       itemSNController.text = prefs.getString('itemBarcode')!;
     }
 

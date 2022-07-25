@@ -1,13 +1,11 @@
 class ServerAddressesProd {
   static const serverAddress = 'https://stmsdev.iqes.com.my';
-  // 'https://stmstmse.tms.iqes.com.my'; // tmse-stms
-  // 'https://stmsent.tms.iqes.com.my'; // ent-stms
-  // 'https://stmstms.tms.iqes.com.my'; // tms-stms
-  // 'http://stmskj.tms.iqes.com.my'; //production
-  // 'http://stmsuat2.iqes.com.my';
-  // 'http://stmsuat1.iqes.com.my';
-  // 'http://stmsdev.iqes.com.my'; //testing // com.stms.stms
-  // https://stmskj.tms.iqes.com.my //com.stms.stmskj
+  // 'https://stmsuat1.iqes.com.my'; // uat1
+  // 'https://stmsent.tms.iqes.com.my'; // ent
+  // 'https://stmstms.tms.iqes.com.my'; // tms
+  // 'https://stmstmse.tms.iqes.com.my'; // tmse
+  // 'https://stmskj.tms.iqes.com.my';  // kjstms
+  // 'https://stmsdev.iqes.com.my'; //testing // com.stms.stms
 
   static const register = '/api/register';
   static const login = '/api/login';

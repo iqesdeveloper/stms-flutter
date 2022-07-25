@@ -96,12 +96,23 @@ class DBPoNonItem {
     return null;
   }
 
+  // // Get data in []
+  // Future<dynamic> getUpload() async {
+  //   final db = await database;
+  //   var results = await db.rawQuery(
+  //       'SELECT item_inventory_id, vendor_item_number, non_tracking_qty FROM poNonItem'
+  //   );
+  //   if (results.length > 0) {
+  //     return results;
+  //   }
+  //
+  //   return null;
+  // }
+
   // Get data in []
   Future<dynamic> getUpload() async {
     final db = await database;
-    var results = await db.rawQuery(
-        'SELECT item_inventory_id, vendor_item_number, non_tracking_qty FROM poNonItem'
-    );
+    var results = await db.rawQuery('SELECT * FROM poNonItem');
     if (results.length > 0) {
       return results;
     }

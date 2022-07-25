@@ -489,7 +489,8 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                             : serialList = [];
 
                                                         selectedItem = snapshot.data[index]['item_name'];
-                                                        prefs.setString('selectedSrID', selectedItem);
+                                                        // prefs.setString('selectedSrID', selectedItem);
+                                                        Storage().selectedInvId = selectedItem;
 
                                                         prefs.setString(
                                                             'srTracking',
@@ -553,7 +554,8 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                                               'serial_list']));
 
                                                                   selectedItem = snapshot.data[index]['item_name'];
-                                                                  prefs.setString('selectedSrID', selectedItem);
+                                                                  // prefs.setString('selectedSrID', selectedItem);
+                                                                  Storage().selectedInvId = selectedItem;
 
                                                                   prefs.setString(
                                                                       'srTracking',
@@ -659,9 +661,8 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                                           index]
                                                                       [
                                                                       'item_name'];
-                                                              prefs.setString(
-                                                                  'selectedSrID',
-                                                                  selectedItem);
+                                                              // prefs.setString('selectedSrID', selectedItem);
+                                                              Storage().selectedInvId = selectedItem;
 
                                                               prefs.setString(
                                                                   'srTracking',
@@ -954,7 +955,8 @@ class _SrItemListViewState extends State<SrItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedSrID', selectedItem);
+        // prefs.setString('selectedSrID', selectedItem);
+        Storage().selectedInvId = selectedItem;
 
         if (nonTrackingType == 'scan') {
           DBSaleReturnNonItem().getSrNonItem(itemSku.id).then((value) {
@@ -1020,7 +1022,8 @@ class _SrItemListViewState extends State<SrItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedSrID', selectedItem);
+        // prefs.setString('selectedSrID', selectedItem);
+        Storage().selectedInvId = selectedItem;
 
         if (nonTrackingType == 'scan') {
           DBSaleReturnNonItem().getSrNonItem(itemUpc.id).then((value) {

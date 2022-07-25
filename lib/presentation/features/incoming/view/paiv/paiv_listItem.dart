@@ -488,7 +488,8 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                                 .getInstance();
 
                                                         selectedItem = snapshot.data[index]['item_name'];
-                                                        prefs.setString('selectedPaIvID', selectedItem);
+                                                        // prefs.setString('selectedPaIvID', selectedItem);
+                                                        Storage().selectedInvId = selectedItem;
 
                                                         prefs.setString('paivTracking', snapshot.data[index]['tracking_type']);
                                                         var tracking = snapshot.data[index]['tracking_type'];
@@ -544,7 +545,8 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                                   prefs.setString('paiv_serialList', json.encode(snapshot.data[index]['serial_list']));
 
                                                                   selectedItem = snapshot.data[index]['item_name'];
-                                                                  prefs.setString('selectedPaIvID', selectedItem);
+                                                                  // prefs.setString('selectedPaIvID', selectedItem);
+                                                                  Storage().selectedInvId = selectedItem;
 
                                                                   prefs.setString('paivTracking', snapshot.data[index]['tracking_type']);
                                                                   var tracking = snapshot.data[index]['tracking_type'];
@@ -620,7 +622,8 @@ class _PaivItemListViewState extends State<PaivItemListView> {
                                                                   await SharedPreferences.getInstance();
 
                                                               selectedItem = snapshot.data[index]['item_name'];
-                                                              prefs.setString('selectedPaIvID', selectedItem);
+                                                              // prefs.setString('selectedPaIvID', selectedItem);
+                                                              Storage().selectedInvId = selectedItem;
 
                                                               prefs.setString('paivTracking', snapshot.data[index]['tracking_type']);
                                                               var tracking = snapshot.data[index]['tracking_type'];
@@ -912,7 +915,8 @@ class _PaivItemListViewState extends State<PaivItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedPaIvID', selectedItem);
+        // prefs.setString('selectedPaIvID', selectedItem);
+        Storage().selectedInvId = selectedItem;
 
         if (nonTrackingType == 'scan') {
           DBPaivNonItem().getPaivNonItem(itemSku.id).then((value) {
@@ -981,7 +985,8 @@ class _PaivItemListViewState extends State<PaivItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedPaIvID', selectedItem);
+        // prefs.setString('selectedPaIvID', selectedItem);
+        Storage().selectedInvId = selectedItem;
 
         if (nonTrackingType == 'scan') {
           DBPaivNonItem().getPaivNonItem(itemSku.id).then((value) {

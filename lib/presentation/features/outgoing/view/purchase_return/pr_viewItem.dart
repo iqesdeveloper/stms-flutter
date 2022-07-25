@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:stms/config/routes.dart';
+import 'package:stms/config/storage.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
 import 'package:stms/data/api/models/outgoing/pr/pr_model.dart';
 import 'package:stms/data/api/models/outgoing/pr/pr_non_model.dart';
@@ -57,6 +58,8 @@ class _PrItemDetailsState extends State<PrItemDetails> {
     getCommon();
     getItemPr();
 
+    selectedInvtry = Storage().selectedInvId;
+
     fToast = FToast();
     fToast.init(context);
   }
@@ -65,16 +68,14 @@ class _PrItemDetailsState extends State<PrItemDetails> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // serialNo = prefs.getString('itemBarcode')!;
 
-    selectedInvtry = prefs.getString('selectedPrID');
-    print('selected inv id pr: $selectedInvtry');
+    // selectedInvtry = prefs.getString('selectedPrID');
 
-    if (tracking == "2") {
-      itemSNController.text = prefs.getString('itemBarcode')!;
-    } else {
+    if (prefs.getString('itemBarcode') != null) {
       itemSNController.text = prefs.getString('itemBarcode')!;
     }
 
     itemSelectedInventory.text = selectedInvtry;
+
     tracking = prefs.getString('prTracking');
   }
 

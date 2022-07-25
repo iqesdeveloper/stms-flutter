@@ -488,9 +488,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                                         selectedItem = snapshot
                                                                 .data[index][
                                                             'item_name'];
-                                                        prefs.setString(
-                                                            'selectedPaivtID',
-                                                            selectedItem);
+                                                        // prefs.setString('selectedPaivtID', selectedItem);
+                                                        Storage().selectedInvId = selectedItem;
 
                                                         prefs.setString(
                                                             'paivtTracking',
@@ -558,9 +557,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                                                               index]
                                                                           [
                                                                           'item_name'];
-                                                                  prefs.setString(
-                                                                      'selectedPaivtID',
-                                                                      selectedItem);
+                                                                  // prefs.setString('selectedPaivtID', selectedItem);
+                                                                  Storage().selectedInvId = selectedItem;
 
                                                                   prefs.setString(
                                                                       'paivtTracking',
@@ -668,7 +666,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
                                                                           index]
                                                                       [
                                                                       'item_name'];
-                                                              prefs.setString('selectedPaivtID', selectedItem);
+                                                              // prefs.setString('selectedPaivtID', selectedItem);
+                                                              Storage().selectedInvId = selectedItem;
 
                                                               prefs.setString(
                                                                   'paivtTracking',
@@ -961,7 +960,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedPaivtID', selectedItem);
+        // prefs.setString('selectedPaivtID', selectedItem);
+        Storage().selectedInvId = selectedItem;
 
         if (nonTrackingType == 'scan') {
           DBPaivtNonItem().getPaivtNonItem(itemSku.id).then((value) {
@@ -1027,7 +1027,8 @@ class _PaivtItemListViewState extends State<PaivtItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedPaivtID', selectedItem);
+        // prefs.setString('selectedPaivtID', selectedItem);
+        Storage().selectedInvId = selectedItem;
 
         if (nonTrackingType == 'scan') {
           DBPaivtNonItem().getPaivtNonItem(itemUpc.id).then((value) {

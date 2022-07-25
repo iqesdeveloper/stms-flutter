@@ -471,7 +471,8 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                             ? serialList = snapshot.data[index]['serial_list'] : serialList = [];
 
                                                         selectedItem = snapshot.data[index]['item_name'];
-                                                        prefs.setString('selectedPrID', selectedItem);
+                                                        // prefs.setString('selectedPrID', selectedItem);
+                                                        Storage().selectedInvId = selectedItem;
 
                                                         prefs.setString('prTracking', snapshot.data[index]['tracking_type']);
                                                         var tracking = snapshot.data[index]['tracking_type'];
@@ -520,7 +521,8 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                                       json.encode(snapshot.data[index]['serial_list']));
 
                                                                   selectedItem = snapshot.data[index]['item_name'];
-                                                                  prefs.setString('selectedPrID', selectedItem);
+                                                                  // prefs.setString('selectedPrID', selectedItem);
+                                                                  Storage().selectedInvId = selectedItem;
 
                                                                   prefs.setString('prTracking', snapshot.data[index]['tracking_type']);
                                                                   var tracking = snapshot.data[index]['tracking_type'];
@@ -596,7 +598,8 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                                   ? serialList = snapshot.data[index]['serial_list'] : serialList = [];
 
                                                               selectedItem = snapshot.data[index]['item_name'];
-                                                              prefs.setString('selectedPrID', selectedItem);
+                                                              // prefs.setString('selectedPrID', selectedItem);
+                                                              Storage().selectedInvId = selectedItem;
 
                                                               prefs.setString('prTracking', snapshot.data[index]['tracking_type']);
                                                               var tracking = snapshot.data[index]['tracking_type'];
@@ -877,7 +880,8 @@ class _PrItemListViewState extends State<PrItemListView> {
             context, 'SKU not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedPrID', selectedItem);
+       // prefs.setString('selectedPrID', selectedItem);
+        Storage().selectedInvId = selectedItem;
 
         if (nonTrackingType == 'scan') {
           DBPurchaseReturnNonItem().getPrNonItem(itemSku.id).then((value) {
@@ -943,7 +947,8 @@ class _PrItemListViewState extends State<PrItemListView> {
             context, 'UPC not match with master inventory');
       } else {
         var nonTrackingType = prefs.getString('nontypeScan');
-        prefs.setString('selectedPrID', selectedItem);
+        // prefs.setString('selectedPrID', selectedItem);
+        Storage().selectedInvId = selectedItem;
 
         if (nonTrackingType == 'scan') {
           DBPurchaseReturnNonItem().getPrNonItem(itemUpc.id).then((value) {

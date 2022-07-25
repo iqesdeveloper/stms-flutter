@@ -15,6 +15,8 @@ class Storage {
   String transfer = '';
   String vendor = '';
   String typeScan = '';
+  String selectedInvId = '';
+  String lineSeqNo = '';
 
   // Write value
   // await secureStorage.write(key: key, value: value);

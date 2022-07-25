@@ -2,7 +2,7 @@
     package="com.stms.stms"> <!--com.stms.stms-->
     <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="STMS"
+        android:label="TEST STMS"
         android:icon="@mipmap/launcher_icon"
        android:allowBackup="false">
         <activity

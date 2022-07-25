@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:stms/config/routes.dart';
+import 'package:stms/config/storage.dart';
 import 'package:stms/data/api/models/incoming/paiv/paiv_model.dart';
 import 'package:stms/data/api/models/incoming/paiv/paiv_non_model.dart';
 import 'package:stms/data/api/models/master/inventory_hive_model.dart';
@@ -60,6 +61,8 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
     getCommon();
     getItemPaiv();
 
+    selectedInvtry = Storage().selectedInvId;
+
     fToast = FToast();
     fToast.init(context);
   }
@@ -68,11 +71,9 @@ class _PaivItemDetailsState extends State<PaivItemDetails> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // serialNo = prefs.getString('itemBarcode')!;
     // await Future.delayed(const Duration(seconds: 1));
-    selectedInvtry = prefs.getString('selectedPaIvID');
+    // selectedInvtry = prefs.getString('selectedPaIvID');
 
-    if (tracking == "2") {
-      itemSNController.text = prefs.getString('itemBarcode')!;
-    } else {
+    if (prefs.getString('itemBarcode') != null) {
       itemSNController.text = prefs.getString('itemBarcode')!;
     }
 
