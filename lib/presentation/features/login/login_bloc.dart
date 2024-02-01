@@ -13,13 +13,18 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({
     required this.userRepository,
     required this.authenticationBloc,
-  }) : super(LoginInitial());
+  }) : super(LoginInitial()) {
+    on<LoginEvent>((event, emit) async {
+      await mapEventToState(event, emit);
+    });
+
+  }
 
   @override
-  Stream<LoginState> mapEventToState(LoginEvent event) async* {
+  Future<void> mapEventToState(event, Emitter<LoginState> emit) async {
     // normal log in
     if (event is LoginPressed) {
-      yield LoginProcessing();
+      emit(LoginProcessing());
       try {
         // var pushToken =
         //     await Storage().secureStorage.read(key: 'push_token') ?? '';
@@ -41,12 +46,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         //   pushToken: pushToken,
         // );
         authenticationBloc.add(AuthenticationLoggedIn(token: token));
-        yield LoginFinished();
+        emit (LoginFinished());
       } catch (error) {
         if (!(error is String)) {
-          yield LoginError(error.toString());
+          emit(LoginError(error.toString()));
         } else {
-          yield LoginError(error);
+          emit(LoginError(error));
         }
       }
     }

@@ -153,7 +153,7 @@ class _CountItemListViewState extends State<CountItemListView> {
                   Container(
                     height: height * 0.65,
                     child: Scrollbar(
-                      isAlwaysShown: true,
+                      thumbVisibility: true,
                       thickness: 5,
                       interactive: true,
                       child: ListView(

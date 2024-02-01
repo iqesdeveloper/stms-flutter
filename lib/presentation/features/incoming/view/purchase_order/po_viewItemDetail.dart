@@ -45,6 +45,7 @@ class _PoItemDetailsState extends State<PoItemDetails> {
   List poItemList = [];
   List getAllPoNonItems = [];
   List getAllPoItems = [];
+  List allPOFromAPI = [];
 
   final format = DateFormat("yyyy-MM-dd");
   final TextEditingController itemSNController = TextEditingController();
@@ -85,6 +86,12 @@ class _PoItemDetailsState extends State<PoItemDetails> {
 
     // selectedItemSequence = prefs.getString('line_seq_no');
     tracking = prefs.getString('poTracking');
+
+    getPurchaseOrderItem.getPurchaseOrderItem().then((value) {
+      setState(() {
+        allPOFromAPI = value;                                 // Get supplier_name API into supplier variable
+      });
+    });
   }
 
   getCommon() {
@@ -251,10 +258,20 @@ class _PoItemDetailsState extends State<PoItemDetails> {
         var itemSequence = getAllPoItems.firstWhereOrNull((element) =>
         element['line_seq_no'] == selectedItemSequence);
 
-        print('ITEM ADJUST1: $itemAdjust');
-        print('ITEM SEQUENCE1: $itemSequence');
-
         if(itemAdjust == null){} else {
+          // Compare similar data base on Serial Number and line sequence
+          var itemNumber = getAllPoItems.where((element) =>
+          element['line_seq_no'] == selectedItemSequence && element['item_inventory_id'] == itemAdjust.id);
+
+          var entQty = int.parse(itemNumber.length.toString())+1;
+          var itemFromAPI = allPOFromAPI.firstWhereOrNull(
+                  (element) => element['line_seq_no'] == selectedItemSequence);
+
+          print('ITEM SEQUENCE1: $itemNumber');
+          print('ITEM SEQUENCE2: ${itemNumber.length}');
+          print('ITEM PO2: $itemFromAPI');
+          print('ITEM ENTQTY: $entQty');
+
           if(itemSequence == null){
             DBPoItem()
                 .createPoItem(PoItem(
@@ -269,26 +286,34 @@ class _PoItemDetailsState extends State<PoItemDetails> {
                   context, ModalRoute.withName(StmsRoutes.poItemList));
             });
           } else {
-            print('ITEM ADJUST2: $itemAdjust');
-            print('ITEM SEQUENCE2: $itemSequence');
-            if(itemSequence['line_seq_no'] == selectedItemSequence &&
-                itemSequence['item_serial_no'] == itemSNController.text &&
-                itemSequence['vendor_item_number'] == itemSNController.text){
-              ErrorDialog.showErrorDialog(
-                  context, 'Similar Serial Number present');
+
+            // check if ENT Qty > PO Qty
+            if(entQty > int.parse(itemFromAPI['item_quantity'])){
+              print('ERROR: TO MANY QUANTITY SCAN');
+              ErrorDialog.showErrorDialog(context, 'Serial No ENT quantity exceed PO quantity.');
             } else {
-              DBPoItem()
-                  .createPoItem(PoItem(
-                itemInvId: itemAdjust.id,
-                vendorItemNo: selectedVendorItem,
-                itemSequence: selectedItemSequence,
-                itemSerialNo: itemSNController.text,
-              ))
-                  .then((value) {
-                showCustomSuccess('Item Save');
-                Navigator.popUntil(
-                    context, ModalRoute.withName(StmsRoutes.poItemList));
-              });
+              // Check if line sequence number is the same
+              if(itemSequence['line_seq_no'] == selectedItemSequence &&
+                  itemSequence['item_serial_no'] == itemSNController.text &&
+                  itemSequence['vendor_item_number'] == itemSNController.text){
+                // If same line sequence number
+                ErrorDialog.showErrorDialog(
+                    context, 'Similar Serial Number present');
+              } else {
+                // If not the same
+                DBPoItem()
+                    .createPoItem(PoItem(
+                  itemInvId: itemAdjust.id,
+                  vendorItemNo: selectedVendorItem,
+                  itemSequence: selectedItemSequence,
+                  itemSerialNo: itemSNController.text,
+                ))
+                    .then((value) {
+                  showCustomSuccess('Item Save');
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(StmsRoutes.poItemList));
+                });
+              }
             }
           }
         }

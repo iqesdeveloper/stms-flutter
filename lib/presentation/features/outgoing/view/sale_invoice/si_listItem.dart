@@ -69,6 +69,7 @@ class _SiItemListViewState extends State<SiItemListView> {
       allSiEmpty,
       allSiNonEmpty,
       combineUpdated,
+      receiveQty,
       itemName,
       locationId;
 
@@ -269,6 +270,15 @@ class _SiItemListViewState extends State<SiItemListView> {
                                   itemCount: snapshot.data.length,
                                   itemBuilder:
                                       (BuildContext context, int index) {
+                                    if(snapshot.data[index]['item_receive_qty']?.isEmpty ?? true){
+                                      // If no data
+                                      receiveQty = '0';
+                                    } else {
+                                      receiveQty = snapshot.data[index]['item_receive_qty'];
+                                    }
+
+                                    var balQty = int.parse(snapshot.data[index]['item_quantity']) - int.parse(receiveQty);
+
                                     return Material(
                                       // color: index % 2 == 0 ? Colors.white : Colors.grey[400],
                                       child: Table(
@@ -291,22 +301,13 @@ class _SiItemListViewState extends State<SiItemListView> {
                                             children: [
                                               Container(
                                                 height: 50,
-                                                padding: EdgeInsets.fromLTRB(
-                                                    2, 0, 0, 0),
-                                                child: snapshot.data[index]
-                                                            ['tracking_type'] ==
-                                                        "2"
+                                                padding: EdgeInsets.fromLTRB(2, 0, 0, 0),
+                                                child: snapshot.data[index]['tracking_type'] == "2"
                                                     ? IconButton(
-                                                        padding:
-                                                            EdgeInsets.all(0),
+                                                        padding: EdgeInsets.all(0),
                                                         onPressed: () {
-                                                          SerialDialog
-                                                              .showSerialDialog(
-                                                                  context,
-                                                                  snapshot.data[
-                                                                          index]
-                                                                      [
-                                                                      'serial_list']);
+                                                          SerialDialog.showSerialDialog(context,
+                                                                  snapshot.data[index]['serial_list']);
                                                         },
                                                         icon: Icon(
                                                           Icons.search,
@@ -432,24 +433,19 @@ class _SiItemListViewState extends State<SiItemListView> {
                                                       backgroundColor:
                                                           Colors.blueAccent,
                                                       textColor: Colors.white,
-                                                      onPressed: () async {
-                                                        SharedPreferences
-                                                            prefs =
-                                                            await SharedPreferences
-                                                                .getInstance();
+                                                      // add BAL QTY Checking this section like in PO
+                                                      onPressed: balQty == 0 || balQty < 0 ? () {
+                                                        // If no value
+                                                        ErrorDialog.showErrorDialog(context,
+                                                            '${snapshot.data[index]['item_name']} is already received all qty.');}
+                                                      : () async {
+                                                        SharedPreferences prefs = await SharedPreferences.getInstance();
 
-                                                        snapshot.data[index][
-                                                                    'tracking_type'] ==
-                                                                "2"
+                                                        snapshot.data[index]['tracking_type'] == "2"
                                                             ? serialList =
-                                                                snapshot.data[
-                                                                        index][
-                                                                    'serial_list']
-                                                            : serialList = [];
+                                                                snapshot.data[index]['serial_list'] : serialList = [];
 
-                                                        selectedItem = snapshot
-                                                                .data[index][
-                                                            'item_name'];
+                                                        selectedItem = snapshot.data[index]['item_name'];
                                                         // prefs.setString('selectedSiID', selectedItem);
                                                         Storage().selectedInvId = selectedItem;
 
@@ -481,9 +477,7 @@ class _SiItemListViewState extends State<SiItemListView> {
                                                       },
                                                     ),
                                                   ),
-                                                  snapshot.data[index][
-                                                              'tracking_type'] ==
-                                                          "2"
+                                                  snapshot.data[index]['tracking_type'] == "2"
                                                       ? Column(
                                                           children: [
                                                             Container(
@@ -500,51 +494,30 @@ class _SiItemListViewState extends State<SiItemListView> {
                                                                       height *
                                                                           0.05),
                                                                 ),
-                                                                onPressed:
-                                                                    () async {
-                                                                  SharedPreferences
-                                                                      prefs =
-                                                                      await SharedPreferences
-                                                                          .getInstance();
+                                                                onPressed: balQty == 0 || balQty < 0 ? () {
+                                                                  // If no value
+                                                                  ErrorDialog.showErrorDialog(
+                                                                      context,
+                                                                      '${snapshot.data[index]['item_name']} is already received all qty.');
+                                                                } : () async {
+                                                                  SharedPreferences prefs = await SharedPreferences.getInstance();
 
-                                                                  prefs.setString(
-                                                                      'si_serialList',
-                                                                      json.encode(
-                                                                          snapshot.data[index]
-                                                                              [
-                                                                              'serial_list']));
+                                                                  prefs.setString('si_serialList',
+                                                                      json.encode(snapshot.data[index]['serial_list']));
 
-                                                                  selectedItem =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'item_name'];
+                                                                  selectedItem = snapshot.data[index]['item_name'];
                                                                   // prefs.setString('selectedSiID', selectedItem);
                                                                   Storage().selectedInvId = selectedItem;
 
-                                                                  prefs.setString(
-                                                                      'siTracking',
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'tracking_type']);
+                                                                  prefs.setString('siTracking',
+                                                                      snapshot.data[index]['tracking_type']);
                                                                   var tracking =
-                                                                      snapshot.data[
-                                                                              index]
-                                                                          [
-                                                                          'tracking_type'];
+                                                                      snapshot.data[index]['tracking_type'];
 
-                                                                  var typeScan =
-                                                                      'manual';
-                                                                  itemName = snapshot
-                                                                              .data[
-                                                                          index]
-                                                                      [
-                                                                      'item_name'];
+                                                                  var typeScan = 'manual';
+                                                                  itemName = snapshot.data[index]['item_name'];
 
-                                                                  checkLocation(
-                                                                      tracking,
-                                                                      typeScan);
+                                                                  checkLocation(tracking, typeScan);
                                                                 },
                                                                 child: Text(
                                                                   'MANUAL',
@@ -603,17 +576,18 @@ class _SiItemListViewState extends State<SiItemListView> {
                                                                   height *
                                                                       0.05),
                                                             ),
-                                                            onPressed:
-                                                                () async {
+                                                            onPressed: balQty == 0 || balQty < 0 ? () {
+                                                              // If no value
+                                                              ErrorDialog.showErrorDialog(
+                                                                  context,
+                                                                  '${snapshot.data[index]['item_name']} is already received all qty.');
+                                                            } : () async {
                                                               SharedPreferences
                                                                   prefs =
                                                                   await SharedPreferences
                                                                       .getInstance();
 
-                                                              snapshot.data[index]
-                                                                          [
-                                                                          'tracking_type'] ==
-                                                                      "2"
+                                                              snapshot.data[index]['tracking_type'] == "2"
                                                                   ? serialList =
                                                                       snapshot.data[
                                                                               index]

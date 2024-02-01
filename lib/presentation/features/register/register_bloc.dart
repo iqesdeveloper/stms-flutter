@@ -10,15 +10,19 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
 
   RegisterBloc({
     required this.licenseRepository,
-  }) : super(RegisterInitial());
+  }) : super(RegisterInitial()){
+    on<RegisterEvent>((event, emit) async {
+      await mapEventToState(event, emit);
+    });
+  }
 
   @override
-  Stream<RegisterState> mapEventToState(
-    RegisterEvent event,
-  ) async* {
+  Future<void> mapEventToState(
+    event, Emitter<RegisterState> emit,
+  ) async {
     // normal register
     if (event is RegisterPressed) {
-      yield RegisterProcessing();
+      emit (RegisterProcessing());
       try {
         final license = await licenseRepository.register(
           license: event.license,
@@ -29,12 +33,12 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         //     .write(key: 'license_key', value: event.license);
 
         Storage().license = license;
-        yield RegisterSuccess();
+        emit (RegisterSuccess());
       } catch (error) {
         if (error is String) {
-          yield RegisterError(error);
+          emit (RegisterError(error));
         } else {
-          yield RegisterError(error.toString());
+          emit (RegisterError(error.toString()));
         }
       }
     }

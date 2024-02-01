@@ -68,6 +68,7 @@ class _PrItemListViewState extends State<PrItemListView> {
       allPrEmpty,
       allPrNonEmpty,
       combineUpdated,
+      receiveQty,
       itemName,
       locationId;
 
@@ -262,6 +263,15 @@ class _PrItemListViewState extends State<PrItemListView> {
                                   itemCount: snapshot.data.length,
                                   itemBuilder:
                                       (BuildContext context, int index) {
+
+                                    if(snapshot.data[index]['item_receive_qty']?.isEmpty ?? true){
+                                      // If no data
+                                      receiveQty = '0';
+                                    } else {
+                                      receiveQty = snapshot.data[index]['item_receive_qty'];
+                                    }
+
+                                    var balQty = int.parse(snapshot.data[index]['item_quantity']) - int.parse(receiveQty);
                                     return Material(
                                       // color: index % 2 == 0 ? Colors.white : Colors.grey[400],
                                       child: Table(
@@ -464,7 +474,11 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                       backgroundColor:
                                                           Colors.blueAccent,
                                                       textColor: Colors.white,
-                                                      onPressed: () async {
+                                                      onPressed: balQty == 0 || balQty < 0 ? () {
+                                                        // If no value
+                                                        ErrorDialog.showErrorDialog(context,
+                                                            '${snapshot.data[index]['item_name']} is already received all qty.');}
+                                                          : () async {
                                                         SharedPreferences prefs = await SharedPreferences.getInstance();
 
                                                         snapshot.data[index]['tracking_type'] == "2"
@@ -513,8 +527,11 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                                       height *
                                                                           0.05),
                                                                 ),
-                                                                onPressed:
-                                                                    () async {
+                                                                onPressed: balQty == 0 || balQty < 0 ? () {
+                                                                  // If no value
+                                                                  ErrorDialog.showErrorDialog(context,
+                                                                      '${snapshot.data[index]['item_name']} is already received all qty.');}
+                                                                    : () async {
                                                                   SharedPreferences prefs = await SharedPreferences.getInstance();
 
                                                                   prefs.setString('pr_serialList',
@@ -590,8 +607,11 @@ class _PrItemListViewState extends State<PrItemListView> {
                                                                   height *
                                                                       0.05),
                                                             ),
-                                                            onPressed:
-                                                                () async {
+                                                            onPressed: balQty == 0 || balQty < 0 ? () {
+                                                              // If no value
+                                                              ErrorDialog.showErrorDialog(context,
+                                                                  '${snapshot.data[index]['item_name']} is already received all qty.');}
+                                                                : () async {
                                                               SharedPreferences prefs = await SharedPreferences.getInstance();
 
                                                               snapshot.data[index]['tracking_type'] == "2"

@@ -76,6 +76,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
           poList.sort((a, b) => a["po_doc"].toLowerCase().compareTo(b["po_doc"].toLowerCase()));
           print('poList list new');
           print(poList);
+
         });
       }
     });
@@ -170,6 +171,7 @@ class _PoDownloadViewState extends State<PoDownloadView> {
                                   selectedPo = null;
                                   poTotalItem = null;
                                   getPoList(vendorId['id']);
+                                  print('VENDOR: $vendorId');
                                 });
                               },
                               isExpanded: true,

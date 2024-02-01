@@ -71,6 +71,7 @@ class _SrItemListViewState extends State<SrItemListView> {
       allSrEmpty,
       allSrNonEmpty,
       combineUpdated,
+      receiveQty,
       itemName,
       locationId;
 
@@ -272,6 +273,15 @@ class _SrItemListViewState extends State<SrItemListView> {
                                   itemCount: snapshot.data.length,
                                   itemBuilder:
                                       (BuildContext context, int index) {
+                                    if(snapshot.data[index]['item_receive_qty']?.isEmpty ?? true){
+                                      // If no data
+                                      receiveQty = '0';
+                                    } else {
+                                      receiveQty = snapshot.data[index]['item_receive_qty'];
+                                    }
+
+                                    var balQty = int.parse(snapshot.data[index]['item_quantity']) - int.parse(receiveQty);
+
                                     return Material(
                                       // color: index % 2 == 0 ? Colors.white : Colors.grey[400],
                                       child: Table(
@@ -473,7 +483,11 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                       backgroundColor:
                                                           Colors.blueAccent,
                                                       textColor: Colors.white,
-                                                      onPressed: () async {
+                                                      onPressed: balQty == 0 || balQty < 0 ? () {
+                                                        // If no value
+                                                        ErrorDialog.showErrorDialog(context,
+                                                            '${snapshot.data[index]['item_name']} is already received all qty.');}
+                                                          : () async {
                                                         SharedPreferences
                                                             prefs =
                                                             await SharedPreferences
@@ -539,8 +553,11 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                                       height *
                                                                           0.05),
                                                                 ),
-                                                                onPressed:
-                                                                    () async {
+                                                                onPressed: balQty == 0 || balQty < 0 ? () {
+                                                                  // If no value
+                                                                  ErrorDialog.showErrorDialog(context,
+                                                                      '${snapshot.data[index]['item_name']} is already received all qty.');}
+                                                                    : () async {
                                                                   SharedPreferences
                                                                       prefs =
                                                                       await SharedPreferences
@@ -637,8 +654,11 @@ class _SrItemListViewState extends State<SrItemListView> {
                                                                   height *
                                                                       0.05),
                                                             ),
-                                                            onPressed:
-                                                                () async {
+                                                            onPressed: balQty == 0 || balQty < 0 ? () {
+                                                              // If no value
+                                                              ErrorDialog.showErrorDialog(context,
+                                                                  '${snapshot.data[index]['item_name']} is already received all qty.');}
+                                                                : () async {
                                                               SharedPreferences
                                                                   prefs =
                                                                   await SharedPreferences
@@ -1200,8 +1220,8 @@ class _SrItemListViewState extends State<SrItemListView> {
           Navigator.popUntil(context, ModalRoute.withName(StmsRoutes.srView));
           SuccessDialog.showSuccessDialog(context, value['message']);
         } else {
-          DBSaleReturnItem().deleteAllSrItem();
-          DBSaleReturnNonItem().deleteAllSrNonItem();
+          // DBSaleReturnItem().deleteAllSrItem();
+          // DBSaleReturnNonItem().deleteAllSrNonItem();
           ErrorDialog.showErrorDialog(context, value['message']);
         }
       });

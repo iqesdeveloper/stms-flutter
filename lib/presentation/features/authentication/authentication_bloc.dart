@@ -22,74 +22,83 @@ class AuthenticationBloc
     required this.profileBloc,
     required this.userRepository,
     required this.licenseRepository,
-  }) : super(AuthenticationUninitialized());
-
-  @override
-  Stream<AuthenticationState> mapEventToState(
-    AuthenticationEvent event,
-  ) async* {
-    // app start
-    if (event is AuthenticationAppStarted) {
-      yield* _mapAuthenticationAppStartedEventToState();
-      // var licenseKey = await _getLicenseKey();
-
-      // if (licenseKey != '0') {
-      //   yield* _mapAuthenticationAppStartedEventToState();
-      // } else {
-      //   add(AuthenticationOnBoardingStart());
-      // }
-    }
-
-    if (event is AuthenticationLoggedIn) {
-      yield* _mapAuthenticatedLoggedInEventToState(event.token);
-    }
-
-    if (event is AuthenticationLoggedOut) {
-      yield* _mapAuthenticatedLoggedOutEventToState();
-    }
-
-    // // app start
-    // if (event is AuthenticationAppStarted) {
-    //   var licenseKey = await _getLicenseKey();
-
-    //   if (licenseKey != '0') {
-    //     yield* _mapAuthenticationAppStartedEventToState();
-    //   } else {
-    //     add(AuthenticationRegisterStart());
-    //   }
-    // }
-    // if (event is AuthenticationLoggedIn) {
-    //   yield* _mapAuthenticatedLoggedInEventToState(event.token);
-    // }
-
-    // if (event is AuthenticationLoggedOut) {
-    //   yield* _mapAuthenticatedLoggedOutEventToState();
-    // }
+  }) : super(AuthenticationUninitialized()){
+    on<AuthenticationAppStarted>((event, emit) async {
+      await mapAuthenticationAppStartedEventToState(event, emit);
+    });
+    on<AuthenticationLoggedIn>((event, emit) async {
+      await _mapAuthenticatedLoggedInEventToState(event.token, emit);
+    });
+    on<AuthenticationLoggedOut>((event, emit) async {
+      await _mapAuthenticatedLoggedOutEventToState(event, emit);
+    });
   }
+  // @override
+  // Future<void> mapEventToState(
+  //   event, Emitter<AuthenticationState> emit,
+  // ) async {
+  //   // app start
+  //   if (event is AuthenticationAppStarted) {
+  //     emit (_mapAuthenticationAppStartedEventToState());
+  //     // var licenseKey = await _getLicenseKey();
+  //
+  //     // if (licenseKey != '0') {
+  //     //   yield* _mapAuthenticationAppStartedEventToState();
+  //     // } else {
+  //     //   add(AuthenticationOnBoardingStart());
+  //     // }
+  //   }
+  //
+  //   if (event is AuthenticationLoggedIn) {
+  //     yield* _mapAuthenticatedLoggedInEventToState(event.token);
+  //   }
+  //
+  //   if (event is AuthenticationLoggedOut) {
+  //     yield* _mapAuthenticatedLoggedOutEventToState();
+  //   }
+  //
+  //   // // app start
+  //   // if (event is AuthenticationAppStarted) {
+  //   //   var licenseKey = await _getLicenseKey();
+  //
+  //   //   if (licenseKey != '0') {
+  //   //     yield* _mapAuthenticationAppStartedEventToState();
+  //   //   } else {
+  //   //     add(AuthenticationRegisterStart());
+  //   //   }
+  //   // }
+  //   // if (event is AuthenticationLoggedIn) {
+  //   //   yield* _mapAuthenticatedLoggedInEventToState(event.token);
+  //   // }
+  //
+  //   // if (event is AuthenticationLoggedOut) {
+  //   //   yield* _mapAuthenticatedLoggedOutEventToState();
+  //   // }
+  // }
 
-  Stream<AuthenticationState>
-      _mapAuthenticationAppStartedEventToState() async* {
+  Future<void>
+  mapAuthenticationAppStartedEventToState(event, Emitter<AuthenticationState> emit) async {
     var licenseKey = await _getLicenseKey();
     print('license key: $licenseKey');
 
     if (licenseKey != '0') {
-      yield AuthenticationAuthenticated();
+      emit (AuthenticationAuthenticated());
     } else {
-      yield AuthenticationUnauthenticated();
+      emit (AuthenticationUnauthenticated());
     }
   }
 
-  Stream<AuthenticationState> _mapAuthenticatedLoggedInEventToState(
-      String token) async* {
+  Future<void> _mapAuthenticatedLoggedInEventToState(
+      String token, Emitter<AuthenticationState> emit) async {
     Storage().token = token;
     await _saveToken(token);
 
     profileBloc.add(ProfileLoad());
 
-    yield AuthenticationAuthenticated();
+    emit (AuthenticationAuthenticated());
   }
 
-  Stream<AuthenticationState> _mapAuthenticatedLoggedOutEventToState() async* {
+  Future<void> _mapAuthenticatedLoggedOutEventToState(event, Emitter<AuthenticationState> emit) async {
     var profileState = profileBloc.state;
     if (profileState is ProfileLoaded) {
       // var profile = profileState.userProfile.profile;
@@ -103,7 +112,7 @@ class AuthenticationBloc
     // Storage().job = '';
     await _deleteToken();
     profileBloc.add(ProfileStart());
-    yield AuthenticationUnauthenticated();
+    emit (AuthenticationUnauthenticated());
   }
 
   /// delete from keystore/keychain
